@@ -1,14 +1,36 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsuarioController;
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// Rota inicial
+Route::get('/', function () {
+    return view('welcome');
+});
+
+// ============ ROTAS PÚBLICAS (SEM AUTENTICAÇÃO) ============
 Route::get('/login', [UsuarioController::class, 'loginForm'])->name('usuarios.login');
 Route::post('/login', [UsuarioController::class, 'login']);
-Route::post('/logout', [UsuarioController::class, 'logout'])->name('usuarios.logout');
 Route::get('/cadastro', [UsuarioController::class, 'create'])->name('usuarios.create');
 Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
 
+// ============ ROTAS PROTEGIDAS (COM AUTENTICAÇÃO) ============
 Route::middleware('auth')->group(function () {
+    
+    // Logout
+    Route::post('/logout', [UsuarioController::class, 'logout'])->name('usuarios.logout');
+    
+    // Rota específica para deletar avatar - DEVE vir ANTES das outras rotas de usuários
+    Route::delete('/usuarios/{usuario}/avatar', [UsuarioController::class, 'deleteAvatar'])
+        ->name('usuarios.deleteAvatar');
+    
+    // Rotas de usuários
     Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
     Route::get('/usuarios/{usuario}', [UsuarioController::class, 'show'])->name('usuarios.show');
     Route::get('/usuarios/{usuario}/editar', [UsuarioController::class, 'edit'])->name('usuarios.edit');
