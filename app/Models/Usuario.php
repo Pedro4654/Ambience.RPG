@@ -28,8 +28,10 @@ class Usuario extends Authenticatable
         'data_de_nascimento',
         'status',
         'nivel_usuario',
-        'data_criacao'
+        'data_criacao',
         // REMOVIDO: data_ultimo_login (conforme solicitado)
+        'password_reset_token',        
+        'password_reset_expires_at'    
     ];
 
     protected $hidden = [
@@ -42,6 +44,7 @@ class Usuario extends Authenticatable
         'data_atualizacao' => 'datetime',
         'data_de_nascimento' => 'date',
         'verificado' => 'boolean',
+          'password_reset_expires_at' => 'datetime'  
         // REMOVIDO: data_ultimo_login (conforme solicitado)
     ];
 
