@@ -22,6 +22,12 @@
             Lembrar de mim
         </label>
     </div>
+
+    <div class="text-center mt-3">
+                        <a href="{{ route('usuarios.forgot.form') }}" class="text-decoration-none">
+                            Esqueci minha senha
+                        </a>
+                    </div>
     
     <button type="submit">Entrar</button>
 </form>

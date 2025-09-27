@@ -20,6 +20,20 @@ Route::post('/login', [UsuarioController::class, 'login']);
 Route::get('/cadastro', [UsuarioController::class, 'create'])->name('usuarios.create');
 Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
 
+
+// ========== ROTAS DE RECUPERAÇÃO DE SENHA ==========
+Route::get('/esqueci-minha-senha', [UsuarioController::class, 'showForgotPasswordForm'])
+    ->name('usuarios.forgot.form');
+
+Route::post('/enviar-link-recuperacao', [UsuarioController::class, 'sendResetLink'])
+    ->name('usuarios.forgot.send');
+
+Route::get('/redefinir-senha/{token}', [UsuarioController::class, 'showResetPasswordForm'])
+    ->name('usuarios.reset.form');
+
+Route::post('/redefinir-senha', [UsuarioController::class, 'resetPassword'])
+    ->name('usuarios.reset.password');
+
 // ============ ROTAS PROTEGIDAS (COM AUTENTICAÇÃO) ============
 Route::middleware('auth')->group(function () {
     
