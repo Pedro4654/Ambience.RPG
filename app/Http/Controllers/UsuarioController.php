@@ -249,7 +249,7 @@ public function deleteAvatar(Usuario $usuario)
     return back()->with('success', 'Foto de perfil removida com sucesso!');
 }
 
-// ========== MÉTODOS PARA RECUPERAÇÃO DE SENHA ==========
+    // ========== MÉTODOS PARA RECUPERAÇÃO DE SENHA COM TOKEN DE 6 DÍGITOS ==========
     
     /**
      * Exibir formulário "Esqueci minha senha"
@@ -260,9 +260,9 @@ public function deleteAvatar(Usuario $usuario)
     }
 
     /**
-     * Enviar email de recuperação de senha
+     * Enviar email com token de 6 dígitos
      */
-    public function sendResetLink(Request $request)
+    public function sendResetToken(Request $request)
     {
         $request->validate([
             'email' => 'required|email|exists:usuarios,email'
@@ -272,6 +272,16 @@ public function deleteAvatar(Usuario $usuario)
             'email.exists' => 'Este email não está cadastrado no sistema.'
         ]);
 
+        // Verificar se email está bloqueado temporariamente
+        if (Usuario::isEmailBlocked($request->email)) {
+            $usuario = Usuario::where('email', $request->email)->first();
+            $minutesRemaining = $usuario->getBlockTimeRemaining();
+            
+            return back()->withErrors([
+                'email' => "Muitas tentativas. Tente novamente em {$minutesRemaining} minutos."
+            ]);
+        }
+
         $usuario = Usuario::where('email', $request->email)
                          ->where('status', 'ativo')
                          ->first();
@@ -280,38 +290,25 @@ public function deleteAvatar(Usuario $usuario)
             return back()->withErrors(['email' => 'Usuário não encontrado ou inativo.']);
         }
 
-        // Gerar token único
-        $token = Str::random(60);
-        $expiresAt = Carbon::now()->addHour(); // Token expira em 1 hora
+        // Gerar token de 6 dígitos
+        $token = $usuario->setResetToken();
 
-        // Salvar token na tabela password_reset_tokens
-        DB::table('password_reset_tokens')->updateOrInsert(
-            ['email' => $request->email],
-            [
-                'token' => Hash::make($token),
-                'created_at' => Carbon::now()
-            ]
-        );
-
-        // Atualizar campos no usuário
-        $usuario->update([
-            'password_reset_token' => $token,
-            'password_reset_expires_at' => $expiresAt
-        ]);
-
-        // Enviar email
+        // Enviar email com token
         try {
-            $this->sendResetPasswordEmail($usuario, $token);
+            $this->sendResetTokenEmail($usuario, $token);
             
-            Log::info('Email de recuperação enviado', [
+            Log::info('Token de recuperação enviado', [
                 'email' => $request->email,
-                'user_id' => $usuario->id
+                'user_id' => $usuario->id,
+                'token_expires_at' => $usuario->reset_token_expires_at
             ]);
 
-            return back()->with('status', 'Link de recuperação enviado para seu email!');
+            return redirect()->route('usuarios.verify.token.form')
+                           ->with('email', $request->email)
+                           ->with('status', 'Token de 6 dígitos enviado para seu email!');
             
         } catch (\Exception $e) {
-            Log::error('Erro ao enviar email de recuperação', [
+            Log::error('Erro ao enviar email com token', [
                 'error' => $e->getMessage(),
                 'email' => $request->email
             ]);
@@ -321,25 +318,84 @@ public function deleteAvatar(Usuario $usuario)
     }
 
     /**
-     * Exibir formulário de nova senha
+     * Exibir formulário de verificação do token
      */
-    public function showResetPasswordForm(Request $request, $token)
+    public function showVerifyTokenForm()
     {
-        // Validar se o token existe e não expirou
-        $usuario = Usuario::where('password_reset_token', $token)
-                         ->where('password_reset_expires_at', '>', Carbon::now())
+        if (!session('email')) {
+            return redirect()->route('usuarios.forgot.form')
+                           ->withErrors(['error' => 'Sessão expirada. Solicite um novo token.']);
+        }
+
+        return view('usuarios.verify-token');
+    }
+
+    /**
+     * Verificar token de 6 dígitos
+     */
+    public function verifyToken(Request $request)
+    {
+        $request->validate([
+            'token' => 'required|digits:6',
+            'email' => 'required|email'
+        ], [
+            'token.required' => 'Digite o código de 6 dígitos.',
+            'token.digits' => 'O código deve ter exatamente 6 dígitos.',
+            'email.required' => 'Email é obrigatório.'
+        ]);
+
+        $usuario = Usuario::where('email', $request->email)
                          ->where('status', 'ativo')
                          ->first();
 
         if (!$usuario) {
-            return redirect()->route('usuarios.login')
-                           ->withErrors(['error' => 'Token inválido ou expirado.']);
+            return back()->withErrors(['token' => 'Usuário não encontrado.']);
         }
 
-        return view('usuarios.reset-password', [
-            'token' => $token,
-            'email' => $request->email
+        // Verificar se ainda pode tentar
+        if (!$usuario->canAttemptReset()) {
+            $minutesRemaining = $usuario->getBlockTimeRemaining();
+            return back()->withErrors([
+                'token' => "Muitas tentativas incorretas. Tente novamente em {$minutesRemaining} minutos."
+            ]);
+        }
+
+        // Verificar se o token está correto e válido
+        if (!$usuario->isValidResetToken($request->token)) {
+            $usuario->incrementResetAttempts();
+            
+            Log::warning('Token incorreto ou expirado', [
+                'email' => $request->email,
+                'token_provided' => $request->token,
+                'attempts' => $usuario->reset_attempts + 1
+            ]);
+
+            return back()->withErrors(['token' => 'Código incorreto ou expirado.'])
+                        ->with('email', $request->email);
+        }
+
+        // Token válido - redirecionar para definir nova senha
+        Log::info('Token verificado com sucesso', [
+            'email' => $request->email,
+            'user_id' => $usuario->id
         ]);
+
+        return redirect()->route('usuarios.reset.password.form')
+                       ->with('verified_email', $request->email)
+                       ->with('verified_token', $request->token);
+    }
+
+    /**
+     * Exibir formulário de nova senha
+     */
+    public function showResetPasswordForm()
+    {
+        if (!session('verified_email') || !session('verified_token')) {
+            return redirect()->route('usuarios.forgot.form')
+                           ->withErrors(['error' => 'Sessão expirada. Comece o processo novamente.']);
+        }
+
+        return view('usuarios.reset-password');
     }
 
     /**
@@ -348,67 +404,105 @@ public function deleteAvatar(Usuario $usuario)
     public function resetPassword(Request $request)
     {
         $request->validate([
-            'token' => 'required',
             'email' => 'required|email',
+            'token' => 'required|digits:6',
             'password' => 'required|confirmed|min:6',
         ], [
-            'token.required' => 'Token é obrigatório.',
-            'email.required' => 'Email é obrigatório.',
-            'email.email' => 'Email deve ser válido.',
             'password.required' => 'Nova senha é obrigatória.',
             'password.confirmed' => 'Confirmação de senha não confere.',
             'password.min' => 'Senha deve ter no mínimo 6 caracteres.'
         ]);
 
-        // Buscar usuário pelo token
-        $usuario = Usuario::where('password_reset_token', $request->token)
-                         ->where('email', $request->email)
-                         ->where('password_reset_expires_at', '>', Carbon::now())
+        $usuario = Usuario::where('email', $request->email)
                          ->where('status', 'ativo')
                          ->first();
 
         if (!$usuario) {
-            return back()->withErrors(['email' => 'Token inválido, expirado ou usuário não encontrado.']);
+            return back()->withErrors(['password' => 'Usuário não encontrado.']);
         }
 
-        // Atualizar senha
-        $usuario->update([
-            'senha_hash' => Hash::make($request->password),
-            'password_reset_token' => null,
-            'password_reset_expires_at' => null
-        ]);
+        // Verificar token uma última vez
+        if (!$usuario->isValidResetToken($request->token)) {
+            return redirect()->route('usuarios.forgot.form')
+                           ->withErrors(['error' => 'Token inválido. Solicite um novo.']);
+        }
 
-        // Remover token da tabela password_reset_tokens
-        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+        // Atualizar senha e limpar dados de reset
+        $usuario->update(['senha_hash' => Hash::make($request->password)]);
+        $usuario->clearResetData();
 
         Log::info('Senha redefinida com sucesso', [
             'user_id' => $usuario->id,
             'email' => $usuario->email
         ]);
 
+        // Limpar sessão
+        session()->forget(['verified_email', 'verified_token', 'email']);
+
         return redirect()->route('usuarios.login')
                         ->with('success', 'Senha alterada com sucesso! Faça login com sua nova senha.');
     }
 
     /**
-     * Enviar email de recuperação
+     * Reenviar token (se expirou)
      */
-    private function sendResetPasswordEmail($usuario, $token)
+    public function resendToken(Request $request)
     {
-        $resetUrl = route('usuarios.reset.form', ['token' => $token, 'email' => $usuario->email]);
-        
+        $request->validate(['email' => 'required|email']);
+
+        $usuario = Usuario::where('email', $request->email)
+                         ->where('status', 'ativo')
+                         ->first();
+
+        if (!$usuario) {
+            return back()->withErrors(['email' => 'Usuário não encontrado.']);
+        }
+
+        // Verificar se não está bloqueado
+        if (!$usuario->canAttemptReset()) {
+            $minutesRemaining = $usuario->getBlockTimeRemaining();
+            return back()->withErrors([
+                'email' => "Aguarde {$minutesRemaining} minutos para solicitar novo token."
+            ]);
+        }
+
+        // Gerar novo token
+        $token = $usuario->setResetToken();
+
+        try {
+            $this->sendResetTokenEmail($usuario, $token);
+            
+            Log::info('Token reenviado', [
+                'email' => $request->email,
+                'user_id' => $usuario->id
+            ]);
+
+            return back()->with('status', 'Novo código enviado para seu email!');
+            
+        } catch (\Exception $e) {
+            Log::error('Erro ao reenviar token', ['error' => $e->getMessage()]);
+            return back()->withErrors(['email' => 'Erro ao enviar email.']);
+        }
+    }
+
+    /**
+     * Enviar email com token de 6 dígitos
+     */
+    private function sendResetTokenEmail($usuario, $token)
+    {
         $data = [
             'usuario' => $usuario,
-            'resetUrl' => $resetUrl,
-            'token' => $token
+            'token' => $token,
+            'expires_at' => $usuario->reset_token_expires_at
         ];
 
-        Mail::send('emails.reset-password', $data, function($message) use ($usuario) {
+        Mail::send('emails.reset-token', $data, function($message) use ($usuario) {
             $message->to($usuario->email, $usuario->username)
-                   ->subject('Recuperação de Senha - Ambience RPG');
+                   ->subject('🔐 Código de Recuperação - Ambience RPG');
         });
     }
+
+
+
+
 }
-
-
-

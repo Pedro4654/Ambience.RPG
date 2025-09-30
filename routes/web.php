@@ -21,18 +21,28 @@ Route::get('/cadastro', [UsuarioController::class, 'create'])->name('usuarios.cr
 Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
 
 
-// ========== ROTAS DE RECUPERAÇÃO DE SENHA ==========
+// ========== ROTAS DE RECUPERAÇÃO DE SENHA COM TOKEN DE 6 DÍGITOS ==========
 Route::get('/esqueci-minha-senha', [UsuarioController::class, 'showForgotPasswordForm'])
     ->name('usuarios.forgot.form');
 
-Route::post('/enviar-link-recuperacao', [UsuarioController::class, 'sendResetLink'])
+Route::post('/enviar-token-recuperacao', [UsuarioController::class, 'sendResetToken'])
     ->name('usuarios.forgot.send');
 
-Route::get('/redefinir-senha/{token}', [UsuarioController::class, 'showResetPasswordForm'])
-    ->name('usuarios.reset.form');
+Route::get('/verificar-token', [UsuarioController::class, 'showVerifyTokenForm'])
+    ->name('usuarios.verify.token.form');
+
+Route::post('/verificar-token', [UsuarioController::class, 'verifyToken'])
+    ->name('usuarios.verify.token');
+
+Route::get('/definir-nova-senha', [UsuarioController::class, 'showResetPasswordForm'])
+    ->name('usuarios.reset.password.form');
 
 Route::post('/redefinir-senha', [UsuarioController::class, 'resetPassword'])
     ->name('usuarios.reset.password');
+
+Route::post('/reenviar-token', [UsuarioController::class, 'resendToken'])
+    ->name('usuarios.resend.token');
+
 
 // ============ ROTAS PROTEGIDAS (COM AUTENTICAÇÃO) ============
 Route::middleware('auth')->group(function () {

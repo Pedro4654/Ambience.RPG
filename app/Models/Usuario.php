@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class Usuario extends Authenticatable
 {
@@ -29,14 +30,23 @@ class Usuario extends Authenticatable
         'status',
         'nivel_usuario',
         'data_criacao',
-        // REMOVIDO: data_ultimo_login (conforme solicitado)
-        'password_reset_token',        
-        'password_reset_expires_at'    
+        'pontos_reputacao',
+        'ranking_posicao',
+        'verificado',
+        // ============ NOVOS CAMPOS PARA RECUPERAÇÃO COM TOKEN DE 6 DÍGITOS ============
+        'reset_token',
+        'reset_token_expires_at',
+        'reset_attempts',
+        'reset_attempts_reset_at',
+        // ============ REMOVER CAMPOS ANTIGOS ============
+        // 'password_reset_token',        
+        // 'password_reset_expires_at'    
     ];
 
     protected $hidden = [
         'senha_hash',
         'remember_token',
+        'reset_token', // ← Importante: nunca expor o token de 6 dígitos
     ];
 
     protected $casts = [
@@ -44,8 +54,10 @@ class Usuario extends Authenticatable
         'data_atualizacao' => 'datetime',
         'data_de_nascimento' => 'date',
         'verificado' => 'boolean',
-          'password_reset_expires_at' => 'datetime'  
-        // REMOVIDO: data_ultimo_login (conforme solicitado)
+        // ============ NOVOS CASTS PARA RECUPERAÇÃO DE SENHA ============
+        'reset_token_expires_at' => 'datetime',
+        'reset_attempts_reset_at' => 'datetime',
+        'reset_attempts' => 'integer',
     ];
 
     public function getAuthPassword()
@@ -58,7 +70,11 @@ class Usuario extends Authenticatable
         $this->attributes['senha_hash'] = Hash::make($password);
     }
 
-    // MÉTODO CORRIGIDO - Método para obter URL completa do avatar
+    // ============ MÉTODOS DE AVATAR (MANTIDOS DO SEU ORIGINAL) ============
+
+    /**
+     * MÉTODO CORRIGIDO - Método para obter URL completa do avatar
+     */
     public function getAvatarUrlAttribute($value)
     {
         Log::info('Verificando avatar_url', ['value' => $value, 'user_id' => $this->id]);
@@ -82,7 +98,9 @@ class Usuario extends Authenticatable
         return $defaultUrl;
     }
 
-    // MÉTODO CORRIGIDO - Método para deletar avatar antigo
+    /**
+     * MÉTODO CORRIGIDO - Método para deletar avatar antigo
+     */
     public function deleteOldAvatar()
     {
         $originalAvatarUrl = $this->getOriginal('avatar_url');
@@ -104,5 +122,181 @@ class Usuario extends Authenticatable
         }
         
         return false;
+    }
+
+    // ============ NOVOS MÉTODOS PARA RECUPERAÇÃO DE SENHA COM TOKEN DE 6 DÍGITOS ============
+
+    /**
+     * Gerar token de 6 dígitos numéricos único
+     */
+    public function generateResetToken(): string
+    {
+        do {
+            $token = sprintf('%06d', mt_rand(0, 999999));
+        } while (
+            self::where('reset_token', $token)
+                ->where('reset_token_expires_at', '>', Carbon::now())
+                ->where('id', '!=', $this->id)
+                ->exists()
+        );
+
+        Log::info('Token de 6 dígitos gerado', [
+            'user_id' => $this->id,
+            'token' => $token,
+            'email' => $this->email
+        ]);
+
+        return $token;
+    }
+
+    /**
+     * Definir token de recuperação
+     */
+    public function setResetToken(): string
+    {
+        $token = $this->generateResetToken();
+        
+        $this->update([
+            'reset_token' => $token,
+            'reset_token_expires_at' => Carbon::now()->addMinutes(15), // 15 minutos de validade
+            'reset_attempts' => 0, // Resetar contador de tentativas
+            'reset_attempts_reset_at' => Carbon::now()->addHour(), // Reset contador após 1 hora
+        ]);
+
+        Log::info('Token de reset definido', [
+            'user_id' => $this->id,
+            'email' => $this->email,
+            'expires_at' => $this->reset_token_expires_at
+        ]);
+
+        return $token;
+    }
+
+    /**
+     * Verificar se token é válido
+     */
+    public function isValidResetToken(string $token): bool
+    {
+        $isValid = $this->reset_token === $token 
+            && $this->reset_token_expires_at 
+            && $this->reset_token_expires_at->isFuture();
+
+        Log::info('Verificação de token', [
+            'user_id' => $this->id,
+            'token_provided' => $token,
+            'token_stored' => $this->reset_token,
+            'expires_at' => $this->reset_token_expires_at,
+            'is_valid' => $isValid
+        ]);
+
+        return $isValid;
+    }
+
+    /**
+     * Verificar se pode tentar reset (máximo 5 tentativas por hora)
+     */
+    public function canAttemptReset(): bool
+    {
+        // Se já passou 1 hora, resetar contador
+        if ($this->reset_attempts_reset_at && $this->reset_attempts_reset_at->isPast()) {
+            $this->update([
+                'reset_attempts' => 0,
+                'reset_attempts_reset_at' => Carbon::now()->addHour()
+            ]);
+            
+            Log::info('Contador de tentativas resetado', ['user_id' => $this->id]);
+            return true;
+        }
+
+        $canAttempt = $this->reset_attempts < 5;
+        
+        Log::info('Verificação de tentativas de reset', [
+            'user_id' => $this->id,
+            'current_attempts' => $this->reset_attempts,
+            'can_attempt' => $canAttempt,
+            'reset_at' => $this->reset_attempts_reset_at
+        ]);
+
+        return $canAttempt;
+    }
+
+    /**
+     * Incrementar tentativas de reset
+     */
+    public function incrementResetAttempts(): void
+    {
+        $this->increment('reset_attempts');
+        
+        // Definir tempo de reset se não existe
+        if (!$this->reset_attempts_reset_at) {
+            $this->update(['reset_attempts_reset_at' => Carbon::now()->addHour()]);
+        }
+
+        Log::info('Tentativas de reset incrementadas', [
+            'user_id' => $this->id,
+            'new_attempts' => $this->reset_attempts + 1,
+            'reset_at' => $this->reset_attempts_reset_at
+        ]);
+    }
+
+    /**
+     * Limpar dados de reset após sucesso
+     */
+    public function clearResetData(): void
+    {
+        $this->update([
+            'reset_token' => null,
+            'reset_token_expires_at' => null,
+            'reset_attempts' => 0,
+            'reset_attempts_reset_at' => null,
+        ]);
+
+        Log::info('Dados de reset limpos', ['user_id' => $this->id]);
+    }
+
+    /**
+     * Verificar se email tem bloqueio temporário
+     */
+    public static function isEmailBlocked(string $email): bool
+    {
+        $user = self::where('email', $email)->first();
+        if (!$user) return false;
+
+        $isBlocked = !$user->canAttemptReset();
+        
+        Log::info('Verificação de bloqueio de email', [
+            'email' => $email,
+            'user_id' => $user->id,
+            'is_blocked' => $isBlocked
+        ]);
+
+        return $isBlocked;
+    }
+
+    /**
+     * Obter tempo restante do bloqueio
+     */
+    public function getBlockTimeRemaining(): ?int
+    {
+        if (!$this->reset_attempts_reset_at) return null;
+        
+        $minutesRemaining = $this->reset_attempts_reset_at->diffInMinutes(Carbon::now());
+        
+        Log::info('Tempo restante de bloqueio', [
+            'user_id' => $this->id,
+            'minutes_remaining' => $minutesRemaining
+        ]);
+        
+        return $minutesRemaining;
+    }
+
+    // ============ MÉTODO PARA COMPATIBILIDADE COM LARAVEL AUTH ============
+    
+    /**
+     * Get the name that can be displayed to represent the user.
+     */
+    public function getNameAttribute()
+    {
+        return $this->nickname ?: $this->username;
     }
 }
