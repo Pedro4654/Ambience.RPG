@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // ============ TABELA USUARIOS - SÓ CRIA SE NÃO EXISTIR ============
+        // ============ TABELA USUARIOS PRINCIPAL ============
         if (!Schema::hasTable('usuarios')) {
             Schema::create('usuarios', function (Blueprint $table) {
                 $table->id();
@@ -28,25 +28,46 @@ return new class extends Migration
                 $table->boolean('verificado')->default(false);
                 $table->integer('pontos_reputacao')->default(0);
                 $table->integer('ranking_posicao')->default(0);
-                $table->string('password_reset_token')->nullable();
-                $table->timestamp('password_reset_expires_at')->nullable();
+                
+                // ============ CAMPOS PARA RECUPERAÇÃO COM TOKEN DE 6 DÍGITOS ============
+                $table->string('reset_token', 6)->nullable()->comment('Token numérico de 6 dígitos');
+                $table->timestamp('reset_token_expires_at')->nullable()->comment('Expiração do token de reset');
+                $table->integer('reset_attempts')->default(0)->comment('Tentativas de reset (máx 5)');
+                $table->timestamp('reset_attempts_reset_at')->nullable()->comment('Reset do contador de tentativas');
                 
                 // Índices para performance
                 $table->index('email');
                 $table->index('status');
+                $table->index(['reset_token', 'reset_token_expires_at']); // Para busca rápida do token
             });
         }
 
         // ============ ADICIONAR COLUNAS QUE PODEM ESTAR FALTANDO ============
         if (Schema::hasTable('usuarios')) {
             Schema::table('usuarios', function (Blueprint $table) {
-                // Só adiciona se não existir
-                if (!Schema::hasColumn('usuarios', 'password_reset_token')) {
-                    $table->string('password_reset_token')->nullable()->after('ranking_posicao');
+                // Remover campos antigos se existirem
+                if (Schema::hasColumn('usuarios', 'password_reset_token')) {
+                    $table->dropColumn('password_reset_token');
                 }
-                if (!Schema::hasColumn('usuarios', 'password_reset_expires_at')) {
-                    $table->timestamp('password_reset_expires_at')->nullable()->after('password_reset_token');
+                if (Schema::hasColumn('usuarios', 'password_reset_expires_at')) {
+                    $table->dropColumn('password_reset_expires_at');
                 }
+                
+                // Adicionar novos campos para token de 6 dígitos
+                if (!Schema::hasColumn('usuarios', 'reset_token')) {
+                    $table->string('reset_token', 6)->nullable()->after('ranking_posicao')->comment('Token numérico de 6 dígitos');
+                }
+                if (!Schema::hasColumn('usuarios', 'reset_token_expires_at')) {
+                    $table->timestamp('reset_token_expires_at')->nullable()->after('reset_token')->comment('Expiração do token de reset');
+                }
+                if (!Schema::hasColumn('usuarios', 'reset_attempts')) {
+                    $table->integer('reset_attempts')->default(0)->after('reset_token_expires_at')->comment('Tentativas de reset (máx 5)');
+                }
+                if (!Schema::hasColumn('usuarios', 'reset_attempts_reset_at')) {
+                    $table->timestamp('reset_attempts_reset_at')->nullable()->after('reset_attempts')->comment('Reset do contador de tentativas');
+                }
+                
+                // Adicionar avatar se não existir
                 if (!Schema::hasColumn('usuarios', 'avatar_url')) {
                     $table->string('avatar_url')->nullable()->after('senha_hash');
                 }
@@ -65,13 +86,9 @@ return new class extends Migration
             });
         }
 
-        // ============ TABELA PASSWORD_RESET_TOKENS - SÓ CRIA SE NÃO EXISTIR ============
-        if (!Schema::hasTable('password_reset_tokens')) {
-            Schema::create('password_reset_tokens', function (Blueprint $table) {
-                $table->string('email')->primary();
-                $table->string('token');
-                $table->timestamp('created_at')->nullable();
-            });
+        // ============ TABELA PASSWORD_RESET_TOKENS (REMOVER - NÃO MAIS NECESSÁRIA) ============
+        if (Schema::hasTable('password_reset_tokens')) {
+            Schema::dropIfExists('password_reset_tokens');
         }
 
         // ============ TABELA MIGRATIONS - SÓ CRIA SE NÃO EXISTIR ============
@@ -89,21 +106,26 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Apenas dropar se foram criadas por esta migration
-        Schema::dropIfExists('migrations');
-        Schema::dropIfExists('password_reset_tokens');
-        Schema::dropIfExists('sessions');
-        
         // Remover apenas as colunas que foram adicionadas
         if (Schema::hasTable('usuarios')) {
             Schema::table('usuarios', function (Blueprint $table) {
-                if (Schema::hasColumn('usuarios', 'password_reset_token')) {
-                    $table->dropColumn('password_reset_token');
+                if (Schema::hasColumn('usuarios', 'reset_token')) {
+                    $table->dropColumn('reset_token');
                 }
-                if (Schema::hasColumn('usuarios', 'password_reset_expires_at')) {
-                    $table->dropColumn('password_reset_expires_at');
+                if (Schema::hasColumn('usuarios', 'reset_token_expires_at')) {
+                    $table->dropColumn('reset_token_expires_at');
+                }
+                if (Schema::hasColumn('usuarios', 'reset_attempts')) {
+                    $table->dropColumn('reset_attempts');
+                }
+                if (Schema::hasColumn('usuarios', 'reset_attempts_reset_at')) {
+                    $table->dropColumn('reset_attempts_reset_at');
                 }
             });
         }
+        
+        // Dropar tabelas criadas
+        Schema::dropIfExists('sessions');
+        Schema::dropIfExists('migrations');
     }
 };
