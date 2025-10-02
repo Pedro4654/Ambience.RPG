@@ -5,35 +5,45 @@ namespace App\Http\Controllers;
 use App\Models\Sala;
 use App\Models\Usuario;
 use App\Models\ParticipanteSala;
-use App\Models\ConviteSala;
 use App\Models\PermissaoSala;
+use App\Models\ConviteSala;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
 
 /**
- * Controller para gerenciamento completo do sistema de salas RPG
- * Responsável por: criação, listagem, entrada, convites e gerenciamento de participantes
+ * Controlador do Sistema de Salas de RPG
+ * 
+ * Gerencia a criação, entrada e administração de salas de RPG
+ * Preparado para integração com React e WebSocket
+ * 
+ * @package App\Http\Controllers
+ * @author Sistema Ambience RPG
+ * @version 2.0
  */
 class SalaController extends Controller
 {
     /**
-     * Exibir lista de salas do usuário autenticado
-     * GET /salas
+     * Exibir dashboard principal do sistema de salas
      * 
-     * Mostra:
-     * - Minhas salas (criadas ou participando)
-     * - Salas públicas disponíveis
-     * - Formulários para entrar e criar salas
+     * Rota: GET /salas
+     * Middleware: auth (usuário deve estar logado)
+     * 
+     * Retorna view com dados das salas ou JSON para API
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Verificar se o usuário está autenticado
+        // Verificar autenticação - redirecionar se não logado
         if (!Auth::check()) {
-            Log::info('Tentativa de acesso a /salas sem autenticação');
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuário não autenticado',
+                    'redirect' => route('usuarios.login')
+                ], 401);
+            }
             return redirect()->route('usuarios.login')->with('error', 'Faça login para acessar as salas.');
         }
 
@@ -66,10 +76,25 @@ class SalaController extends Controller
             'salas_publicas' => $salasPublicas->count()
         ]);
 
-        return response()->json([
-            'minhas_salas' => $minhasSalas,
-            'salas_publicas' => $salasPublicas,
-            'user_id' => $userId
+        // Retornar JSON se for requisição API ou AJAX
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'minhas_salas' => $minhasSalas,
+                'salas_publicas' => $salasPublicas,
+                'user_id' => $userId,
+                'estatisticas' => [
+                    'total_minhas_salas' => $minhasSalas->count(),
+                    'total_salas_publicas' => $salasPublicas->count()
+                ]
+            ]);
+        }
+
+        // Retornar view Blade para navegação web
+        return view('salas.dashboard', [
+            'minhasSalas' => $minhasSalas,
+            'salasPublicas' => $salasPublicas,
+            'userId' => $userId
         ]);
     }
 
@@ -253,6 +278,7 @@ class SalaController extends Controller
                         'message' => 'Senha incorreta!'
                     ], 400);
                 }
+
             } elseif ($sala->tipo === 'apenas_convite') {
                 // Verificar se tem convite válido
                 $conviteValido = ConviteSala::where('sala_id', $salaId)
@@ -331,10 +357,10 @@ class SalaController extends Controller
     }
 
     /**
-     * Exibir sala específica
+     * Exibir sala específica com teste WebSocket
      * GET /salas/{id}
      */
-    public function show($id)
+    public function show($id, Request $request)
     {
         try {
             $userId = Auth::id();
@@ -352,16 +378,21 @@ class SalaController extends Controller
 
             // Verificar se o usuário é participante
             $participante = $sala->participantes->where('usuario_id', $userId)->first();
-            
+
             if (!$participante) {
                 Log::warning('Tentativa de acesso não autorizado à sala', [
                     'user_id' => $userId,
                     'sala_id' => $id
                 ]);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Você não tem acesso a esta sala.'
-                ], 403);
+
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Você não tem acesso a esta sala.'
+                    ], 403);
+                }
+
+                return redirect('/salas')->with('error', 'Você não tem acesso a esta sala.');
             }
 
             // Simular teste de WebSocket para verificar conectividade em tempo real
@@ -373,14 +404,21 @@ class SalaController extends Controller
                 'papel' => $participante->papel
             ]);
 
-            return response()->json([
+            $dadosSala = [
                 'sala' => $sala,
                 'meu_papel' => $participante->papel,
                 'minhas_permissoes' => $sala->permissoes->first(),
                 'websocket_status' => $websocketStatus,
                 'participantes_online' => $sala->participantes->count(), // Simulado
                 'success' => true
-            ]);
+            ];
+
+            // Retornar JSON para API ou view para navegação
+            if ($request->expectsJson()) {
+                return response()->json($dadosSala);
+            }
+
+            return view('salas.show', $dadosSala);
 
         } catch (\Exception $e) {
             Log::error('Erro ao carregar sala', [
@@ -389,10 +427,14 @@ class SalaController extends Controller
                 'user_id' => Auth::id()
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Sala não encontrada.'
-            ], 404);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sala não encontrada.'
+                ], 404);
+            }
+
+            return redirect('/salas')->with('error', 'Sala não encontrada.');
         }
     }
 
@@ -546,7 +588,7 @@ class SalaController extends Controller
      * Aceitar convite via token
      * GET /convites/{token}
      */
-    public function aceitarConvite($token)
+    public function aceitarConvite($token, Request $request)
     {
         try {
             // Buscar convite válido
@@ -557,10 +599,13 @@ class SalaController extends Controller
                 ->first();
 
             if (!$convite) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Convite inválido ou expirado.'
-                ], 400);
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Convite inválido ou expirado.'
+                    ], 400);
+                }
+                return redirect('/salas')->with('error', 'Convite inválido ou expirado.');
             }
 
             $userId = Auth::id();
@@ -610,11 +655,15 @@ class SalaController extends Controller
                 'sala_id' => $convite->sala_id
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => "Bem-vindo(a) à sala '{$convite->sala->nome}'!",
-                'redirect_to' => "/salas/{$convite->sala_id}"
-            ]);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Bem-vindo(a) à sala '{$convite->sala->nome}'!",
+                    'redirect_to' => "/salas/{$convite->sala_id}"
+                ]);
+            }
+
+            return redirect("/salas/{$convite->sala_id}")->with('success', "Bem-vindo(a) à sala '{$convite->sala->nome}'!");
 
         } catch (\Exception $e) {
             Log::error('Erro ao aceitar convite', [
