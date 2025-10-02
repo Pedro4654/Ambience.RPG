@@ -51,20 +51,20 @@ class SalaController extends Controller
         Log::info('Usuário acessando sistema de salas', ['user_id' => $userId]);
 
         // Buscar salas do usuário (criadas ou participando)
-        $minhasSalas = Sala::whereHas('participantes', function($query) use ($userId) {
+        $minhasSalas = Sala::whereHas('participantes', function ($query) use ($userId) {
             $query->where('usuario_id', $userId)
-                  ->where('ativo', true);
-        })->with(['criador', 'participantes' => function($query) {
+                ->where('ativo', true);
+        })->with(['criador', 'participantes' => function ($query) {
             $query->where('ativo', true)->with('usuario');
         }])->orderBy('data_criacao', 'desc')->get();
 
         // Buscar salas públicas que o usuário NÃO participa
         $salasPublicas = Sala::where('tipo', 'publica')
             ->where('ativa', true)
-            ->whereDoesntHave('participantes', function($query) use ($userId) {
+            ->whereDoesntHave('participantes', function ($query) use ($userId) {
                 $query->where('usuario_id', $userId)->where('ativo', true);
             })
-            ->with(['criador', 'participantes' => function($query) {
+            ->with(['criador', 'participantes' => function ($query) {
                 $query->where('ativo', true)->with('usuario');
             }])
             ->orderBy('data_criacao', 'desc')
@@ -182,7 +182,6 @@ class SalaController extends Controller
                 'message' => 'Sala criada com sucesso!',
                 'sala' => $sala
             ], 201);
-
         } catch (\Exception $e) {
             Log::error('Erro ao criar sala', [
                 'error' => $e->getMessage(),
@@ -222,7 +221,7 @@ class SalaController extends Controller
             $userId = Auth::id();
 
             // Buscar a sala
-            $sala = Sala::with(['participantes' => function($query) {
+            $sala = Sala::with(['participantes' => function ($query) {
                 $query->where('ativo', true)->with('usuario');
             }])->findOrFail($salaId);
 
@@ -278,7 +277,6 @@ class SalaController extends Controller
                         'message' => 'Senha incorreta!'
                     ], 400);
                 }
-
             } elseif ($sala->tipo === 'apenas_convite') {
                 // Verificar se tem convite válido
                 $conviteValido = ConviteSala::where('sala_id', $salaId)
@@ -315,7 +313,14 @@ class SalaController extends Controller
                 'pode_convidar_usuarios' => false
             ]);
 
-            // Se entrou por convite, marcar convite como aceito
+            // *** NOVA FUNCIONALIDADE WEBSOCKET ***
+            // Marcar usuário como online na sala
+            $user->setOnline($salaId);
+
+            // Broadcast evento de entrada na sala
+            broadcast(new UserJoinedRoom($user, $sala));
+
+            // Se entrou por convite, marcar como aceito
             if ($sala->tipo === 'apenas_convite') {
                 ConviteSala::where('sala_id', $salaId)
                     ->where('destinatario_id', $userId)
@@ -330,7 +335,7 @@ class SalaController extends Controller
             ]);
 
             // Carregar dados atualizados
-            $sala->load(['criador', 'participantes' => function($query) {
+            $sala->load(['criador', 'participantes' => function ($query) {
                 $query->where('ativo', true)->with('usuario');
             }]);
 
@@ -340,7 +345,6 @@ class SalaController extends Controller
                 'sala' => $sala,
                 'redirect_to' => "/salas/{$sala->id}"
             ]);
-
         } catch (\Exception $e) {
             Log::error('Erro ao entrar na sala', [
                 'error' => $e->getMessage(),
@@ -368,10 +372,10 @@ class SalaController extends Controller
             // Buscar sala com relacionamentos
             $sala = Sala::with([
                 'criador',
-                'participantes' => function($query) {
+                'participantes' => function ($query) {
                     $query->where('ativo', true)->with('usuario');
                 },
-                'permissoes' => function($query) use ($userId) {
+                'permissoes' => function ($query) use ($userId) {
                     $query->where('usuario_id', $userId);
                 }
             ])->findOrFail($id);
@@ -419,7 +423,6 @@ class SalaController extends Controller
             }
 
             return view('salas.show', $dadosSala);
-
         } catch (\Exception $e) {
             Log::error('Erro ao carregar sala', [
                 'error' => $e->getMessage(),
@@ -442,65 +445,134 @@ class SalaController extends Controller
      * Sair da sala
      * POST /salas/{id}/sair
      */
-    public function sairSala($id)
-    {
-        try {
-            $userId = Auth::id();
+    // Método sairSala atualizado
+public function sairSala($id)
+{
+    try {
+        $userId = Auth::id();
+        $user = Auth::user();
 
-            // Buscar participação na sala
-            $participante = ParticipanteSala::where('sala_id', $id)
-                ->where('usuario_id', $userId)
-                ->where('ativo', true)
-                ->first();
+        // Buscar participação na sala
+        $participante = ParticipanteSala::where('sala_id', $id)
+            ->where('usuario_id', $userId)
+            ->where('ativo', true)
+            ->first();
 
-            if (!$participante) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Você não participa desta sala.'
-                ], 400);
-            }
-
-            // Verificar se é o criador da sala
-            $sala = Sala::findOrFail($id);
-            if ($sala->criador_id == $userId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Como criador, você não pode sair da sala. Transfira a liderança primeiro.'
-                ], 400);
-            }
-
-            // Desativar participação
-            $participante->update(['ativo' => false]);
-
-            // Remover permissões
-            PermissaoSala::where('sala_id', $id)
-                ->where('usuario_id', $userId)
-                ->delete();
-
-            Log::info('Usuário saiu da sala', [
-                'user_id' => $userId,
-                'sala_id' => $id
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Você saiu da sala.',
-                'redirect_to' => '/salas'
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Erro ao sair da sala', [
-                'error' => $e->getMessage(),
-                'sala_id' => $id,
-                'user_id' => Auth::id()
-            ]);
-
+        if (!$participante) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erro interno.'
-            ], 500);
+                'message' => 'Você não participa desta sala.'
+            ], 400);
         }
+
+        // Verificar se é o criador da sala
+        $sala = Sala::findOrFail($id);
+        if ($sala->criador_id == $userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Como criador, você não pode sair da sala. Transfira a liderança primeiro.'
+            ], 400);
+        }
+
+        // *** NOVA FUNCIONALIDADE WEBSOCKET ***
+        // Broadcast evento de saída ANTES de desativar
+        broadcast(new UserLeftRoom($user, $sala));
+
+        // Desativar participação
+        $participante->update(['ativo' => false]);
+
+        // Remover permissões
+        PermissaoSala::where('sala_id', $id)
+            ->where('usuario_id', $userId)
+            ->delete();
+
+        // Marcar usuário como offline da sala
+        $user->setOffline();
+
+        // Broadcast mudança de status
+        broadcast(new UserStatusChanged($user, 'offline'));
+
+        Log::info('Usuário saiu da sala', [
+            'user_id' => $userId,
+            'sala_id' => $id
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Você saiu da sala.',
+            'redirect_to' => '/salas'
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Erro ao sair da sala', [
+            'error' => $e->getMessage(),
+            'sala_id' => $id,
+            'user_id' => Auth::id()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro interno.'
+        ], 500);
     }
+}
+
+// Novo método para obter usuários online da sala
+public function getOnlineUsers($id)
+{
+    try {
+        $sala = Sala::findOrFail($id);
+        
+        // Verificar se o usuário participa da sala
+        $participante = ParticipanteSala::where('sala_id', $id)
+            ->where('usuario_id', Auth::id())
+            ->where('ativo', true)
+            ->first();
+
+        if (!$participante) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Você não tem acesso a esta sala.'
+            ], 403);
+        }
+
+        // Buscar usuários online na sala
+        $onlineUsers = Usuario::onlineInRoom($id)
+            ->with(['participantesSala' => function($query) use ($id) {
+                $query->where('sala_id', $id)->where('ativo', true);
+            }])
+            ->get()
+            ->map(function($user) {
+                $participante = $user->participantesSala->first();
+                return [
+                    'id' => $user->id,
+                    'username' => $user->username,
+                    'avatar' => $user->avatar,
+                    'papel' => $participante ? $participante->papel : 'membro',
+                    'last_seen' => $user->last_seen,
+                    'is_online' => true
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'online_users' => $onlineUsers,
+            'count' => $onlineUsers->count()
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Erro ao buscar usuários online', [
+            'error' => $e->getMessage(),
+            'sala_id' => $id,
+            'user_id' => Auth::id()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro interno.'
+        ], 500);
+    }
+}
 
     /**
      * Gerar convite para sala
@@ -569,7 +641,6 @@ class SalaController extends Controller
                 'convite' => $convite,
                 'link_convite' => url("/convites/{$token}")
             ]);
-
         } catch (\Exception $e) {
             Log::error('Erro ao gerar convite', [
                 'error' => $e->getMessage(),
@@ -664,7 +735,6 @@ class SalaController extends Controller
             }
 
             return redirect("/salas/{$convite->sala_id}")->with('success', "Bem-vindo(a) à sala '{$convite->sala->nome}'!");
-
         } catch (\Exception $e) {
             Log::error('Erro ao aceitar convite', [
                 'error' => $e->getMessage(),
@@ -697,5 +767,71 @@ class SalaController extends Controller
 
         Log::info('Teste WebSocket simulado', $status);
         return $status;
+    }
+
+    public function infoSala($id, Request $request)
+    {
+        try {
+            $sala = Sala::select(['id', 'nome', 'tipo', 'max_participantes', 'ativa'])
+                ->with(['participantes' => function ($query) {
+                    $query->where('ativo', true);
+                }])
+                ->findOrFail($id);
+
+            if (!$sala->ativa) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Esta sala não está mais ativa.'
+                ], 400);
+            }
+
+            $userId = Auth::id();
+
+            // Verificar se já é participante
+            $jaParticipa = ParticipanteSala::where('sala_id', $id)
+                ->where('usuario_id', $userId)
+                ->where('ativo', true)
+                ->exists();
+
+            if ($jaParticipa) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Você já participa desta sala!'
+                ], 400);
+            }
+
+            // Verificar limite de participantes
+            $participantesAtivos = $sala->participantes->count();
+            if ($participantesAtivos >= $sala->max_participantes) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sala lotada! Máximo de participantes atingido.'
+                ], 400);
+            }
+
+            return response()->json([
+                'success' => true,
+                'sala' => [
+                    'id' => $sala->id,
+                    'nome' => $sala->nome,
+                    'tipo' => $sala->tipo,
+                    'participantes_atuais' => $participantesAtivos,
+                    'max_participantes' => $sala->max_participantes,
+                    'precisa_senha' => $sala->tipo === 'privada',
+                    'apenas_convite' => $sala->tipo === 'apenas_convite'
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Erro ao buscar informações da sala', [
+                'error' => $e->getMessage(),
+                'sala_id' => $id,
+                'user_id' => Auth::id()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Sala não encontrada.'
+            ], 404);
+        }
     }
 }

@@ -20,7 +20,7 @@
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         .main-container {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
@@ -29,7 +29,7 @@
             margin: 20px;
             padding: 30px;
         }
-        
+
         .sala-card {
             background: linear-gradient(145deg, #ffffff, #f8f9fa);
             border: none;
@@ -39,19 +39,19 @@
             overflow: hidden;
             margin-bottom: 20px;
         }
-        
+
         .sala-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
         }
-        
+
         .sala-header {
             background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
             padding: 15px 20px;
             margin: -15px -20px 15px -20px;
         }
-        
+
         .tipo-badge {
             font-size: 0.85em;
             padding: 5px 12px;
@@ -59,11 +59,11 @@
             text-transform: uppercase;
             font-weight: 600;
         }
-        
+
         .tipo-publica { background-color: #28a745; }
         .tipo-privada { background-color: #dc3545; }
         .tipo-apenas_convite { background-color: #ffc107; color: #212529; }
-        
+
         .btn-primary-custom {
             background: linear-gradient(45deg, #667eea, #764ba2);
             border: none;
@@ -72,12 +72,12 @@
             font-weight: 600;
             transition: all 0.3s ease;
         }
-        
+
         .btn-primary-custom:hover {
             transform: scale(1.05);
             box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
-        
+
         .btn-success-custom {
             background: linear-gradient(45deg, #28a745, #20c997);
             border: none;
@@ -86,12 +86,12 @@
             font-weight: 600;
             transition: all 0.3s ease;
         }
-        
+
         .btn-success-custom:hover {
             transform: scale(1.05);
             box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
         }
-        
+
         .section-title {
             color: #2c3e50;
             font-weight: 700;
@@ -99,7 +99,7 @@
             position: relative;
             padding-bottom: 10px;
         }
-        
+
         .section-title::after {
             content: '';
             position: absolute;
@@ -110,30 +110,30 @@
             background: linear-gradient(45deg, #667eea, #764ba2);
             border-radius: 2px;
         }
-        
+
         .modal-header-custom {
             background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
             border-radius: 10px 10px 0 0;
         }
-        
+
         .form-control:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
-        
+
         .empty-state {
             text-align: center;
             padding: 40px;
             color: #6c757d;
         }
-        
+
         .empty-state i {
             font-size: 4rem;
             margin-bottom: 20px;
             opacity: 0.5;
         }
-        
+
         .websocket-indicator {
             position: fixed;
             top: 20px;
@@ -146,30 +146,47 @@
             z-index: 1050;
             animation: pulse 2s infinite;
         }
-        
+
         .websocket-indicator.disconnected {
             background: #dc3545;
         }
-        
+
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
-        
+
         .loading-spinner {
             display: none;
             text-align: center;
             padding: 20px;
         }
-        
+
         .alert-custom {
             border: none;
             border-radius: 10px;
             padding: 15px 20px;
         }
+
+        .senha-info {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .sala-info-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
     </style>
 </head>
+
 <body>
     <!-- Indicador WebSocket -->
     <div id="websocketIndicator" class="websocket-indicator">
@@ -265,13 +282,13 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label for="descricaoSala" class="form-label">Descrição</label>
                             <textarea class="form-control" id="descricaoSala" name="descricao" rows="3" 
                                       placeholder="Descreva sua aventura, sistema de jogo, nível dos jogadores..."></textarea>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3" id="senhaContainer" style="display: none;">
@@ -288,7 +305,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label for="imagemSala" class="form-label">URL da Imagem</label>
                             <input type="url" class="form-control" id="imagemSala" name="imagem_url" 
@@ -324,22 +341,37 @@
                             <input type="number" class="form-control" id="idSalaEntrar" name="sala_id" required 
                                    placeholder="Digite o ID numérico da sala">
                         </div>
-                        
-                        <div class="mb-3" id="senhaEntrarContainer" style="display: none;">
-                            <label for="senhaEntrar" class="form-label">Senha da Sala</label>
-                            <input type="password" class="form-control" id="senhaEntrar" name="senha" 
-                                   placeholder="Digite a senha da sala privada">
+
+                        <!-- Container para informações da sala -->
+                        <div id="infoSalaContainer" style="display: none;">
+                            <div class="sala-info-card">
+                                <h6><i class="fas fa-info-circle me-2"></i>Informações da Sala</h6>
+                                <div id="infoSalaContent"></div>
+                            </div>
                         </div>
-                        
+
+                        <!-- Container para senha -->
+                        <div id="senhaEntrarContainer" style="display: none;">
+                            <div class="senha-info">
+                                <h6><i class="fas fa-lock me-2 text-warning"></i>Sala Privada</h6>
+                                <p class="mb-2">Esta sala é privada. Digite a senha para continuar:</p>
+                                <input type="password" class="form-control" id="senhaEntrar" name="senha" 
+                                       placeholder="Digite a senha da sala">
+                            </div>
+                        </div>
+
                         <div class="alert alert-info alert-custom">
                             <i class="fas fa-info-circle me-2"></i>
-                            <strong>Dica:</strong> Se a sala for privada, você precisará da senha. 
-                            Salas "apenas convite" requerem um convite válido.
+                            <strong>Dica:</strong> Digite o ID da sala e clique em "Verificar Sala" primeiro. 
+                            Se for uma sala privada, você poderá inserir a senha antes de entrar.
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success-custom">
+                        <button type="button" id="btnVerificarSala" class="btn btn-info">
+                            <i class="fas fa-search me-2"></i>Verificar Sala
+                        </button>
+                        <button type="submit" id="btnEntrarSala" class="btn btn-success-custom" style="display: none;">
                             <i class="fas fa-sign-in-alt me-2"></i>Entrar na Sala
                         </button>
                     </div>
@@ -361,328 +393,423 @@
         });
 
         // Classe principal do Sistema de Salas
-        class SistemaDebug{
-        
-        constructor() {
-            this.init();
-            this.loadSalas();
-            this.bindEvents();
-            this.setupWebSocketIndicator();
-        }
+        class SistemaSalas {
+            constructor() {
+                this.init();
+                this.loadSalas();
+                this.bindEvents();
+                this.setupWebSocketIndicator();
+            }
 
-        init() {
-            console.log('🎲 Sistema de Salas inicializado');
-        }
+            init() {
+                console.log('🎮 Sistema de Salas inicializado');
+            }
 
-        // Carregar dados das salas via AJAX
-        loadSalas() {
-            this.showLoading();
-            
-            $.get('/salas')
-                .done((data) => {
-                    console.log('📊 Dados carregados:', data);
-                    this.renderMinhasSalas(data.minhas_salas);
-                    this.renderSalasPublicas(data.salas_publicas);
-                    this.hideLoading();
-                })
-                .fail((xhr) => {
-                    console.error('❌ Erro ao carregar salas:', xhr);
-                    this.showAlert('Erro ao carregar salas. Tente novamente.', 'danger');
-                    this.hideLoading();
+            // Carregar dados das salas via AJAX
+            loadSalas() {
+                this.showLoading();
+                
+                $.get('/salas')
+                    .done(data => {
+                        console.log('📊 Dados carregados:', data);
+                        this.renderMinhasSalas(data.minhas_salas);
+                        this.renderSalasPublicas(data.salas_publicas);
+                        this.hideLoading();
+                    })
+                    .fail(xhr => {
+                        console.error('❌ Erro ao carregar salas:', xhr);
+                        this.showAlert('Erro ao carregar salas. Tente novamente.', 'danger');
+                        this.hideLoading();
+                    });
+            }
+
+            // Renderizar minhas salas
+            renderMinhasSalas(salas) {
+                const container = $('#minhasSalasContainer');
+                
+                if (salas.length === 0) {
+                    container.html(`
+                        <div class="col-12">
+                            <div class="empty-state">
+                                <i class="fas fa-home"></i>
+                                <h4>Você ainda não participa de nenhuma sala</h4>
+                                <p>Crie sua primeira sala ou entre em uma sala pública!</p>
+                            </div>
+                        </div>
+                    `);
+                    return;
+                }
+
+                let html = '';
+                salas.forEach(sala => {
+                    html += this.generateSalaCard(sala, true);
                 });
-        }
-
-        // Renderizar minhas salas
-        renderMinhasSalas(salas) {
-            const container = $('#minhasSalasContainer');
-            
-            if (salas.length === 0) {
-                container.html(`
-                    <div class="col-12">
-                        <div class="empty-state">
-                            <i class="fas fa-home"></i>
-                            <h4>Você ainda não participa de nenhuma sala</h4>
-                            <p>Crie sua primeira sala ou entre em uma sala pública!</p>
-                        </div>
-                    </div>
-                `);
-                return;
+                container.html(html);
             }
 
-            let html = '';
-            salas.forEach(sala => {
-                html += this.generateSalaCard(sala, true);
-            });
-            container.html(html);
-        }
-
-        // Renderizar salas públicas
-        renderSalasPublicas(salas) {
-            const container = $('#salasPublicasContainer');
-            
-            if (salas.length === 0) {
-                container.html(`
-                    <div class="col-12">
-                        <div class="empty-state">
-                            <i class="fas fa-globe"></i>
-                            <h4>Nenhuma sala pública disponível</h4>
-                            <p>Seja o primeiro a criar uma sala pública!</p>
-                        </div>
-                    </div>
-                `);
-                return;
-            }
-
-            let html = '';
-            salas.forEach(sala => {
-                html += this.generateSalaCard(sala, false);
-            });
-            container.html(html);
-        }
-
-        // Gerar HTML do card da sala
-        generateSalaCard(sala, isMyRoom) {
-            const participantes = sala.participantes || [];
-            const criador = sala.criador || {};
-            const tipoClass = `tipo-${sala.tipo}`;
-            const tipoText = {
-                'publica': '🌍 Pública',
-                'privada': '🔒 Privada',
-                'apenas_convite': '📧 Convite'
-            }[sala.tipo] || sala.tipo;
-
-            const actionButton = isMyRoom 
-                ? `<a href="/salas/${sala.id}" class="btn btn-primary-custom btn-sm">
-                     <i class="fas fa-play me-1"></i>Entrar
-                   </a>`
-                : `<button class="btn btn-success-custom btn-sm" onclick="sistema.entrarSalaRapida(${sala.id})">
-                     <i class="fas fa-sign-in-alt me-1"></i>Juntar-se
-                   </button>`;
-
-            return `
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="sala-card animate__animated animate__fadeInUp">
-                        <div class="sala-header">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">${sala.nome}</h5>
-                                <span class="tipo-badge ${tipoClass}">${tipoText}</span>
+            // Renderizar salas públicas
+            renderSalasPublicas(salas) {
+                const container = $('#salasPublicasContainer');
+                
+                if (salas.length === 0) {
+                    container.html(`
+                        <div class="col-12">
+                            <div class="empty-state">
+                                <i class="fas fa-globe"></i>
+                                <h4>Nenhuma sala pública disponível</h4>
+                                <p>Seja o primeiro a criar uma sala pública!</p>
                             </div>
                         </div>
+                    `);
+                    return;
+                }
+
+                let html = '';
+                salas.forEach(sala => {
+                    html += this.generateSalaCard(sala, false);
+                });
+                container.html(html);
+            }
+
+            // Gerar HTML do card da sala
+            generateSalaCard(sala, isMyRoom) {
+                const participantes = sala.participantes || [];
+                const criador = sala.criador || {};
+                const tipoClass = `tipo-${sala.tipo}`;
+                const tipoText = {
+                    'publica': '🌍 Pública',
+                    'privada': '🔒 Privada',
+                    'apenas_convite': '📧 Convite'
+                }[sala.tipo] || sala.tipo;
+
+                const actionButton = isMyRoom ? 
+                    `<a href="/salas/${sala.id}" class="btn btn-primary-custom btn-sm">
+                        <i class="fas fa-play me-1"></i>Entrar
+                     </a>` :
+                    `<button class="btn btn-success-custom btn-sm" onclick="sistema.entrarSalaRapida(${sala.id})">
+                        <i class="fas fa-sign-in-alt me-1"></i>Juntar-se
+                     </button>`;
+
+                return `
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="sala-card animate__animated animate__fadeInUp">
+                            <div class="sala-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">${sala.nome}</h5>
+                                    <span class="tipo-badge ${tipoClass}">${tipoText}</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted mb-3">${sala.descricao || 'Sem descrição'}</p>
+                                
+                                <div class="row text-center mb-3">
+                                    <div class="col-4">
+                                        <small class="text-muted d-block">ID</small>
+                                        <strong>${sala.id}</strong>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-muted d-block">Participantes</small>
+                                        <strong>${participantes.length}/${sala.max_participantes}</strong>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-muted d-block">Criador</small>
+                                        <strong>${criador.username || 'N/A'}</strong>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Criada ${this.formatDate(sala.data_criacao)}
+                                    </small>
+                                    ${actionButton}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Formatar data
+            formatDate(dateString) {
+                if (!dateString) return 'N/A';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
+
+            // Eventos
+            bindEvents() {
+                // Mostrar/ocultar campo senha baseado no tipo
+                $('#tipoSala').change(e => {
+                    const senhaContainer = $('#senhaContainer');
+                    if (e.target.value === 'privada') {
+                        senhaContainer.show();
+                        $('#senhaSala').attr('required', true);
+                    } else {
+                        senhaContainer.hide();
+                        $('#senhaSala').attr('required', false);
+                    }
+                });
+
+                // Submit criar sala
+                $('#formCriarSala').submit(e => {
+                    e.preventDefault();
+                    this.criarSala();
+                });
+
+                // Submit entrar em sala
+                $('#formEntrarSala').submit(e => {
+                    e.preventDefault();
+                    this.entrarSala();
+                });
+
+                // Verificar sala antes de entrar
+                $('#btnVerificarSala').click(() => {
+                    this.verificarSala();
+                });
+
+                // Limpar formulário quando modal fechar
+                $('#modalEntrarSala').on('hidden.bs.modal', () => {
+                    this.resetFormEntrarSala();
+                });
+            }
+
+            // Verificar informações da sala
+            verificarSala() {
+                const salaId = $('#idSalaEntrar').val();
+                
+                if (!salaId) {
+                    this.showAlert('Digite o ID da sala primeiro.', 'warning');
+                    return;
+                }
+
+                const btnVerificar = $('#btnVerificarSala');
+                const btnEntrar = $('#btnEntrarSala');
+                const originalText = btnVerificar.html();
+                
+                btnVerificar.html('<i class="fas fa-spinner fa-spin me-2"></i>Verificando...');
+                btnVerificar.prop('disabled', true);
+
+                $.get(`/salas/${salaId}/info`)
+                    .done(response => {
+                        if (response.success) {
+                            this.mostrarInfoSala(response.sala);
+                            btnEntrar.show();
+                            btnVerificar.html('<i class="fas fa-check me-2"></i>Verificado');
+                        }
+                    })
+                    .fail(xhr => {
+                        console.error('❌ Erro ao verificar sala:', xhr);
+                        const errorMsg = xhr.responseJSON?.message || 'Erro ao verificar sala.';
+                        this.showAlert(errorMsg, 'danger');
                         
-                        <div class="card-body">
-                            <p class="text-muted mb-3">${sala.descricao || 'Sem descrição'}</p>
-                            
-                            <div class="row text-center mb-3">
-                                <div class="col-4">
-                                    <small class="text-muted d-block">ID</small>
-                                    <strong>#${sala.id}</strong>
-                                </div>
-                                <div class="col-4">
-                                    <small class="text-muted d-block">Participantes</small>
-                                    <strong>${participantes.length}/${sala.max_participantes}</strong>
-                                </div>
-                                <div class="col-4">
-                                    <small class="text-muted d-block">Criador</small>
-                                    <strong>${criador.username || 'N/A'}</strong>
-                                </div>
-                            </div>
-                            
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">
-                                    <i class="fas fa-clock me-1"></i>
-                                    Criada: ${this.formatDate(sala.data_criacao)}
-                                </small>
-                                ${actionButton}
-                            </div>
+                        btnVerificar.html(originalText);
+                        btnVerificar.prop('disabled', false);
+                    });
+            }
+
+            // Mostrar informações da sala
+            mostrarInfoSala(sala) {
+                const infoContainer = $('#infoSalaContainer');
+                const senhaContainer = $('#senhaEntrarContainer');
+                
+                let infoHtml = `
+                    <div class="row">
+                        <div class="col-6">
+                            <strong>Nome:</strong><br>
+                            <span class="text-muted">${sala.nome}</span>
+                        </div>
+                        <div class="col-6">
+                            <strong>Tipo:</strong><br>
+                            <span class="text-muted">${this.getTipoText(sala.tipo)}</span>
                         </div>
                     </div>
-                </div>
-            `;
-        }
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <strong>Participantes:</strong><br>
+                            <span class="text-muted">${sala.participantes_atuais}/${sala.max_participantes}</span>
+                        </div>
+                        <div class="col-6">
+                            <strong>Status:</strong><br>
+                            <span class="badge bg-success">Ativa</span>
+                        </div>
+                    </div>
+                `;
 
-        // Formatar data
-        formatDate(dateString) {
-            if (!dateString) return 'N/A';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-        }
+                $('#infoSalaContent').html(infoHtml);
+                infoContainer.show();
 
-        // Eventos
-        bindEvents() {
-            // Mostrar/ocultar campo senha baseado no tipo
-            $('#tipoSala').change((e) => {
-                const senhaContainer = $('#senhaContainer');
-                if (e.target.value === 'privada') {
+                // Mostrar campo senha se necessário
+                if (sala.precisa_senha) {
                     senhaContainer.show();
-                    $('#senhaSala').attr('required', true);
+                    $('#senhaEntrar').attr('required', true);
                 } else {
                     senhaContainer.hide();
-                    $('#senhaSala').attr('required', false);
+                    $('#senhaEntrar').attr('required', false);
                 }
-            });
 
-            // Submit criar sala
-            $('#formCriarSala').submit((e) => {
-                e.preventDefault();
-                this.criarSala();
-            });
+                // Verificar se é apenas convite
+                if (sala.apenas_convite) {
+                    this.showAlert('Esta sala é apenas por convite. Você precisa ser convidado.', 'warning');
+                }
+            }
 
-            // Submit entrar em sala
-            $('#formEntrarSala').submit((e) => {
-                e.preventDefault();
-                this.entrarSala();
-            });
-        }
+            // Obter texto do tipo
+            getTipoText(tipo) {
+                const tipos = {
+                    'publica': '🌍 Pública',
+                    'privada': '🔒 Privada',
+                    'apenas_convite': '📧 Apenas Convite'
+                };
+                return tipos[tipo] || tipo;
+            }
 
-        // Criar nova sala
-        criarSala() {
-            const formData = new FormData($('#formCriarSala')[0]);
-            const data = Object.fromEntries(formData);
+            // Reset form entrar sala
+            resetFormEntrarSala() {
+                $('#formEntrarSala')[0].reset();
+                $('#infoSalaContainer').hide();
+                $('#senhaEntrarContainer').hide();
+                $('#btnEntrarSala').hide();
+                $('#btnVerificarSala').html('<i class="fas fa-search me-2"></i>Verificar Sala').prop('disabled', false);
+                $('#senhaEntrar').attr('required', false);
+            }
 
-            $.post('/salas', data)
-                .done((response) => {
-                    if (response.success) {
-                        this.showAlert(response.message, 'success');
-                        $('#modalCriarSala').modal('hide');
-                        $('#formCriarSala')[0].reset();
-                        this.loadSalas(); // Recarregar salas
-                        
-                        // Redirecionar para a sala criada após 2 segundos
-                        setTimeout(() => {
-                            window.location.href = `/salas/${response.sala.id}`;
-                        }, 2000);
-                    } else {
-                        this.showAlert(response.message, 'danger');
-                    }
-                })
-                .fail((xhr) => {
-                    console.error('❌ Erro ao criar sala:', xhr);
-                    const errors = xhr.responseJSON?.errors;
-                    if (errors) {
-                        let errorMsg = 'Erros de validação:<br>';
-                        Object.values(errors).forEach(error => {
-                            errorMsg += `• ${error[0]}<br>`;
-                        });
-                        this.showAlert(errorMsg, 'danger');
-                    } else {
-                        this.showAlert('Erro interno. Tente novamente.', 'danger');
-                    }
-                });
-        }
+            // Criar nova sala
+            criarSala() {
+                const formData = new FormData($('#formCriarSala')[0]);
+                const data = Object.fromEntries(formData);
 
-        // Entrar em sala
-        entrarSala() {
-            const formData = new FormData($('#formEntrarSala')[0]);
-            const data = Object.fromEntries(formData);
+                $.post('/salas', data)
+                    .done(response => {
+                        if (response.success) {
+                            this.showAlert(response.message, 'success');
+                            $('#modalCriarSala').modal('hide');
+                            $('#formCriarSala')[0].reset();
+                            this.loadSalas(); // Recarregar salas
 
-            $.post('/salas/entrar', data)
-                .done((response) => {
-                    if (response.success) {
-                        this.showAlert(response.message, 'success');
-                        $('#modalEntrarSala').modal('hide');
-                        $('#formEntrarSala')[0].reset();
-                        
-                        // Redirecionar para a sala após 1.5 segundos
-                        setTimeout(() => {
-                            window.location.href = response.redirect_to;
-                        }, 1500);
-                    } else {
-                        this.showAlert(response.message, 'warning');
-                        
-                        // Se for sala privada, mostrar campo senha
-                        if (response.message.includes('privada')) {
-                            $('#senhaEntrarContainer').show();
-                            $('#senhaEntrar').attr('required', true);
+                            // Redirecionar para a sala criada após 2 segundos
+                            setTimeout(() => {
+                                window.location.href = `/salas/${response.sala.id}`;
+                            }, 2000);
+                        } else {
+                            this.showAlert(response.message, 'danger');
                         }
-                    }
-                })
-                .fail((xhr) => {
-                    console.error('❌ Erro ao entrar na sala:', xhr);
-                    const errors = xhr.responseJSON?.errors;
-                    if (errors) {
-                        let errorMsg = '';
-                        Object.values(errors).forEach(error => {
-                            errorMsg += error[0] + ' ';
-                        });
+                    })
+                    .fail(xhr => {
+                        console.error('❌ Erro ao criar sala:', xhr);
+                        const errors = xhr.responseJSON?.errors;
+                        if (errors) {
+                            let errorMsg = 'Erros de validação:<br>';
+                            Object.values(errors).forEach(error => {
+                                errorMsg += `• ${error[0]}<br>`;
+                            });
+                            this.showAlert(errorMsg, 'danger');
+                        } else {
+                            this.showAlert('Erro interno. Tente novamente.', 'danger');
+                        }
+                    });
+            }
+
+            // Entrar em sala
+            entrarSala() {
+                const formData = new FormData($('#formEntrarSala')[0]);
+                const data = Object.fromEntries(formData);
+
+                $.post('/salas/entrar', data)
+                    .done(response => {
+                        if (response.success) {
+                            this.showAlert(response.message, 'success');
+                            $('#modalEntrarSala').modal('hide');
+                            this.resetFormEntrarSala();
+
+                            // Redirecionar para a sala após 1.5 segundos
+                            setTimeout(() => {
+                                window.location.href = response.redirect_to;
+                            }, 1500);
+                        } else {
+                            this.showAlert(response.message, 'warning');
+                        }
+                    })
+                    .fail(xhr => {
+                        console.error('❌ Erro ao entrar na sala:', xhr);
+                        const errorMsg = xhr.responseJSON?.message || 'Erro interno. Tente novamente.';
                         this.showAlert(errorMsg, 'danger');
+                    });
+            }
+
+            // Entrar em sala rapidamente (para salas públicas)
+            entrarSalaRapida(salaId) {
+                $.post('/salas/entrar', { sala_id: salaId })
+                    .done(response => {
+                        if (response.success) {
+                            this.showAlert(response.message, 'success');
+                            setTimeout(() => {
+                                window.location.href = response.redirect_to;
+                            }, 1500);
+                        } else {
+                            this.showAlert(response.message, 'warning');
+                        }
+                    })
+                    .fail(xhr => {
+                        console.error('❌ Erro ao entrar na sala:', xhr);
+                        this.showAlert('Erro ao entrar na sala. Tente novamente.', 'danger');
+                    });
+            }
+
+            // Mostrar alerta
+            showAlert(message, type = 'info') {
+                const alertHtml = `
+                    <div class="alert alert-${type} alert-custom alert-dismissible fade show animate__animated animate__fadeIn" role="alert">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+                $('#alertContainer').prepend(alertHtml);
+
+                // Auto-dismiss após 5 segundos
+                setTimeout(() => {
+                    $('.alert').first().alert('close');
+                }, 5000);
+            }
+
+            // Loading
+            showLoading() {
+                $('#loadingSpinner').show();
+            }
+
+            hideLoading() {
+                $('#loadingSpinner').hide();
+            }
+
+            // Simular WebSocket (preparação para implementação real)
+            setupWebSocketIndicator() {
+                const indicator = $('#websocketIndicator');
+                
+                // Simular status de conexão
+                let connected = true;
+                setInterval(() => {
+                    connected = !connected;
+                    if (connected) {
+                        indicator.removeClass('disconnected')
+                                 .html('<i class="fas fa-wifi"></i> WebSocket: Conectado');
                     } else {
-                        this.showAlert('Erro interno. Tente novamente.', 'danger');
+                        indicator.addClass('disconnected')
+                                 .html('<i class="fas fa-wifi"></i> WebSocket: Reconectando...');
                     }
-                });
+                }, 10000); // Alterna a cada 10 segundos para demo
+            }
         }
 
-        // Entrar em sala rapidamente (para salas públicas)
-        entrarSalaRapida(salaId) {
-            $.post('/salas/entrar', { sala_id: salaId })
-                .done((response) => {
-                    if (response.success) {
-                        this.showAlert(response.message, 'success');
-                        setTimeout(() => {
-                            window.location.href = response.redirect_to;
-                        }, 1500);
-                    } else {
-                        this.showAlert(response.message, 'warning');
-                    }
-                })
-                .fail((xhr) => {
-                    console.error('❌ Erro ao entrar na sala:', xhr);
-                    this.showAlert('Erro ao entrar na sala. Tente novamente.', 'danger');
-                });
-        }
-
-        // Mostrar alerta
-        showAlert(message, type = 'info') {
-            const alertHtml = `
-                <div class="alert alert-${type} alert-custom alert-dismissible fade show animate__animated animate__fadeIn" role="alert">
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            `;
-            $('#alertContainer').prepend(alertHtml);
-            
-            // Auto-dismiss após 5 segundos
-            setTimeout(() => {
-                $('.alert').first().alert('close');
-            }, 5000);
-        }
-
-        // Loading
-        showLoading() {
-            $('#loadingSpinner').show();
-        }
-
-        hideLoading() {
-            $('#loadingSpinner').hide();
-        }
-
-        // Simular WebSocket (preparação para implementação real)
-        setupWebSocketIndicator() {
-            const indicator = $('#websocketIndicator');
-            
-            // Simular status de conexão
-            let connected = true;
-            setInterval(() => {
-                connected = !connected;
-                if (connected) {
-                    indicator.removeClass('disconnected')
-                            .html('<i class="fas fa-wifi"></i> WebSocket: Conectado');
-                } else {
-                    indicator.addClass('disconnected')
-                            .html('<i class="fas fa-wifi"></i> WebSocket: Reconectando...');
-                }
-            }, 10000); // Alterna a cada 10 segundos para demo
-        }
-    }
-
-    // Inicializar sistema quando document estiver pronto
-    let sistema;
-    $(document).ready(() => {
-        sistema = new SistemaDebug
-    });
+        // Inicializar sistema quando document estiver pronto
+        let sistema;
+        $(document).ready(() => {
+            sistema = new SistemaSalas();
+        });
     </script>
 </body>
 </html>
