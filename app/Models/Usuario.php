@@ -21,7 +21,7 @@ class Usuario extends Authenticatable
 
     protected $fillable = [
         'username',
-        'nickname', 
+        'nickname',
         'email',
         'senha_hash',
         'avatar_url',
@@ -38,9 +38,9 @@ class Usuario extends Authenticatable
         'reset_token_expires_at',
         'reset_attempts',
         'reset_attempts_reset_at',
-        // ============ REMOVER CAMPOS ANTIGOS ============
-        // 'password_reset_token',        
-        // 'password_reset_expires_at'    
+        'is_online',
+        'last_seen',
+        'current_room'
     ];
 
     protected $hidden = [
@@ -58,6 +58,8 @@ class Usuario extends Authenticatable
         'reset_token_expires_at' => 'datetime',
         'reset_attempts_reset_at' => 'datetime',
         'reset_attempts' => 'integer',
+        'is_online' => 'boolean',
+        'last_seen' => 'datetime'
     ];
 
     public function getAuthPassword()
@@ -70,6 +72,43 @@ class Usuario extends Authenticatable
         $this->attributes['senha_hash'] = Hash::make($password);
     }
 
+    // Métodos para status online
+    public function setOnline($roomId = null)
+    {
+        $this->update([
+            'is_online' => true,
+            'last_seen' => now(),
+            'current_room' => $roomId
+        ]);
+    }
+
+    public function setOffline()
+    {
+        $this->update([
+            'is_online' => false,
+            'last_seen' => now(),
+            'current_room' => null
+        ]);
+    }
+
+    public function isInRoom($roomId)
+    {
+        return $this->current_room == $roomId && $this->is_online;
+    }
+
+    // Scope para usuários online
+    public function scopeOnline($query)
+    {
+        return $query->where('is_online', true);
+    }
+
+    // Scope para usuários online em uma sala específica
+    public function scopeOnlineInRoom($query, $roomId)
+    {
+        return $query->where('is_online', true)
+            ->where('current_room', $roomId);
+    }
+
     // ============ MÉTODOS DE AVATAR (MANTIDOS DO SEU ORIGINAL) ============
 
     /**
@@ -78,11 +117,11 @@ class Usuario extends Authenticatable
     public function getAvatarUrlAttribute($value)
     {
         Log::info('Verificando avatar_url', ['value' => $value, 'user_id' => $this->id]);
-        
+
         if ($value) {
             $fullPath = storage_path('app/public/' . $value);
             Log::info('Caminho completo do avatar', ['path' => $fullPath, 'exists' => file_exists($fullPath)]);
-            
+
             if (file_exists($fullPath)) {
                 $url = asset('storage/' . $value);
                 Log::info('URL do avatar gerada', ['url' => $url]);
@@ -91,7 +130,7 @@ class Usuario extends Authenticatable
                 Log::warning('Arquivo de avatar não encontrado', ['path' => $fullPath]);
             }
         }
-        
+
         // Avatar padrão caso não tenha foto
         $defaultUrl = asset('images/default-avatar.png');
         Log::info('Usando avatar padrão', ['url' => $defaultUrl]);
@@ -105,11 +144,11 @@ class Usuario extends Authenticatable
     {
         $originalAvatarUrl = $this->getOriginal('avatar_url');
         Log::info('Tentando deletar avatar antigo', ['avatar_url' => $originalAvatarUrl]);
-        
+
         if ($originalAvatarUrl) {
             $fullPath = storage_path('app/public/' . $originalAvatarUrl);
             Log::info('Caminho para deletar', ['path' => $fullPath, 'exists' => file_exists($fullPath)]);
-            
+
             if (file_exists($fullPath)) {
                 $deleted = unlink($fullPath);
                 Log::info('Resultado da deleção', ['deleted' => $deleted, 'path' => $fullPath]);
@@ -120,7 +159,7 @@ class Usuario extends Authenticatable
         } else {
             Log::info('Nenhum avatar para deletar');
         }
-        
+
         return false;
     }
 
@@ -135,9 +174,9 @@ class Usuario extends Authenticatable
             $token = sprintf('%06d', mt_rand(0, 999999));
         } while (
             self::where('reset_token', $token)
-                ->where('reset_token_expires_at', '>', Carbon::now())
-                ->where('id', '!=', $this->id)
-                ->exists()
+            ->where('reset_token_expires_at', '>', Carbon::now())
+            ->where('id', '!=', $this->id)
+            ->exists()
         );
 
         Log::info('Token de 6 dígitos gerado', [
@@ -155,7 +194,7 @@ class Usuario extends Authenticatable
     public function setResetToken(): string
     {
         $token = $this->generateResetToken();
-        
+
         $this->update([
             'reset_token' => $token,
             'reset_token_expires_at' => Carbon::now()->addMinutes(15), // 15 minutos de validade
@@ -177,8 +216,8 @@ class Usuario extends Authenticatable
      */
     public function isValidResetToken(string $token): bool
     {
-        $isValid = $this->reset_token === $token 
-            && $this->reset_token_expires_at 
+        $isValid = $this->reset_token === $token
+            && $this->reset_token_expires_at
             && $this->reset_token_expires_at->isFuture();
 
         Log::info('Verificação de token', [
@@ -203,13 +242,13 @@ class Usuario extends Authenticatable
                 'reset_attempts' => 0,
                 'reset_attempts_reset_at' => Carbon::now()->addHour()
             ]);
-            
+
             Log::info('Contador de tentativas resetado', ['user_id' => $this->id]);
             return true;
         }
 
         $canAttempt = $this->reset_attempts < 5;
-        
+
         Log::info('Verificação de tentativas de reset', [
             'user_id' => $this->id,
             'current_attempts' => $this->reset_attempts,
@@ -226,7 +265,7 @@ class Usuario extends Authenticatable
     public function incrementResetAttempts(): void
     {
         $this->increment('reset_attempts');
-        
+
         // Definir tempo de reset se não existe
         if (!$this->reset_attempts_reset_at) {
             $this->update(['reset_attempts_reset_at' => Carbon::now()->addHour()]);
@@ -263,7 +302,7 @@ class Usuario extends Authenticatable
         if (!$user) return false;
 
         $isBlocked = !$user->canAttemptReset();
-        
+
         Log::info('Verificação de bloqueio de email', [
             'email' => $email,
             'user_id' => $user->id,
@@ -279,19 +318,19 @@ class Usuario extends Authenticatable
     public function getBlockTimeRemaining(): ?int
     {
         if (!$this->reset_attempts_reset_at) return null;
-        
+
         $minutesRemaining = $this->reset_attempts_reset_at->diffInMinutes(Carbon::now());
-        
+
         Log::info('Tempo restante de bloqueio', [
             'user_id' => $this->id,
             'minutes_remaining' => $minutesRemaining
         ]);
-        
+
         return $minutesRemaining;
     }
 
     // ============ MÉTODO PARA COMPATIBILIDADE COM LARAVEL AUTH ============
-    
+
     /**
      * Get the name that can be displayed to represent the user.
      */
