@@ -14,14 +14,15 @@ class Kernel extends ConsoleKernel
      * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
      * @return void
      */
+
     protected function schedule(Schedule $schedule)
-    {
-        // Agendamento para execução periódica do job que limpa usuários offline
-        $schedule->job(new CleanupOfflineUsers())
-                 ->everyTwoMinutes()
-                 ->withoutOverlapping()
-                 ->runInBackground();
-    }
+{
+    // Limpeza de usuários offline a cada 2 minutos
+    $schedule->job(new \App\Jobs\CleanupOfflineUsers())
+             ->everyTwoMinutes()
+             ->withoutOverlapping()
+             ->runInBackground();
+}
 
     /**
      * Registra os comandos Artisan fornecidos pelo aplicativo.

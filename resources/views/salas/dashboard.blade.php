@@ -392,13 +392,108 @@
             }
         });
 
-        // Classe principal do Sistema de Salas
-        class SistemaSalas {
-            constructor() {
-                this.init();
-                this.loadSalas();
-                this.bindEvents();
-                this.setupWebSocketIndicator();
+
+class WebSocketStatusManager {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        this.setupGlobalStatusChannel();
+        this.updateWebSocketIndicator();
+    }
+
+    // Canal global para status de usuários
+    setupGlobalStatusChannel() {
+        window.Echo.channel('user-status')
+            .listen('.user.status.changed', (e) => {
+                console.log('Status do usuário mudou:', e);
+                this.handleUserStatusChange(e);
+            });
+    }
+
+    // Gerenciar mudanças de status
+    handleUserStatusChange(event) {
+        const { user, status, room_id } = event;
+        
+        // Atualizar indicadores visuais no dashboard
+        this.updateUserStatusInCards(user.id, status);
+        
+        // Mostrar notificação se relevante
+        if (room_id) {
+            const message = status === 'online' 
+                ? `${user.username} está online na sala ${room_id}`
+                : `${user.username} ficou offline`;
+            
+            this.showStatusNotification(message, status === 'online' ? 'success' : 'warning');
+        }
+    }
+
+    // Atualizar status nos cards das salas
+    updateUserStatusInCards(userId, status) {
+        $(`.user-${userId}-status`).removeClass('text-success text-danger')
+            .addClass(status === 'online' ? 'text-success' : 'text-danger')
+            .html(`<i class="fas fa-circle me-1" style="font-size: 8px;"></i> ${status === 'online' ? 'Online' : 'Offline'}`);
+    }
+
+    // Atualizar indicador de WebSocket
+    updateWebSocketIndicator() {
+        const indicator = $('#websocketIndicator');
+        
+        // Status da conexão Echo
+        if (window.Echo && window.Echo.connector && window.Echo.connector.pusher) {
+            const connection = window.Echo.connector.pusher.connection;
+            
+            connection.bind('connected', () => {
+                indicator.removeClass('disconnected')
+                    .html('<i class="fas fa-wifi"></i> WebSocket Conectado');
+                console.log('✅ Dashboard WebSocket conectado');
+            });
+            
+            connection.bind('disconnected', () => {
+                indicator.addClass('disconnected')
+                    .html('<i class="fas fa-wifi"></i> WebSocket Desconectado');
+                console.log('❌ Dashboard WebSocket desconectado');
+            });
+            
+            connection.bind('error', (error) => {
+                console.error('❌ Erro WebSocket Dashboard:', error);
+                indicator.addClass('disconnected')
+                    .html('<i class="fas fa-exclamation-triangle"></i> Erro WebSocket');
+            });
+        }
+    }
+
+    // Mostrar notificação de status
+    showStatusNotification(message, type) {
+        const alertHtml = `
+            <div class="alert alert-${type} alert-custom alert-dismissible fade show animate__animated animate__fadeIn" 
+                 role="alert">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        $('#alertContainer').prepend(alertHtml);
+        
+        // Auto-dismiss após 4 segundos
+        setTimeout(() => {
+            $('.alert').first().alert('close');
+        }, 4000);
+    }
+}
+
+// Adicionar à classe SistemaSalas existente
+class SistemaSalas {
+    constructor() {
+        this.init();
+        this.loadSalas();
+        this.bindEvents();
+        this.setupWebSocketIndicator();
+        
+        // Nova funcionalidade WebSocket
+        this.webSocketManager = new WebSocketStatusManager();
             }
 
             init() {
@@ -810,6 +905,7 @@
         $(document).ready(() => {
             sistema = new SistemaSalas();
         });
+        
     </script>
 </body>
 </html>
