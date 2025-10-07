@@ -1,0 +1,39 @@
+{
+    "name": "nsfw-detector",
+    "version": "1.0.0",
+    "description": "Detector de conteúdo NSFW client-side usando NSFW.js",
+    "main": "index.html",
+    "scripts": {
+      "start": "npx http-server -p 8080",
+      "dev": "npx live-server --port=8080",
+      "serve": "python -m http.server 8080"
+    },
+    "keywords": [
+      "nsfw",
+      "image-detection",
+      "machine-learning",
+      "tensorflow",
+      "client-side"
+    ],
+    "author": "Desenvolvedor",
+    "license": "MIT",
+    "dependencies": {
+      "nsfwjs": "^2.4.2"
+    },
+    "devDependencies": {
+      "http-server": "^14.1.1",
+      "live-server": "^1.2.2"
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/usuario/nsfw-detector"
+    },
+    "engines": {
+      "node": ">=14.0.0"
+    },
+    "browserslist": [
+      "last 2 versions",
+      "> 1%",
+      "not dead"
+    ]
+  }

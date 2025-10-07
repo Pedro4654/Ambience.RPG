@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ Detector NSFW - Client Side</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ Detector de Conteúdo NSFW</h1>
+            <p>Análise 100% local - suas imagens não saem do seu dispositivo</p>
+            <div class="status-indicator">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">Carregando modelo...</span>
+            </div>
+        </header>
+
+        <main>
+            <!-- Área de Upload -->
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📤</div>
+                    <p class="upload-text">Clique aqui ou arraste uma imagem</p>
+                    <p class="upload-subtitle">Formatos: JPG, PNG, GIF, WEBP (máx. 10MB)</p>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p id="loadingText">Analisando imagem...</p>
+            </div>
+
+            <!-- Preview da Imagem -->
+            <div class="preview-section" id="previewSection">
+                <div class="preview-header">
+                    <h3>📷 Imagem Selecionada</h3>
+                    <button class="btn-secondary" id="clearBtn">🗑️ Limpar</button>
+                </div>
+                <img id="imagePreview" alt="Preview da imagem">
+                <div class="image-info">
+                    <span id="imageSize"></span>
+                    <span id="imageDimensions"></span>
+                </div>
+            </div>
+
+            <!-- Resultados -->
+            <div class="result-section" id="resultSection">
+                <!-- Resultado será inserido aqui via JavaScript -->
+            </div>
+
+            <!-- Informações e Estatísticas -->
+            <div class="info-section">
+                <!-- Informações do Modelo -->
+                <div class="model-info">
+                    <h3>📊 Status do Modelo</h3>
+                    <div class="model-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Status:</span>
+                            <span class="stat-value" id="modelStatus">Não carregado</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Tempo de carregamento:</span>
+                            <span class="stat-value" id="loadTime">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Imagens analisadas:</span>
+                            <span class="stat-value" id="imageCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Bloqueadas:</span>
+                            <span class="stat-value" id="blockedCount">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informações das Categorias -->
+                <div class="categories-info">
+                    <h3>🏷️ Categorias de Classificação</h3>
+                    <div class="category-grid">
+                        <div class="category-item">
+                            <div class="category-icon">🎨</div>
+                            <div class="category-content">
+                                <strong>Drawing</strong>
+                                <p>Desenhos, ilustrações, arte digital</p>
+                            </div>
+                        </div>
+                        <div class="category-item">
+                            <div class="category-icon">😐</div>
+                            <div class="category-content">
+                                <strong>Neutral</strong>
+                                <p>Conteúdo neutro, seguro para trabalho</p>
+                            </div>
+                        </div>
+                        <div class="category-item">
+                            <div class="category-icon">🔞</div>
+                            <div class="category-content">
+                                <strong>Porn</strong>
+                                <p>Conteúdo pornográfico explícito</p>
+                            </div>
+                        </div>
+                        <div class="category-item">
+                            <div class="category-icon">👙</div>
+                            <div class="category-content">
+                                <strong>Sexy</strong>
+                                <p>Conteúdo sugestivo, sensual</p>
+                            </div>
+                        </div>
+                        <div class="category-item">
+                            <div class="category-icon">🌸</div>
+                            <div class="category-content">
+                                <strong>Hentai</strong>
+                                <p>Anime/manga com conteúdo adulto</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <p>⚡ Powered by <a href="https://github.com/infinitered/nsfwjs" target="_blank" rel="noopener">NSFW.js</a></p>
+                <p>🔒 Processamento 100% local - nenhuma imagem é enviada para servidores</p>
+                <p>🚀 Desenvolvido para Laragon - <code>http://localhost/nsfw-detector/</code></p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal de Ajuda -->
+    <div class="modal" id="helpModal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h2>❓ Como Usar</h2>
+            <ol>
+                <li>Aguarde o modelo carregar (indicador verde no topo)</li>
+                <li>Clique na área de upload ou arraste uma imagem</li>
+                <li>Veja os resultados da análise em tempo real</li>
+                <li>Analise as probabilidades de cada categoria</li>
+            </ol>
+            <h3>🔧 Configurações de Bloqueio</h3>
+            <ul>
+                <li><strong>Porn:</strong> Bloqueia se &gt; 60%</li>
+                <li><strong>Hentai:</strong> Bloqueia se &gt; 60%</li>
+                <li><strong>Sexy:</strong> Bloqueia se &gt; 80%</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Botão de Ajuda -->
+    <button class="help-btn" id="helpBtn">❓</button>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/nsfwjs@2.4.2/dist/nsfwjs.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
