@@ -122,6 +122,9 @@ Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->g
     Route::post('/salas/{id}/convidar', [SalaController::class, 'gerarConvite'])->name('salas.convidar')
         ->where('id', '[0-9]+');
 
+        Route::get('/salas/websocket-config', [SalaController::class, 'getWebSocketConfig'])->middleware('auth');
+
+
     // ========== ROTAS DE CONVITES ==========
 
     /**

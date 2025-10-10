@@ -834,4 +834,59 @@ public function getOnlineUsers($id)
             ], 404);
         }
     }
+
+    /**
+ * Endpoint para configuração do WebSocket no frontend
+ * GET /salas/websocket-config
+ */
+public function getWebSocketConfig(Request $request)
+{
+    try {
+        $userId = Auth::id();
+        
+        // Verificar se o usuário está autenticado
+        if (!$userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuário não autenticado'
+            ], 401);
+        }
+
+        // Retornar configurações do WebSocket
+        $config = [
+            'success' => true,
+            'websocket' => [
+                'enabled' => config('broadcasting.default') !== 'null',
+                'driver' => config('broadcasting.default'),
+                'app_key' => config('broadcasting.connections.reverb.key'),
+                'host' => config('broadcasting.connections.reverb.options.host'),
+                'port' => config('broadcasting.connections.reverb.options.port'),
+                'scheme' => config('broadcasting.connections.reverb.options.scheme'),
+                'user_id' => $userId
+            ],
+            'channels' => [
+                'user_status' => "user-status",
+                'user_private' => "private-user.{$userId}"
+            ]
+        ];
+
+        return response()->json($config);
+        
+    } catch (\Exception $e) {
+        Log::error('Erro ao obter configurações WebSocket', [
+            'error' => $e->getMessage(),
+            'user_id' => Auth::id()
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'websocket' => [
+                'enabled' => false,
+                'driver' => 'null'
+            ],
+            'message' => 'WebSocket indisponível'
+        ]);
+    }
+}
+
 }

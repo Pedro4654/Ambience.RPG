@@ -12,6 +12,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Animate.css -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+
+    
     
     <style>
         /* Estilos personalizados para o sistema de salas */
@@ -383,7 +385,7 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+    @vite(['resources/js/app.js', 'resources/js/bootstrap.js', 'resources/js/echo.js'])
     <script>
         // Configuração CSRF para AJAX
         $.ajaxSetup({
@@ -395,21 +397,105 @@
 
 class WebSocketStatusManager {
     constructor() {
+        this.isEnabled = false;
+        this.config = null;
         this.init();
     }
 
-    init() {
-        this.setupGlobalStatusChannel();
+    async init() {
+        try {
+            // Carregar configurações do WebSocket do backend
+            const response = await $.get('/salas/websocket-config');
+            
+            if (response.success && response.websocket.enabled) {
+                this.config = response;
+                this.isEnabled = true;
+                
+                // Aguardar window.Echo estar disponível
+                this.waitForEcho();
+            } else {
+                console.log('📡 WebSocket desabilitado ou indisponível');
+                this.setupFallbackMode();
+            }
+        } catch (error) {
+            console.error('❌ Erro ao carregar configurações WebSocket:', error);
+            this.setupFallbackMode();
+        }
+        
         this.updateWebSocketIndicator();
     }
 
+    // Aguardar window.Echo estar disponível
+   waitForEcho() {
+    let attempts = 0;
+    const maxAttempts = 30; // 15 segundos máximo
+    
+    const checkEcho = () => {
+        attempts++;
+        
+        console.log(`🔍 Tentativa ${attempts}: Verificando window.Echo...`);
+        
+        if (window.Echo && window.Echo.channel && typeof window.Echo.channel === 'function') {
+            console.log('✅ Window.Echo disponível, configurando canais...');
+            this.setupGlobalStatusChannel();
+            return;
+        }
+        
+        // Verificar se está carregando
+        if (window.Echo && !window.Echo.channel) {
+            console.log('⏳ Echo carregando, aguardando channel...');
+        }
+        
+        if (attempts < maxAttempts) {
+            setTimeout(checkEcho, 500);
+        } else {
+            console.log('⚠️ Timeout aguardando window.Echo, usando modo fallback');
+            console.log('Debug window.Echo:', window.Echo);
+            this.setupFallbackMode();
+        }
+    };
+    
+    checkEcho();
+}
+
     // Canal global para status de usuários
     setupGlobalStatusChannel() {
-        window.Echo.channel('user-status')
-            .listen('.user.status.changed', (e) => {
-                console.log('Status do usuário mudou:', e);
-                this.handleUserStatusChange(e);
-            });
+        try {
+            if (!window.Echo || !window.Echo.channel) {
+                throw new Error('window.Echo não disponível');
+            }
+
+            // Canal de status global
+            window.Echo.channel('user-status')
+                .listen('.user.status.changed', (e) => {
+                    console.log('📱 Status do usuário mudou:', e);
+                    this.handleUserStatusChange(e);
+                });
+
+            // Canal privado do usuário (se configurado)
+            if (this.config.channels.user_private) {
+                window.Echo.private(this.config.channels.user_private)
+                    .listen('.user.notification', (e) => {
+                        console.log('🔔 Notificação privada:', e);
+                        this.showStatusNotification(e.message, 'info');
+                    });
+            }
+
+            console.log('✅ Canais WebSocket configurados com sucesso');
+            
+        } catch (error) {
+            console.error('❌ Erro ao configurar canais WebSocket:', error);
+            this.setupFallbackMode();
+        }
+    }
+
+    // Modo fallback quando WebSocket não está disponível
+    setupFallbackMode() {
+        this.isEnabled = false;
+        console.log('📴 Modo fallback ativado - sem WebSocket em tempo real');
+        
+        // Simular indicador desconectado
+        this.updateWebSocketIndicator();
     }
 
     // Gerenciar mudanças de status
@@ -422,7 +508,7 @@ class WebSocketStatusManager {
         // Mostrar notificação se relevante
         if (room_id) {
             const message = status === 'online' 
-                ? `${user.username} está online na sala ${room_id}`
+                ? `${user.username} está online na sala ${room_id}` 
                 : `${user.username} ficou offline`;
             
             this.showStatusNotification(message, status === 'online' ? 'success' : 'warning');
@@ -431,44 +517,69 @@ class WebSocketStatusManager {
 
     // Atualizar status nos cards das salas
     updateUserStatusInCards(userId, status) {
-        $(`.user-${userId}-status`).removeClass('text-success text-danger')
+        $(`.user-${userId}-status`)
+            .removeClass('text-success text-danger')
             .addClass(status === 'online' ? 'text-success' : 'text-danger')
-            .html(`<i class="fas fa-circle me-1" style="font-size: 8px;"></i> ${status === 'online' ? 'Online' : 'Offline'}`);
+            .html(`<i class="fas fa-circle me-1" style="font-size: 8px;"></i>${status === 'online' ? 'Online' : 'Offline'}`);
     }
 
     // Atualizar indicador de WebSocket
     updateWebSocketIndicator() {
-        const indicator = $('#websocketIndicator');
-        
-        // Status da conexão Echo
-        if (window.Echo && window.Echo.connector && window.Echo.connector.pusher) {
+    const indicator = $('#websocketIndicator');
+    
+    if (this.isEnabled && window.Echo && window.Echo.connector && window.Echo.connector.pusher) {
+        try {
             const connection = window.Echo.connector.pusher.connection;
             
             connection.bind('connected', () => {
                 indicator.removeClass('disconnected')
-                    .html('<i class="fas fa-wifi"></i> WebSocket Conectado');
+                       .html('<i class="fas fa-wifi"></i> WebSocket: Conectado');
                 console.log('✅ Dashboard WebSocket conectado');
             });
             
             connection.bind('disconnected', () => {
                 indicator.addClass('disconnected')
-                    .html('<i class="fas fa-wifi"></i> WebSocket Desconectado');
+                       .html('<i class="fas fa-wifi"></i> WebSocket: Desconectado');
                 console.log('❌ Dashboard WebSocket desconectado');
             });
             
             connection.bind('error', (error) => {
                 console.error('❌ Erro WebSocket Dashboard:', error);
                 indicator.addClass('disconnected')
-                    .html('<i class="fas fa-exclamation-triangle"></i> Erro WebSocket');
+                       .html('<i class="fas fa-exclamation-triangle"></i> Erro WebSocket');
             });
+            
+            // Verificar estado atual da conexão
+            if (connection.state === 'connected') {
+                indicator.removeClass('disconnected')
+                       .html('<i class="fas fa-wifi"></i> WebSocket: Conectado');
+            }
+            
+        } catch (error) {
+            console.error('❌ Erro ao configurar indicadores:', error);
+            this.showFallbackIndicator();
         }
+    } else {
+        console.log('📴 WebSocket não disponível:', {
+            isEnabled: this.isEnabled,
+            hasEcho: !!window.Echo,
+            hasConnector: !!(window.Echo && window.Echo.connector)
+        });
+        this.showFallbackIndicator();
+    }
+}
+
+    // Mostrar indicador de fallback
+    showFallbackIndicator() {
+        const indicator = $('#websocketIndicator');
+        indicator.addClass('disconnected')
+                .html('<i class="fas fa-plug"></i> WebSocket: Indisponível');
     }
 
     // Mostrar notificação de status
-    showStatusNotification(message, type) {
+    showStatusNotification(message, type = 'info') {
         const alertHtml = `
-            <div class="alert alert-${type} alert-custom alert-dismissible fade show animate__animated animate__fadeIn" 
-                 role="alert">
+            <div class="alert alert-${type} alert-custom alert-dismissible fade show animate__animated animate__fadeIn" role="alert">
                 <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
                 ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
