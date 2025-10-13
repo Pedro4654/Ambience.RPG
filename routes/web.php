@@ -82,6 +82,10 @@ Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->g
         ->name('salas.online-users')
         ->where('id', '[0-9]+');
 
+    Route::get('/api/salas/data', [SalaController::class, 'getSalasAjax'])
+        ->middleware(['auth'])
+        ->name('salas.ajax.data');
+
     /**
      * Criar nova sala
      * POST /salas - Cria sala (pública, privada ou apenas convite)

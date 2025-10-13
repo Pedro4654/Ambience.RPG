@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Sistema de Salas - Ambience RPG</title>
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Animate.css -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
-    
+
     <style>
         /* Estilos personalizados para o sistema de salas */
         body {
@@ -60,9 +61,18 @@
             font-weight: 600;
         }
 
-        .tipo-publica { background-color: #28a745; }
-        .tipo-privada { background-color: #dc3545; }
-        .tipo-apenas_convite { background-color: #ffc107; color: #212529; }
+        .tipo-publica {
+            background-color: #28a745;
+        }
+
+        .tipo-privada {
+            background-color: #dc3545;
+        }
+
+        .tipo-apenas_convite {
+            background-color: #ffc107;
+            color: #212529;
+        }
 
         .btn-primary-custom {
             background: linear-gradient(45deg, #667eea, #764ba2);
@@ -152,9 +162,17 @@
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         .loading-spinner {
@@ -267,8 +285,8 @@
                             <div class="col-md-8">
                                 <div class="mb-3">
                                     <label for="nomeSala" class="form-label">Nome da Sala *</label>
-                                    <input type="text" class="form-control" id="nomeSala" name="nome" required 
-                                           placeholder="Ex: Aventura em Pedra Branca">
+                                    <input type="text" class="form-control" id="nomeSala" name="nome" required
+                                        placeholder="Ex: Aventura em Pedra Branca">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -285,31 +303,31 @@
 
                         <div class="mb-3">
                             <label for="descricaoSala" class="form-label">Descrição</label>
-                            <textarea class="form-control" id="descricaoSala" name="descricao" rows="3" 
-                                      placeholder="Descreva sua aventura, sistema de jogo, nível dos jogadores..."></textarea>
+                            <textarea class="form-control" id="descricaoSala" name="descricao" rows="3"
+                                placeholder="Descreva sua aventura, sistema de jogo, nível dos jogadores..."></textarea>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3" id="senhaContainer" style="display: none;">
                                     <label for="senhaSala" class="form-label">Senha da Sala</label>
-                                    <input type="password" class="form-control" id="senhaSala" name="senha" 
-                                           placeholder="Mínimo 4 caracteres">
+                                    <input type="password" class="form-control" id="senhaSala" name="senha"
+                                        placeholder="Mínimo 4 caracteres">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="maxParticipantes" class="form-label">Máx. Participantes</label>
-                                    <input type="number" class="form-control" id="maxParticipantes" 
-                                           name="max_participantes" value="50" min="2" max="100">
+                                    <input type="number" class="form-control" id="maxParticipantes"
+                                        name="max_participantes" value="50" min="2" max="100">
                                 </div>
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label for="imagemSala" class="form-label">URL da Imagem</label>
-                            <input type="url" class="form-control" id="imagemSala" name="imagem_url" 
-                                   placeholder="https://exemplo.com/imagem.jpg">
+                            <input type="url" class="form-control" id="imagemSala" name="imagem_url"
+                                placeholder="https://exemplo.com/imagem.jpg">
                             <div class="form-text">Deixe em branco para usar imagem padrão</div>
                         </div>
                     </div>
@@ -338,8 +356,8 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="idSalaEntrar" class="form-label">ID da Sala *</label>
-                            <input type="number" class="form-control" id="idSalaEntrar" name="sala_id" required 
-                                   placeholder="Digite o ID numérico da sala">
+                            <input type="number" class="form-control" id="idSalaEntrar" name="sala_id" required
+                                placeholder="Digite o ID numérico da sala">
                         </div>
 
                         <!-- Container para informações da sala -->
@@ -355,14 +373,14 @@
                             <div class="senha-info">
                                 <h6><i class="fas fa-lock me-2 text-warning"></i>Sala Privada</h6>
                                 <p class="mb-2">Esta sala é privada. Digite a senha para continuar:</p>
-                                <input type="password" class="form-control" id="senhaEntrar" name="senha" 
-                                       placeholder="Digite a senha da sala">
+                                <input type="password" class="form-control" id="senhaEntrar" name="senha"
+                                    placeholder="Digite a senha da sala">
                             </div>
                         </div>
 
                         <div class="alert alert-info alert-custom">
                             <i class="fas fa-info-circle me-2"></i>
-                            <strong>Dica:</strong> Digite o ID da sala e clique em "Verificar Sala" primeiro. 
+                            <strong>Dica:</strong> Digite o ID da sala e clique em "Verificar Sala" primeiro.
                             Se for uma sala privada, você poderá inserir a senha antes de entrar.
                         </div>
                     </div>
@@ -383,7 +401,7 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+
     <script>
         // Configuração CSRF para AJAX
         $.ajaxSetup({
@@ -408,12 +426,21 @@
             // Carregar dados das salas via AJAX
             loadSalas() {
                 this.showLoading();
-                
-                $.get('/salas')
+
+                $.ajax({
+                        url: '/api/salas/data', // NOVA URL
+                        type: 'GET',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                            'Accept': 'application/json'
+                        }
+                    })
                     .done(data => {
                         console.log('📊 Dados carregados:', data);
-                        this.renderMinhasSalas(data.minhas_salas);
-                        this.renderSalasPublicas(data.salas_publicas);
+                        if (data.success) {
+                            this.renderMinhasSalas(data.minhas_salas);
+                            this.renderSalasPublicas(data.salas_publicas);
+                        }
                         this.hideLoading();
                     })
                     .fail(xhr => {
@@ -426,7 +453,7 @@
             // Renderizar minhas salas
             renderMinhasSalas(salas) {
                 const container = $('#minhasSalasContainer');
-                
+
                 if (salas.length === 0) {
                     container.html(`
                         <div class="col-12">
@@ -450,7 +477,7 @@
             // Renderizar salas públicas
             renderSalasPublicas(salas) {
                 const container = $('#salasPublicasContainer');
-                
+
                 if (salas.length === 0) {
                     container.html(`
                         <div class="col-12">
@@ -480,9 +507,9 @@
                     'publica': '🌍 Pública',
                     'privada': '🔒 Privada',
                     'apenas_convite': '📧 Convite'
-                }[sala.tipo] || sala.tipo;
+                } [sala.tipo] || sala.tipo;
 
-                const actionButton = isMyRoom ? 
+                const actionButton = isMyRoom ?
                     `<a href="/salas/${sala.id}" class="btn btn-primary-custom btn-sm">
                         <i class="fas fa-play me-1"></i>Entrar
                      </a>` :
@@ -581,7 +608,7 @@
             // Verificar informações da sala
             verificarSala() {
                 const salaId = $('#idSalaEntrar').val();
-                
+
                 if (!salaId) {
                     this.showAlert('Digite o ID da sala primeiro.', 'warning');
                     return;
@@ -590,7 +617,7 @@
                 const btnVerificar = $('#btnVerificarSala');
                 const btnEntrar = $('#btnEntrarSala');
                 const originalText = btnVerificar.html();
-                
+
                 btnVerificar.html('<i class="fas fa-spinner fa-spin me-2"></i>Verificando...');
                 btnVerificar.prop('disabled', true);
 
@@ -606,7 +633,7 @@
                         console.error('❌ Erro ao verificar sala:', xhr);
                         const errorMsg = xhr.responseJSON?.message || 'Erro ao verificar sala.';
                         this.showAlert(errorMsg, 'danger');
-                        
+
                         btnVerificar.html(originalText);
                         btnVerificar.prop('disabled', false);
                     });
@@ -616,7 +643,7 @@
             mostrarInfoSala(sala) {
                 const infoContainer = $('#infoSalaContainer');
                 const senhaContainer = $('#senhaEntrarContainer');
-                
+
                 let infoHtml = `
                     <div class="row">
                         <div class="col-6">
@@ -744,20 +771,92 @@
 
             // Entrar em sala rapidamente (para salas públicas)
             entrarSalaRapida(salaId) {
-                $.post('/salas/entrar', { sala_id: salaId })
-                    .done(response => {
-                        if (response.success) {
-                            this.showAlert(response.message, 'success');
+                console.log('Tentando entrar na sala:', salaId);
+
+                $.ajax({
+                        url: '/salas/entrar',
+                        type: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        data: {
+                            sala_id: salaId
+                        },
+                        dataType: 'json', // Força interpretação como JSON
+                        timeout: 10000 // 10 segundos de timeout
+                    })
+                    .done((response) => {
+                        console.log('Resposta recebida:', response);
+
+                        if (response && response.success) {
+                            this.showAlert(response.message || 'Entrada realizada com sucesso!', 'success');
+
+                            // Aguardar um pouco antes do redirecionamento
                             setTimeout(() => {
-                                window.location.href = response.redirect_to;
+                                if (response.redirect_to) {
+                                    window.location.href = response.redirect_to;
+                                } else {
+                                    // Fallback: recarregar página atual
+                                    location.reload();
+                                }
                             }, 1500);
                         } else {
-                            this.showAlert(response.message, 'warning');
+                            // Sucesso HTTP mas falha lógica
+                            console.warn('Resposta de sucesso mas com falha lógica:', response);
+                            this.showAlert(response.message || 'Erro inesperado ao entrar na sala.', 'warning');
                         }
                     })
-                    .fail(xhr => {
-                        console.error('❌ Erro ao entrar na sala:', xhr);
-                        this.showAlert('Erro ao entrar na sala. Tente novamente.', 'danger');
+                    .fail((xhr, status, error) => {
+                        console.error('Erro na requisição AJAX:', {
+                            xhr: xhr,
+                            status: status,
+                            error: error,
+                            responseText: xhr.responseText,
+                            statusCode: xhr.status
+                        });
+
+                        let errorMsg = 'Erro ao entrar na sala. Tente novamente.';
+
+                        // Tentar interpretar resposta de erro
+                        try {
+                            if (xhr.responseJSON) {
+                                errorMsg = xhr.responseJSON.message || errorMsg;
+                            } else if (xhr.responseText) {
+                                // Tentar fazer parse manual do JSON
+                                const response = JSON.parse(xhr.responseText);
+                                if (response.message) {
+                                    errorMsg = response.message;
+                                }
+                            }
+                        } catch (e) {
+                            console.warn('Não foi possível interpretar resposta de erro:', e);
+                        }
+
+                        // Tratar códigos de status específicos
+                        if (xhr.status === 401) {
+                            errorMsg = 'Sessão expirada. Faça login novamente.';
+                            setTimeout(() => {
+                                window.location.href = '/login';
+                            }, 2000);
+                        } else if (xhr.status === 422) {
+                            if (xhr.responseJSON && xhr.responseJSON.errors) {
+                                errorMsg = Object.values(xhr.responseJSON.errors).flat().join('<br>');
+                            }
+                        } else if (xhr.status === 419) {
+                            errorMsg = 'Token CSRF inválido. Recarregando página...';
+                            setTimeout(() => {
+                                location.reload();
+                            }, 2000);
+                        } else if (xhr.status === 0) {
+                            errorMsg = 'Problema de conexão. Verifique sua internet.';
+                        }
+
+                        this.showAlert(errorMsg, 'danger');
+                    })
+                    .always(() => {
+                        console.log('Requisição finalizada');
                     });
             }
 
@@ -789,17 +888,17 @@
             // Simular WebSocket (preparação para implementação real)
             setupWebSocketIndicator() {
                 const indicator = $('#websocketIndicator');
-                
+
                 // Simular status de conexão
                 let connected = true;
                 setInterval(() => {
                     connected = !connected;
                     if (connected) {
                         indicator.removeClass('disconnected')
-                                 .html('<i class="fas fa-wifi"></i> WebSocket: Conectado');
+                            .html('<i class="fas fa-wifi"></i> WebSocket: Conectado');
                     } else {
                         indicator.addClass('disconnected')
-                                 .html('<i class="fas fa-wifi"></i> WebSocket: Reconectando...');
+                            .html('<i class="fas fa-wifi"></i> WebSocket: Reconectando...');
                     }
                 }, 10000); // Alterna a cada 10 segundos para demo
             }
@@ -812,4 +911,5 @@
         });
     </script>
 </body>
+
 </html>
