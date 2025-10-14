@@ -14,25 +14,22 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 });
 
 // Canal de presença para salas específicas
-Broadcast::channel('sala.{id}', function (Usuario $user, $id) {
-    // Verificar se o usuário participa da sala
-    $participante = ParticipanteSala::where('sala_id', $id)
+Broadcast::channel('sala.{salaId}', function (Usuario $user, int $salaId) {
+    $pertence = ParticipanteSala::where('sala_id', $salaId)
         ->where('usuario_id', $user->id)
         ->where('ativo', true)
-        ->first();
-    
-    if ($participante) {
-        return [
-            'id' => $user->id,
-            'username' => $user->username,
-            'avatar' => $user->avatar,
-            'papel' => $participante->papel,
-            'data_entrada' => $participante->data_entrada,
-            'is_online' => true
-        ];
+        ->exists();
+
+    if (! $pertence) {
+        return false;
     }
-    
-    return false;
+
+    return [
+        'id' => (int) $user->id,
+        'name' => $user->username,       // adiciona name para casar com o front
+        'username' => $user->username,   // mantém username se for útil
+        'avatar' => $user->avatar,
+    ];
 });
 
 // Canal geral para status de usuários
