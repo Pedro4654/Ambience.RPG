@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Controlador do Sistema de Salas de RPG
@@ -214,93 +215,69 @@ class SalaController extends Controller
      * POST /salas/entrar
      */
     public function entrarSala(Request $request)
-    {
-        Log::info('Tentativa de entrada em sala', [
-            'user_id' => Auth::id(),
-            'dados' => $request->only('sala_id')
-        ]);
+{
+    Log::info('Tentativa de entrada em sala', [
+        'user_id' => Auth::id(),
+        'dados' => $request->only('sala_id')
+    ]);
 
-        // Validação
-        $request->validate([
-            'sala_id' => 'required|integer|exists:salas,id',
-            'senha' => 'nullable|string'
-        ], [
-            'sala_id.required' => 'ID da sala obrigatório',
-            'sala_id.exists' => 'Sala não encontrada'
-        ]);
+    // Validação
+    $request->validate([
+        'sala_id' => 'required|integer|exists:salas,id',
+        'senha' => 'nullable|string'
+    ], [
+        'sala_id.required' => 'ID da sala obrigatório',
+        'sala_id.exists' => 'Sala não encontrada'
+    ]);
 
-        try {
-            $salaId = $request->sala_id;
-            $userId = Auth::id();
+    try {
+        $salaId = $request->sala_id;
+        $userId = Auth::id();
 
-            // Buscar a sala
-            $sala = Sala::with(['participantes' => function ($query) {
-                $query->where('ativo', true)->with('usuario');
-            }])->findOrFail($salaId);
+        // Buscar a sala
+        $sala = Sala::with(['participantes' => function ($query) {
+            $query->where('ativo', true)->with('usuario');
+        }])->findOrFail($salaId);
 
-            // Verificar se a sala está ativa
-            if (!$sala->ativa) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Esta sala não está mais ativa.'
-                ], 400);
+        // Verificar se a sala está ativa
+        if (!$sala->ativa) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Esta sala não está mais ativa.'
+            ], 400);
+        }
+
+        // Verificar se já é participante ativo
+        $jaParticipa = ParticipanteSala::where('sala_id', $salaId)
+            ->where('usuario_id', $userId)
+            ->where('ativo', true)
+            ->exists();
+
+        if ($jaParticipa) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Você já participa desta sala!',
+                'sala' => $sala,
+                'redirect_to' => "/salas/{$sala->id}"
+            ]);
+        }
+
+        // Se não é participante ativo, procurar registro existente (mesmo inativo) para reativar
+        $participante = ParticipanteSala::where('sala_id', $salaId)
+            ->where('usuario_id', $userId)
+            ->first();
+
+        if ($participante) {
+            // Reactiva o participante em vez de criar um novo (evita conflito de UNIQUE)
+            $participante->ativo = true;
+            $participante->data_entrada = now();
+            // caso tenha campos de papel/permissão, manter ou resetar conforme lógica do seu app
+            if (empty($participante->papel)) {
+                $participante->papel = 'membro';
             }
-
-            // Verificar se já é participante
-            $jaParticipa = ParticipanteSala::where('sala_id', $salaId)
-                ->where('usuario_id', $userId)
-                ->where('ativo', true)
-                ->exists();
-
-            if ($jaParticipa) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Você já participa desta sala!',
-                    'sala' => $sala,
-                    'redirect_to' => "/salas/{$sala->id}"
-                ]);
-            }
-
-            // Verificar limite de participantes
-            $participantesAtivos = $sala->participantes->where('ativo', true)->count();
-            if ($participantesAtivos >= $sala->max_participantes) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Sala lotada! Máximo de participantes atingido.'
-                ], 400);
-            }
-
-            // Verificações baseadas no tipo da sala
-            if ($sala->tipo === 'privada') {
-                if (!$request->filled('senha')) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Esta sala é privada. Senha obrigatória.'
-                    ], 400);
-                }
-
-                if (!Hash::check($request->senha, $sala->senha_hash)) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Senha incorreta!'
-                    ], 400);
-                }
-            } elseif ($sala->tipo === 'apenas_convite') {
-                $conviteValido = ConviteSala::where('sala_id', $salaId)
-                    ->where('destinatario_id', $userId)
-                    ->where('status', 'pendente')
-                    ->where('data_expiracao', '>', now())
-                    ->exists();
-
-                if (!$conviteValido) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Esta sala é apenas por convite. Você precisa ser convidado.'
-                    ], 403);
-                }
-            }
-
-            // Adicionar usuário como participante
+            $participante->save();
+        } else {
+            // Criar novo participante (somente se não existir nenhum registro)
             $participante = ParticipanteSala::create([
                 'sala_id' => $salaId,
                 'usuario_id' => $userId,
@@ -308,8 +285,14 @@ class SalaController extends Controller
                 'data_entrada' => now(),
                 'ativo' => true
             ]);
+        }
 
-            // Definir permissões padrão para novos membros
+        // Definir permissões padrão para o usuário — apenas se não existir já
+        $permExists = PermissaoSala::where('sala_id', $salaId)
+            ->where('usuario_id', $userId)
+            ->exists();
+
+        if (!$permExists) {
             PermissaoSala::create([
                 'sala_id' => $salaId,
                 'usuario_id' => $userId,
@@ -319,47 +302,243 @@ class SalaController extends Controller
                 'pode_moderar_chat' => false,
                 'pode_convidar_usuarios' => false
             ]);
+        }
 
-            // Se entrou por convite, marcar como aceito
-            if ($sala->tipo === 'apenas_convite') {
-                ConviteSala::where('sala_id', $salaId)
-                    ->where('destinatario_id', $userId)
-                    ->where('status', 'pendente')
-                    ->update(['status' => 'aceito']);
-            }
+        // Se entrou por convite, marcar como aceito
+        if ($sala->tipo === 'apenas_convite') {
+            ConviteSala::where('sala_id', $salaId)
+                ->where('destinatario_id', $userId)
+                ->where('status', 'pendente')
+                ->update(['status' => 'aceito']);
+        }
 
-            Log::info('Usuário entrou na sala com sucesso', [
-                'user_id' => $userId,
-                'sala_id' => $salaId,
-                'nome_sala' => $sala->nome
-            ]);
+        Log::info('Usuário entrou na sala com sucesso', [
+            'user_id' => $userId,
+            'sala_id' => $salaId,
+            'nome_sala' => $sala->nome
+        ]);
 
-            // Carregar dados atualizados
-            $sala->load(['criador', 'participantes' => function ($query) {
-                $query->where('ativo', true)->with('usuario');
-            }]);
+        // Carregar dados atualizados
+        $sala->load(['criador', 'participantes' => function ($query) {
+            $query->where('ativo', true)->with('usuario');
+        }]);
 
-            return response()->json([
-                'success' => true,
-                'message' => "Bem-vindo(a) à sala {$sala->nome}!",
-                'sala' => $sala,
-                'redirect_to' => "/salas/{$sala->id}"
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Erro ao entrar na sala', [
-                'error' => $e->getMessage(),
-                'user_id' => Auth::id(),
-                'sala_id' => $request->sala_id ?? null,
-                'line' => $e->getLine(),
-                'file' => $e->getFile()
-            ]);
+        return response()->json([
+            'success' => true,
+            'message' => "Bem-vindo(a) à sala {$sala->nome}!",
+            'sala' => $sala,
+            'redirect_to' => "/salas/{$sala->id}"
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Erro ao entrar na sala', [
+            'error' => $e->getMessage(),
+            'user_id' => Auth::id(),
+            'sala_id' => $request->sala_id ?? null,
+            'line' => $e->getLine(),
+            'file' => $e->getFile()
+        ]);
 
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro interno. Tente novamente.'
+        ], 500);
+    }
+}
+
+
+// Retorna dados do participante + permissões (JSON)
+public function getPermissoesParticipante(Request $request, $salaId, $usuarioId)
+{
+    try {
+        $userId = Auth::id();
+
+        // Buscar sala
+        $sala = Sala::findOrFail($salaId);
+
+        // Só o criador pode gerenciar permissões
+        if ($sala->criador_id !== $userId) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erro interno. Tente novamente.'
-            ], 500);
+                'message' => 'Somente o criador da sala pode gerenciar permissões.'
+            ], 403);
         }
+
+        // Buscar participante (mesmo que inativo — mas só permitir gerenciar se existir)
+        $participante = ParticipanteSala::where('sala_id', $salaId)
+            ->where('usuario_id', $usuarioId)
+            ->first();
+
+        if (!$participante) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Participante não encontrado.'
+            ], 404);
+        }
+
+        // Buscar permissões (se não existir, devolver padrões desativados)
+        $permissoes = PermissaoSala::where('sala_id', $salaId)
+            ->where('usuario_id', $usuarioId)
+            ->first();
+
+        if (!$permissoes) {
+            $permissoes = (object)[
+                'pode_criar_conteudo' => false,
+                'pode_editar_grid' => false,
+                'pode_iniciar_sessao' => false,
+                'pode_moderar_chat' => false,
+                'pode_convidar_usuarios' => false
+            ];
+        }
+
+        // Carregar dados do usuário (username, avatar) se desejar
+        // Carregar dados do usuário (username, avatar) de forma segura
+$columns = ['id', 'username'];
+if (Schema::hasColumn('usuarios', 'avatar')) {
+    $columns[] = 'avatar';
+} elseif (Schema::hasColumn('usuarios', 'avatar_url')) {
+    // seleciona avatar_url mas renomeia para 'avatar' na resposta
+    $columns[] = 'avatar_url as avatar';
+}
+
+// Se preferir usar o model Eloquent do relacionamento:
+$usuario = $participante->usuario()->select($columns)->first();
+
+// fallback caso não exista (segurança)
+if (!$usuario) {
+    $usuario = (object)[
+        'id' => $usuarioId,
+        'username' => null,
+        'avatar' => null
+    ];
+}
+
+        return response()->json([
+            'success' => true,
+            'participante' => [
+                'usuario' => $usuario,
+                'papel' => $participante->papel,
+                'ativo' => (bool) $participante->ativo
+            ],
+            'permissoes' => $permissoes
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Erro ao buscar permissões do participante', [
+            'error' => $e->getMessage(),
+            'sala_id' => $salaId,
+            'usuario_id' => $usuarioId,
+            'user_id' => Auth::id()
+        ]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro interno. Tente novamente.'
+        ], 500);
     }
+}
+
+// Atualiza permissões do participante (JSON)
+public function updatePermissoesParticipante(Request $request, $salaId, $usuarioId)
+{
+    try {
+        $userId = Auth::id();
+
+        // Buscar sala
+        $sala = Sala::findOrFail($salaId);
+
+        // Só o criador pode gerenciar permissões
+        if ($sala->criador_id !== $userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Somente o criador da sala pode gerenciar permissões.'
+            ], 403);
+        }
+
+        // Não permitir gerenciar as próprias permissões (criador)
+        if ($usuarioId == $userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Você não pode alterar suas próprias permissões aqui.'
+            ], 400);
+        }
+
+        // Encontrar participante
+        $participante = ParticipanteSala::where('sala_id', $salaId)
+            ->where('usuario_id', $usuarioId)
+            ->first();
+
+        if (!$participante) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Participante não encontrado.'
+            ], 404);
+        }
+
+        // Validação simples dos inputs (booleans e papel)
+        $data = $request->validate([
+            'pode_criar_conteudo' => 'sometimes|boolean',
+            'pode_editar_grid' => 'sometimes|boolean',
+            'pode_iniciar_sessao' => 'sometimes|boolean',
+            'pode_moderar_chat' => 'sometimes|boolean',
+            'pode_convidar_usuarios' => 'sometimes|boolean',
+            'papel' => 'sometimes|string|in:membro,admin_sala,mestre'
+        ]);
+
+        // Atualizar ou criar a linha de permissões
+        $permissoes = PermissaoSala::firstOrNew([
+            'sala_id' => $salaId,
+            'usuario_id' => $usuarioId
+        ]);
+
+        // Para cada campo, se vier no request, atribuir; caso contrário, manter
+        $fields = [
+            'pode_criar_conteudo',
+            'pode_editar_grid',
+            'pode_iniciar_sessao',
+            'pode_moderar_chat',
+            'pode_convidar_usuarios'
+        ];
+        foreach ($fields as $f) {
+            if ($request->has($f)) {
+                $permissoes->$f = (bool) $request->input($f);
+            }
+        }
+        $permissoes->save();
+
+        // Atualizar papel se informado
+        if ($request->has('papel')) {
+            $participante->papel = $request->input('papel');
+            $participante->save();
+        }
+
+        Log::info('Permissões atualizadas', [
+            'by_user' => $userId,
+            'target_user' => $usuarioId,
+            'sala_id' => $salaId
+        ]);
+
+        // Opcional: broadcast evento de atualização de permissões (se tiver websocket)
+        // event(new PermissoesAtualizadas($salaId, $usuarioId));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Permissões atualizadas com sucesso.',
+            'permissoes' => $permissoes,
+            'participante' => [
+                'papel' => $participante->papel
+            ]
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Erro ao atualizar permissões do participante', [
+            'error' => $e->getMessage(),
+            'sala_id' => $salaId,
+            'usuario_id' => $usuarioId,
+            'by_user' => Auth::id()
+        ]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro interno. Tente novamente.'
+        ], 500);
+    }
+}
 
     /**
      * Exibir sala específica com teste WebSocket
@@ -447,75 +626,75 @@ class SalaController extends Controller
      * POST /salas/{id}/sair
      */
     // Método sairSala atualizado
-    public function sairSala($id)
-    {
-        try {
-            $userId = Auth::id();
-            $user = Auth::user();
+    public function sairSala(Request $request, $id)
+{
+    try {
+        $userId = Auth::id();
+        $user = Auth::user();
 
-            // Buscar participação na sala
-            $participante = ParticipanteSala::where('sala_id', $id)
-                ->where('usuario_id', $userId)
-                ->where('ativo', true)
-                ->first();
+        // Buscar participação na sala
+        $participante = ParticipanteSala::where('sala_id', $id)
+            ->where('usuario_id', $userId)
+            ->where('ativo', true)
+            ->first();
 
-            if (!$participante) {
+        if (!$participante) {
+            if ($request->wantsJson() || $request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Você não participa desta sala.'
-                ], 400);
+                    'message' => 'Você não está nesta sala.'
+                ], 403);
             }
+            return redirect()->route('salas.index')->withErrors('Você não está nesta sala.');
+        }
 
-            // Verificar se é o criador da sala
-            $sala = Sala::findOrFail($id);
-            if ($sala->criador_id == $userId) {
+        // Impedir que o criador saia diretamente (exemplo)
+        $sala = Sala::find($id);
+        if ($sala && $sala->criador_id == $userId) {
+            if ($request->wantsJson() || $request->expectsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Como criador, você não pode sair da sala. Transfira a liderança primeiro.'
                 ], 400);
             }
+            return redirect()->route('salas.show', ['id' => $id])->withErrors('Como criador, você não pode sair da sala. Transfira a liderança primeiro.');
+        }
 
-            // *** NOVA FUNCIONALIDADE WEBSOCKET ***
-            // Broadcast evento de saída ANTES de desativar
-            broadcast(new UserLeftRoom($user, $sala));
+        // Marcar como inativo / remover participação
+        $participante->ativo = false;
+        $participante->save();
 
-            // Desativar participação
-            $participante->update(['ativo' => false]);
+        Log::info('Usuário saiu da sala', [
+            'user_id' => $userId,
+            'sala_id' => $id
+        ]);
 
-            // Remover permissões
-            PermissaoSala::where('sala_id', $id)
-                ->where('usuario_id', $userId)
-                ->delete();
-
-            // Marcar usuário como offline da sala
-            $user->setOffline();
-
-            // Broadcast mudança de status
-            broadcast(new UserStatusChanged($user, 'offline'));
-
-            Log::info('Usuário saiu da sala', [
-                'user_id' => $userId,
-                'sala_id' => $id
-            ]);
-
+        if ($request->wantsJson() || $request->expectsJson()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Você saiu da sala.',
-                'redirect_to' => '/salas'
+                'redirect_to' => route('salas.index')
             ]);
-        } catch (\Exception $e) {
-            Log::error('Erro ao sair da sala', [
-                'error' => $e->getMessage(),
-                'sala_id' => $id,
-                'user_id' => Auth::id()
-            ]);
+        }
 
+        return redirect()->route('salas.index')->with('success', 'Você saiu da sala.');
+    } catch (\Exception $e) {
+        Log::error('Erro ao sair da sala', [
+            'error' => $e->getMessage(),
+            'sala_id' => $id,
+            'user_id' => Auth::id()
+        ]);
+
+        if ($request->wantsJson() || $request->expectsJson()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Erro interno.'
             ], 500);
         }
+
+        return redirect()->back()->withErrors('Erro interno ao tentar sair da sala.');
     }
+}
 
     // Novo método para obter usuários online da sala
     public function getOnlineUsers($id)
@@ -545,13 +724,13 @@ class SalaController extends Controller
                 ->map(function ($user) {
                     $participante = $user->participantesSala->first();
                     return [
-                        'id' => $user->id,
-                        'username' => $user->username,
-                        'avatar' => $user->avatar,
-                        'papel' => $participante ? $participante->papel : 'membro',
-                        'last_seen' => $user->last_seen,
-                        'is_online' => true
-                    ];
+    'id' => $user->id,
+    'username' => $user->username,
+    'avatar' => $user->avatar ?? $user->avatar_url ?? null,
+    'papel' => $participante ? $participante->papel : 'membro',
+    'last_seen' => $user->last_seen,
+    'is_online' => true
+];
                 });
 
             return response()->json([

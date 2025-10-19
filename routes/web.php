@@ -126,6 +126,17 @@ Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->g
     Route::post('/salas/{id}/convidar', [SalaController::class, 'gerarConvite'])->name('salas.convidar')
         ->where('id', '[0-9]+');
 
+
+    // Exibir permissões do participante (JSON)
+Route::get('/salas/{sala}/participantes/{usuario}/permissoes', [SalaController::class, 'getPermissoesParticipante'])
+    ->name('salas.participantes.permissoes.show')
+    ->where(['sala' => '[0-9]+', 'usuario' => '[0-9]+']);
+
+// Atualizar permissões do participante (JSON)
+Route::post('/salas/{sala}/participantes/{usuario}/permissoes', [SalaController::class, 'updatePermissoesParticipante'])
+    ->name('salas.participantes.permissoes.update')
+    ->where(['sala' => '[0-9]+', 'usuario' => '[0-9]+']);
+
     // ========== ROTAS DE CONVITES ==========
 
     /**
