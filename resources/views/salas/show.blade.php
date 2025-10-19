@@ -102,13 +102,11 @@
                 </a>
 
                 @if($meu_papel !== 'mestre' && $sala->criador_id !== auth()->id())
-                    <form method="POST" action="{{ route('salas.sair', ['id' => $sala->id]) }}">
-                        @csrf
-                        <button type="submit" class="btn btn-outline-danger">
-                            <i class="fa-solid fa-door-open me-1"></i> Sair da Sala
-                        </button>
-                    </form>
-                @endif
+    <!-- Botão que abre o modal de confirmação -->
+    <button id="btnSairSala" type="button" class="btn btn-outline-danger">
+        <i class="fa-solid fa-door-open me-1"></i> Sair da Sala
+    </button>
+@endif
             </div>
         </div>
 
@@ -206,16 +204,33 @@
                                             </div>
                                         </div>
 
-                                        <div class="text-end">
-                                            <small class="user-status text-muted d-block"
-                                                   data-user-status
-                                                   data-user-id="{{ $uid }}">
-                                                Offline
-                                            </small>
-                                            <span class="badge rounded-pill user-dot bg-secondary"
-                                                  data-user-dot
-                                                  data-user-id="{{ $uid }}"></span>
-                                        </div>
+                                        <div class="text-end d-flex align-items-start">
+    <div class="me-2 text-end">
+        <small class="user-status text-muted d-block"
+               data-user-status
+               data-user-id="{{ $uid }}">
+            Offline
+        </small>
+        <span class="badge rounded-pill user-dot bg-secondary"
+              data-user-dot
+              data-user-id="{{ $uid }}"></span>
+    </div>
+
+    @if((int)auth()->id() === (int)$sala->criador_id && (int)$uid !== (int)$sala->criador_id)
+        <div class="dropdown">
+            <button class="btn btn-sm btn-light dropdown-toggle" type="button"
+                    id="dropdownMenuButton-{{ $uid }}" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-solid fa-ellipsis"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton-{{ $uid }}">
+                <button type="button" class="dropdown-item manage-permissions-btn" data-user-id="{{ $uid }}">
+  <i class="fa-solid fa-user-gear me-1"></i> Gerenciar Permissões
+</button>
+                {{-- outras ações aqui se quiser (ex: promover, remover) --}}
+            </ul>
+        </div>
+    @endif
+</div>
                                     </div>
                                 </div>
                             </div>
@@ -437,5 +452,307 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const btn = document.getElementById('btnSairSala');
+  const confirmBtn = document.getElementById('confirmSairBtn');
+
+  if (!btn || !confirmBtn) return;
+
+  function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    if (meta) return meta.getAttribute('content');
+    const inputToken = document.querySelector('input[name="_token"]');
+    if (inputToken) return inputToken.value;
+    return '';
+  }
+
+  btn.addEventListener('click', function () {
+    const modalEl = document.getElementById('confirmSairModal');
+    if (window.bootstrap && modalEl) {
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    } else {
+      if (confirm('Você deseja mesmo sair dessa sala?')) {
+        submitSair();
+      }
+    }
+  });
+
+  confirmBtn.addEventListener('click', function () {
+    confirmBtn.disabled = true;
+    const originalText = confirmBtn.innerHTML;
+    confirmBtn.innerHTML = 'Saindo...';
+    submitSair().finally(() => {
+      confirmBtn.disabled = false;
+      confirmBtn.innerHTML = originalText;
+    });
+  });
+
+  async function submitSair() {
+    try {
+      const csrfToken = getCsrfToken();
+      const url = "{{ route('salas.sair', ['id' => $sala->id]) }}";
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': csrfToken,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+      });
+
+      const json = await res.json();
+
+      if (res.ok && json.success) {
+        const modalEl = document.getElementById('confirmSairModal');
+        if (window.bootstrap && modalEl) {
+          const modal = bootstrap.Modal.getInstance(modalEl);
+          if (modal) modal.hide();
+        }
+        try {
+  if (window.Echo) {
+    Echo.leave('presence-sala.{{ $sala->id }}'); // ajuste o nome do channel conforme usa
+  } else if (window.Pusher) {
+    // se usa Pusher direto: unsubscribe do channel
+    const chName = 'presence-sala.{{ $sala->id }}';
+    try {
+      const pusher = Echo && Echo.connector && Echo.connector.pusher ? Echo.connector.pusher : window.Pusher && window.Pusher.instances && window.Pusher.instances[0];
+      if (pusher && pusher.channels && pusher.channels.channels[chName]) {
+        pusher.unsubscribe(chName);
+      }
+    } catch(e) { /* ignorar */ }
+  }
+} catch(e){ console.warn('Erro ao tentar deixar channel:', e); }
+
+window.location.replace(json.redirect_to || "{{ route('salas.index') }}");
+      } else {
+        alert(json.message || 'Erro ao sair da sala.');
+      }
+    } catch (err) {
+      console.error('Erro ao tentar sair da sala:', err);
+      alert('Erro de rede ao tentar sair. Tente novamente.');
+    }
+  }
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const modalEl = document.getElementById('managePermissionsModal');
+  const mpForm = document.getElementById('managePermissionsForm');
+  const mpUserId = document.getElementById('mp_user_id');
+  const mpSaveBtn = document.getElementById('mp_save_btn');
+  const mpAlert = document.getElementById('mp_alert');
+
+  // Helpers para checkboxes
+  const fields = {
+    pode_criar_conteudo: document.getElementById('mp_pode_criar_conteudo'),
+    pode_editar_grid: document.getElementById('mp_pode_editar_grid'),
+    pode_iniciar_sessao: document.getElementById('mp_pode_iniciar_sessao'),
+    pode_moderar_chat: document.getElementById('mp_pode_moderar_chat'),
+    pode_convidar_usuarios: document.getElementById('mp_pode_convidar_usuarios'),
+  };
+
+  function getCsrf() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  }
+
+  function getShowUrl(salaId, userId) {
+    return `/salas/${salaId}/participantes/${userId}/permissoes`;
+  }
+  function getUpdateUrl(salaId, userId) {
+    return `/salas/${salaId}/participantes/${userId}/permissoes`;
+  }
+
+  const SALA_ID = "{{ $sala->id }}";
+
+  // Delegation: quando clicar em Gerenciar Permissões
+  document.body.addEventListener('click', function (e) {
+    const el = e.target.closest('.manage-permissions-btn');
+    if (!el) return;
+
+    e.preventDefault();
+    const userId = el.getAttribute('data-user-id');
+    if (!userId) return;
+
+    // resetar modal
+    mpUserId.value = userId;
+    mpAlert.classList.add('d-none');
+    mpAlert.innerText = '';
+
+    // garantir que os checkboxes estejam em estado definido enquanto carrega
+    Object.values(fields).forEach(f => { if (f) f.checked = false; });
+
+    // fetch permissões (rota retorna { success, participante, permissoes })
+    const url = getShowUrl(SALA_ID, userId);
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': getCsrf()
+      },
+      credentials: 'same-origin'
+    })
+    .then(async res => {
+      if (!res.ok) {
+        // tenta mostrar mensagem se vier JSON
+        let json = {};
+        try { json = await res.json(); } catch (e) {}
+        throw (json && json.message) ? json : { message: 'Erro ao buscar permissões.', status: res.status };
+      }
+      return res.json();
+    })
+    .then(data => {
+      // Atenção: o backend retorna { success: true, participante: {...}, permissoes: {...} }
+      // usar data.permissoes se existir
+      const permissoes = (data && data.permissoes) ? data.permissoes : (data || {});
+
+      // segurança: zerar antes e só marcar os que vierem como truthy
+      Object.values(fields).forEach(f => { if (f) f.checked = false; });
+
+      fields.pode_criar_conteudo.checked = !!permissoes.pode_criar_conteudo;
+      fields.pode_editar_grid.checked = !!permissoes.pode_editar_grid;
+      fields.pode_iniciar_sessao.checked = !!permissoes.pode_iniciar_sessao;
+      fields.pode_moderar_chat.checked = !!permissoes.pode_moderar_chat;
+      fields.pode_convidar_usuarios.checked = !!permissoes.pode_convidar_usuarios;
+
+      // opcional: atualizar título do modal com username (se retornado)
+      if (data.participante && data.participante.usuario && data.participante.usuario.username) {
+        const label = document.getElementById('managePermissionsModalLabel');
+        label.innerText = `Gerenciar Permissões — ${data.participante.usuario.username}`;
+      }
+
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    })
+    .catch(err => {
+      mpAlert.className = 'alert alert-danger';
+      mpAlert.innerText = err.message || 'Erro ao buscar permissões.';
+      mpAlert.classList.remove('d-none');
+    });
+  });
+
+  // Submissão do form (não alterei a lógica original além de garantir CSRF e payload corretos)
+  mpForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    mpSaveBtn.disabled = true;
+    mpSaveBtn.innerText = 'Salvando...';
+
+    const userId = mpUserId.value;
+    const payload = {
+      pode_criar_conteudo: !!fields.pode_criar_conteudo.checked,
+      pode_editar_grid: !!fields.pode_editar_grid.checked,
+      pode_iniciar_sessao: !!fields.pode_iniciar_sessao.checked,
+      pode_moderar_chat: !!fields.pode_moderar_chat.checked,
+      pode_convidar_usuarios: !!fields.pode_convidar_usuarios.checked
+    };
+
+    const url = getUpdateUrl(SALA_ID, userId);
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': getCsrf()
+      },
+      credentials: 'same-origin',
+      body: JSON.stringify(payload)
+    })
+    .then(async res => {
+      mpSaveBtn.disabled = false;
+      mpSaveBtn.innerText = 'Salvar';
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw json;
+      }
+      return res.json();
+    })
+    .then(json => {
+      mpAlert.className = 'alert alert-success';
+      mpAlert.innerText = json.message || 'Permissões atualizadas com sucesso.';
+      mpAlert.classList.remove('d-none');
+
+      setTimeout(() => {
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+      }, 800);
+    })
+    .catch(err => {
+      mpAlert.className = 'alert alert-danger';
+      mpAlert.innerText = err.message || 'Erro ao salvar permissões.';
+      mpAlert.classList.remove('d-none');
+    });
+  });
+
+});
+</script>
+
+<!-- Modal de confirmação (Bootstrap 5) -->
+    <div class="modal fade" id="confirmSairModal" tabindex="-1" aria-labelledby="confirmSairModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="confirmSairModalLabel">Sair da sala</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            Você deseja mesmo sair dessa sala?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button id="confirmSairBtn" type="button" class="btn btn-danger">Sair</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Gerenciar Permissões -->
+<div class="modal fade" id="managePermissionsModal" tabindex="-1" aria-labelledby="managePermissionsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <form id="managePermissionsForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="managePermissionsModalLabel">Gerenciar Permissões</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="mp_user_id" value="">
+          <div class="mb-2">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="mp_pode_criar_conteudo">
+              <label class="form-check-label" for="mp_pode_criar_conteudo">Criar Conteúdo</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="mp_pode_editar_grid">
+              <label class="form-check-label" for="mp_pode_editar_grid">Editar Grid</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="mp_pode_iniciar_sessao">
+              <label class="form-check-label" for="mp_pode_iniciar_sessao">Iniciar Sessão</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="mp_pode_moderar_chat">
+              <label class="form-check-label" for="mp_pode_moderar_chat">Moderar Chat</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="mp_pode_convidar_usuarios">
+              <label class="form-check-label" for="mp_pode_convidar_usuarios">Convidar Usuários</label>
+            </div>
+          </div>
+          <div id="mp_alert" class="d-none alert" role="alert"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          <button type="submit" class="btn btn-primary" id="mp_save_btn">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 </body>
 </html>
