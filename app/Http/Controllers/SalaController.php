@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Sala;
 use App\Models\Usuario;
+use App\Models\SessaoJogo;
+use App\Models\ParticipanteSessao;
 use App\Models\ParticipanteSala;
 use App\Models\PermissaoSala;
 use App\Models\ConviteSala;
@@ -345,6 +347,390 @@ class SalaController extends Controller
     }
 }
 
+public function iniciarSessao(Request $request, $id)
+{
+    try {
+        $userId = Auth::id();
+        $sala = Sala::findOrFail($id);
+
+        // 1. VERIFICAR SE O USUÁRIO PARTICIPA DA SALA
+        $participante = ParticipanteSala::where('sala_id', $id)
+            ->where('usuario_id', $userId)
+            ->where('ativo', true)
+            ->first();
+
+        if (!$participante) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Você não faz parte desta sala.'
+            ], 403);
+        }
+
+        // 2. VERIFICAR PERMISSÃO PARA INICIAR SESSÃO
+        $permissao = PermissaoSala::where('sala_id', $id)
+            ->where('usuario_id', $userId)
+            ->first();
+
+        // Somente o criador da sala OU quem tem permissão pode iniciar sessão
+        $ehCriador = (int)$sala->criador_id === (int)$userId;
+        $temPermissao = $permissao && $permissao->pode_iniciar_sessao === true;
+
+        if (!$ehCriador && !$temPermissao) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Você não tem permissão para iniciar sessões nesta sala.'
+            ], 403);
+        }
+
+        // 3. VERIFICAR SE JÁ EXISTE UMA SESSÃO ATIVA NA SALA
+        $sessaoAtiva = SessaoJogo::where('sala_id', $id)
+            ->whereIn('status', ['ativa', 'pausada'])
+            ->first();
+
+        if ($sessaoAtiva) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Já existe uma sessão ativa ou pausada nesta sala.',
+                'sessao_existente' => [
+                    'id' => $sessaoAtiva->id,
+                    'nome' => $sessaoAtiva->nome_sessao,
+                    'status' => $sessaoAtiva->status
+                ]
+            ], 400);
+        }
+
+        // 4. VALIDAR DADOS DA SESSÃO
+        $validated = $request->validate([
+            'nome_sessao' => 'nullable|string|max:100',
+            'configuracoes' => 'nullable|array'
+        ]);
+
+        // 5. CRIAR NOVA SESSÃO - O MESTRE É SEMPRE O CRIADOR DA SALA
+        $sessao = SessaoJogo::create([
+            'sala_id' => $id,
+            'nome_sessao' => $validated['nome_sessao'] ?? 'Sessão de ' . $sala->nome,
+            'mestre_id' => $sala->criador_id, // SEMPRE O CRIADOR DA SALA
+            'data_inicio' => now(),
+            'status' => 'ativa',
+            'configuracoes' => $validated['configuracoes'] ?? []
+        ]);
+
+        // 6. ADICIONAR TODOS OS PARTICIPANTES ATIVOS DA SALA NA SESSÃO
+        $participantesAtivos = ParticipanteSala::where('sala_id', $id)
+            ->where('ativo', true)
+            ->get();
+
+        foreach ($participantesAtivos as $part) {
+            // Evitar duplicação
+            ParticipanteSessao::firstOrCreate(
+                [
+                    'sessao_id' => $sessao->id,
+                    'usuario_id' => $part->usuario_id
+                ],
+                [
+                    'data_entrada' => now(),
+                    'ativo' => true
+                ]
+            );
+        }
+
+        Log::info('Sessão iniciada com sucesso', [
+            'sessao_id' => $sessao->id,
+            'sala_id' => $id,
+            'mestre_id' => $sala->criador_id,
+            'iniciada_por' => $userId,
+            'participantes' => $participantesAtivos->count()
+        ]);
+
+        // 7. DISPARAR EVENTO WEBSOCKET PARA TODOS OS PARTICIPANTES ONLINE
+        try {
+            broadcast(new \App\Events\SessionStarted($sessao, $sala));
+        } catch (\Exception $e) {
+            Log::warning('Erro ao disparar evento de sessão iniciada', [
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        // 8. CARREGAR RELACIONAMENTOS PARA RETORNO
+        $sessao->load(['mestre', 'participantes.usuario', 'sala']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Sessão iniciada com sucesso!',
+            'sessao' => $sessao,
+            'redirect_to' => route('sessoes.show', ['id' => $sessao->id])
+        ], 201);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Dados inválidos.',
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        Log::error('Erro ao iniciar sessão', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'sala_id' => $id,
+            'user_id' => Auth::id()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro ao iniciar sessão. Tente novamente.'
+        ], 500);
+    }
+}
+
+
+/**
+ * Visualizar sala de sessão ativa
+ * GET /sessoes/{id}
+ */
+public function showSessao($id)
+{
+    try {
+        $userId = Auth::id();
+        $sessao = SessaoJogo::with([
+            'sala',
+            'mestre',
+            'participantes.usuario'
+        ])->findOrFail($id);
+
+        // Verificar se o usuário participa da sessão
+        $participaSessao = ParticipanteSessao::where('sessao_id', $id)
+            ->where('usuario_id', $userId)
+            ->where('ativo', true)
+            ->exists();
+
+        if (!$participaSessao) {
+            return redirect()->route('salas.show', ['id' => $sessao->sala_id])
+                ->with('error', 'Você não faz parte desta sessão.');
+        }
+
+        // Verificar permissão para finalizar sessão
+        // Pode finalizar: quem tem permissão de INICIAR SESSÃO (inclui o mestre)
+        $permissao = PermissaoSala::where('sala_id', $sessao->sala_id)
+            ->where('usuario_id', $userId)
+            ->first();
+
+        $ehCriador = (int)$sessao->sala->criador_id === (int)$userId;
+        $podeFinalizarSessao = $ehCriador || ($permissao && $permissao->pode_iniciar_sessao === true);
+
+        // IDs dos participantes para indicador online (implementar lógica real depois)
+        $idsParticipantes = $sessao->participantes->pluck('usuario_id')->toArray();
+
+        return view('sessoes.show', [
+            'sessao' => $sessao,
+            'pode_finalizar_sessao' => $podeFinalizarSessao,
+            'idsParticipantes' => $idsParticipantes
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Erro ao carregar sessão', [
+            'error' => $e->getMessage(),
+            'sessao_id' => $id,
+            'user_id' => Auth::id()
+        ]);
+
+        return redirect()->route('salas.index')
+            ->with('error', 'Sessão não encontrada.');
+    }
+}
+
+/**
+ * Entrar em uma sessão já iniciada
+ * POST /sessoes/{id}/entrar
+ */
+public function entrarNaSessao($id)
+{
+    try {
+        $userId = Auth::id();
+        $sessao = SessaoJogo::with('sala')->findOrFail($id);
+
+        // 1. VERIFICAR SE A SESSÃO ESTÁ ATIVA
+        if ($sessao->status !== 'ativa') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Esta sessão não está ativa.'
+            ], 400);
+        }
+
+        // 2. VERIFICAR SE O USUÁRIO É PARTICIPANTE DA SALA
+        $participanteSala = ParticipanteSala::where('sala_id', $sessao->sala_id)
+            ->where('usuario_id', $userId)
+            ->where('ativo', true)
+            ->first();
+
+        if (!$participanteSala) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Você não faz parte desta sala.'
+            ], 403);
+        }
+
+        // 3. VERIFICAR SE JÁ ESTÁ NA SESSÃO
+        $jaParticipa = ParticipanteSessao::where('sessao_id', $id)
+            ->where('usuario_id', $userId)
+            ->where('ativo', true)
+            ->exists();
+
+        if ($jaParticipa) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Você já está nesta sessão.',
+                'redirect_to' => route('sessoes.show', ['id' => $id])
+            ]);
+        }
+
+        // 4. ADICIONAR O USUÁRIO À SESSÃO
+        ParticipanteSessao::create([
+            'sessao_id' => $id,
+            'usuario_id' => $userId,
+            'data_entrada' => now(),
+            'ativo' => true
+        ]);
+
+        Log::info('Usuário entrou na sessão', [
+            'sessao_id' => $id,
+            'usuario_id' => $userId,
+            'sala_id' => $sessao->sala_id
+        ]);
+
+        // 5. DISPARAR EVENTO WEBSOCKET
+        try {
+            broadcast(new \App\Events\UserJoinedSession($sessao, $userId))->toOthers();
+        } catch (\Exception $e) {
+            Log::warning('Erro ao disparar evento de entrada na sessão', [
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Você entrou na sessão!',
+            'redirect_to' => route('sessoes.show', ['id' => $id])
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Erro ao entrar na sessão', [
+            'error' => $e->getMessage(),
+            'sessao_id' => $id,
+            'user_id' => Auth::id()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro ao entrar na sessão. Tente novamente.'
+        ], 500);
+    }
+}
+
+
+/**
+ * Obter sessão ativa de uma sala
+ * GET /salas/{id}/sessao-ativa
+ */
+public function getSessaoAtiva($id)
+{
+    try {
+        $sessaoAtiva = SessaoJogo::where('sala_id', $id)
+            ->whereIn('status', ['ativa', 'pausada'])
+            ->with(['mestre', 'participantes.usuario'])
+            ->first();
+
+        return response()->json([
+            'success' => true,
+            'sessao' => $sessaoAtiva
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro ao buscar sessão.'
+        ], 500);
+    }
+}
+
+/**
+ * Finalizar sessão
+ * POST /sessoes/{id}/finalizar
+ */
+public function finalizarSessao($id)
+{
+    try {
+        $userId = Auth::id();
+        $sessao = SessaoJogo::with('sala')->findOrFail($id);
+
+        // 1. VERIFICAR SE O USUÁRIO TEM PERMISSÃO PARA FINALIZAR
+        $ehCriador = (int)$sessao->sala->criador_id === (int)$userId;
+        
+        $permissao = PermissaoSala::where('sala_id', $sessao->sala_id)
+            ->where('usuario_id', $userId)
+            ->first();
+        
+        $temPermissao = $permissao && $permissao->pode_iniciar_sessao === true;
+
+        if (!$ehCriador && !$temPermissao) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Apenas o mestre ou usuários com permissão podem finalizar a sessão.'
+            ], 403);
+        }
+
+        // 2. VERIFICAR SE A SESSÃO PODE SER FINALIZADA
+        if ($sessao->status === 'finalizada') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Esta sessão já foi finalizada.'
+            ], 400);
+        }
+
+        // 3. FINALIZAR A SESSÃO
+        $sessao->status = 'finalizada';
+        $sessao->data_fim = now();
+        $sessao->save();
+
+        // 4. DESATIVAR TODOS OS PARTICIPANTES DA SESSÃO
+        ParticipanteSessao::where('sessao_id', $id)
+            ->update(['ativo' => false]);
+
+        Log::info('Sessão finalizada com sucesso', [
+            'sessao_id' => $id,
+            'mestre_id' => $sessao->mestre_id,
+            'finalizada_por' => $userId,
+            'sala_id' => $sessao->sala_id
+        ]);
+
+        // 5. DISPARAR EVENTO WEBSOCKET
+        try {
+            broadcast(new \App\Events\SessionEnd($sessao));
+        } catch (\Exception $e) {
+            Log::warning('Erro ao disparar evento de sessão finalizada', [
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Sessão finalizada com sucesso!',
+            'redirect_to' => route('salas.show', ['id' => $sessao->sala_id])
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Erro ao finalizar sessão', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'sessao_id' => $id,
+            'user_id' => Auth::id()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro ao finalizar sessão. Tente novamente.'
+        ], 500);
+    }
+}
 
 // Retorna dados do participante + permissões (JSON)
 public function getPermissoesParticipante(Request $request, $salaId, $usuarioId)
@@ -544,82 +930,76 @@ public function updatePermissoesParticipante(Request $request, $salaId, $usuario
      * Exibir sala específica com teste WebSocket
      * GET /salas/{id}
      */
-    public function show($id, Request $request)
-    {
-        try {
-            $userId = Auth::id();
-
-            // Buscar sala com relacionamentos
-            $sala = Sala::with([
-                'criador',
-                'participantes' => function ($query) {
-                    $query->where('ativo', true)->with('usuario');
-                },
-                'permissoes' => function ($query) use ($userId) {
-                    $query->where('usuario_id', $userId);
-                }
-            ])->findOrFail($id);
-
-            // Verificar se o usuário é participante
-            $participante = $sala->participantes->where('usuario_id', $userId)->first();
-
-            if (!$participante) {
-                Log::warning('Tentativa de acesso não autorizado à sala', [
-                    'user_id' => $userId,
-                    'sala_id' => $id
-                ]);
-
-                if ($request->expectsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Você não tem acesso a esta sala.'
-                    ], 403);
-                }
-
-                return redirect('/salas')->with('error', 'Você não tem acesso a esta sala.');
+    public function show($id)
+{
+    try {
+        $userId = Auth::id();
+        
+        // Buscar sala com relacionamentos
+        $sala = Sala::with([
+            'criador',
+            'participantes' => function ($query) {
+                $query->where('ativo', true)->with('usuario');
             }
+        ])->findOrFail($id);
 
-            // Simular teste de WebSocket para verificar conectividade em tempo real
-            $websocketStatus = $this->testarWebSocket();
+        // Verificar se o usuário é participante ativo
+        $participante = ParticipanteSala::where('sala_id', $id)
+            ->where('usuario_id', $userId)
+            ->where('ativo', true)
+            ->first();
 
-            Log::info('Usuário acessou sala', [
-                'user_id' => $userId,
-                'sala_id' => $id,
-                'papel' => $participante->papel
-            ]);
-
-            $dadosSala = [
-                'sala' => $sala,
-                'meu_papel' => $participante->papel,
-                'minhas_permissoes' => $sala->permissoes->first(),
-                'websocket_status' => $websocketStatus,
-                'participantes_online' => $sala->participantes->count(), // Simulado
-                'success' => true
-            ];
-
-            // Retornar JSON para API ou view para navegação
-            if ($request->expectsJson()) {
-                return response()->json($dadosSala);
-            }
-
-            return view('salas.show', $dadosSala);
-        } catch (\Exception $e) {
-            Log::error('Erro ao carregar sala', [
-                'error' => $e->getMessage(),
-                'sala_id' => $id,
-                'user_id' => Auth::id()
-            ]);
-
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Sala não encontrada.'
-                ], 404);
-            }
-
-            return redirect('/salas')->with('error', 'Sala não encontrada.');
+        if (!$participante) {
+            return redirect()->route('salas.index')
+                ->with('error', 'Você não tem acesso a esta sala.');
         }
+
+        // Buscar permissões do usuário
+        $permissoes = PermissaoSala::where('sala_id', $id)
+            ->where('usuario_id', $userId)
+            ->first();
+
+        // Buscar sessão ativa (se houver)
+        $sessaoAtiva = SessaoJogo::where('sala_id', $id)
+            ->whereIn('status', ['ativa', 'pausada'])
+            ->with(['mestre', 'participantes'])
+            ->first();
+
+        // Verificar se o usuário já está na sessão ativa
+        $participaNaSessao = false;
+        if ($sessaoAtiva) {
+            $participaNaSessao = ParticipanteSessao::where('sessao_id', $sessaoAtiva->id)
+                ->where('usuario_id', $userId)
+                ->where('ativo', true)
+                ->exists();
+        }
+
+        // Dados para a view
+        $dados = [
+            'sala' => $sala,
+            'meu_papel' => $participante->papel,
+            'minhas_permissoes' => $permissoes,
+            'sessao_ativa' => $sessaoAtiva,
+            'participa_na_sessao' => $participaNaSessao,
+            'websocket_status' => [
+                'ping' => rand(20, 50),
+                'server' => config('broadcasting.connections.pusher.options.host', 'localhost:6001')
+            ]
+        ];
+
+        return view('salas.show', $dados);
+
+    } catch (\Exception $e) {
+        Log::error('Erro ao carregar sala', [
+            'error' => $e->getMessage(),
+            'sala_id' => $id,
+            'user_id' => Auth::id()
+        ]);
+
+        return redirect()->route('salas.index')
+            ->with('error', 'Sala não encontrada.');
     }
+}
 
     /**
      * Sair da sala

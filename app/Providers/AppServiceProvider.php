@@ -3,7 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Gate; // ← ESTA LINHA ESTAVA FALTANDO!
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Broadcast; // ← ADICIONAR ESTE USE
 use App\Models\Usuario;
 use App\Policies\UsuarioPolicy;
 
@@ -22,6 +23,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Registrar Policy de Usuário
         Gate::policy(Usuario::class, UsuarioPolicy::class);
+        
+        // ==================== REGISTRAR ROTAS DE BROADCASTING ====================
+        // ADICIONE ESTAS LINHAS:
+        Broadcast::routes(['middleware' => ['web', 'auth']]);
     }
 }

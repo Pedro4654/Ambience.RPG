@@ -5,16 +5,16 @@ import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-    plugins: [
-        laravel({
-            input: ['resources/css/app.css', 'resources/js/app.tsx'],
-            ssr: 'resources/js/ssr.tsx',
-            refresh: true,
-        }),
-        react(),
-        tailwindcss(),
-    ],
-    esbuild: {
-        jsx: 'automatic',
-    },
+  plugins: [
+    react(),      // 1º
+    laravel({     // 2º
+      input: [
+        'resources/js/app.tsx',
+        'resources/js/pages/sala-show.tsx',
+      ],
+      refresh: true,
+    }),
+  ],
 });
+
+
