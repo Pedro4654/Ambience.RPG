@@ -360,4 +360,18 @@ class Sala extends Model
             'salas_convite' => static::where('tipo', 'apenas_convite')->count()
         ];
     }
+    public function getSessaoAtiva()
+{
+    return $this->sessoes()
+        ->whereIn('status', ['ativa', 'pausada'])
+        ->first();
+}
+
+/**
+ * Verificar se há sessão ativa
+ */
+public function temSessaoAtiva(): bool
+{
+    return $this->getSessaoAtiva() !== null;
+}
 }

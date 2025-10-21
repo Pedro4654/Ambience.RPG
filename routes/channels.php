@@ -1,47 +1,107 @@
 <?php
 
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Log;
 use App\Models\Usuario;
 use App\Models\ParticipanteSala;
+use App\Models\ParticipanteSessao;
+
 /*
 |--------------------------------------------------------------------------
 | Broadcast Channels
 |--------------------------------------------------------------------------
 */
 
-Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
-});
-
-// Canal de presença para salas específicas
+// ==================== CANAL DE PRESENÇA DA SALA ====================
 Broadcast::channel('sala.{salaId}', function (Usuario $user, int $salaId) {
-    $pertence = ParticipanteSala::where('sala_id', $salaId)
-        ->where('usuario_id', $user->id)
-        ->where('ativo', true)
-        ->exists();
+    try {
+        $pertence = ParticipanteSala::where('sala_id', $salaId)
+            ->where('usuario_id', $user->id)
+            ->where('ativo', true)
+            ->exists();
 
-    if (! $pertence) {
+        if (!$pertence) {
+            Log::info('[Broadcasting] Acesso negado - Usuário não participa da sala', [
+                'user_id' => $user->id,
+                'sala_id' => $salaId
+            ]);
+            return false;
+        }
+
+        Log::info('[Broadcasting] Acesso concedido ao canal sala', [
+            'user_id' => $user->id,
+            'sala_id' => $salaId
+        ]);
+
+        return [
+            'id' => (int) $user->id,
+            'name' => $user->username,
+            'username' => $user->username,
+            'avatar' => $user->avatar,
+        ];
+    } catch (\Exception $e) {
+        Log::error('[Broadcasting] Erro ao autenticar canal sala', [
+            'error' => $e->getMessage(),
+            'user_id' => $user->id,
+            'sala_id' => $salaId
+        ]);
         return false;
     }
-
-    return [
-        'id' => (int) $user->id,
-        'name' => $user->username,       // adiciona name para casar com o front
-        'username' => $user->username,   // mantém username se for útil
-        'avatar' => $user->avatar,
-    ];
 });
 
-// Canal geral para status de usuários
-Broadcast::channel('user-status', function (Usuario $user) {
-    return [
-        'id' => $user->id,
-        'username' => $user->username,
-        'is_online' => $user->is_online
-    ];
+// ==================== CANAL DE PRESENÇA DA SESSÃO ====================
+Broadcast::channel('sessao.{sessaoId}', function (Usuario $user, int $sessaoId) {
+    try {
+        // Verificar se a sessão existe
+        $sessao = \App\Models\SessaoJogo::find($sessaoId);
+        
+        if (!$sessao) {
+            Log::warning('[Broadcasting] Sessão não encontrada', [
+                'sessao_id' => $sessaoId,
+                'user_id' => $user->id
+            ]);
+            return false;
+        }
+
+        // Verificar se o usuário participa da SALA da sessão (não da sessão em si)
+        // Isso permite que todos da sala possam se conectar ao canal antes de entrar na sessão
+        $participaSala = ParticipanteSala::where('sala_id', $sessao->sala_id)
+            ->where('usuario_id', $user->id)
+            ->where('ativo', true)
+            ->exists();
+
+        if (!$participaSala) {
+            Log::info('[Broadcasting] Acesso negado - Usuário não participa da sala da sessão', [
+                'user_id' => $user->id,
+                'sessao_id' => $sessaoId,
+                'sala_id' => $sessao->sala_id
+            ]);
+            return false;
+        }
+
+        Log::info('[Broadcasting] Acesso concedido ao canal sessão', [
+            'user_id' => $user->id,
+            'sessao_id' => $sessaoId
+        ]);
+
+        return [
+            'id' => (int) $user->id,
+            'name' => $user->username,
+            'username' => $user->username,
+            'avatar' => $user->avatar,
+        ];
+    } catch (\Exception $e) {
+        Log::error('[Broadcasting] Erro ao autenticar canal sessão', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'user_id' => $user->id,
+            'sessao_id' => $sessaoId
+        ]);
+        return false;
+    }
 });
 
-// Canal privado para notificações do usuário
+// ==================== CANAL PRIVADO DO USUÁRIO ====================
 Broadcast::channel('user.{id}', function (Usuario $user, $id) {
     return (int) $user->id === (int) $id;
 });

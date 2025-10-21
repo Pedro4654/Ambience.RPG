@@ -49,6 +49,43 @@ Route::post('/redefinir-senha', [UsuarioController::class, 'resetPassword'])
 Route::post('/reenviar-token', [UsuarioController::class, 'resendToken'])
     ->name('usuarios.resend.token');
 
+Route::post('/salas/{id}/iniciar-sessao', [SalaController::class, 'iniciarSessao'])
+    ->name('salas.iniciar-sessao')
+    ->where('id', '[0-9]+');
+
+/**
+ * Visualizar sala de sessão
+ * GET /sessoes/{id}
+ */
+Route::get('/sessoes/{id}', [SalaController::class, 'showSessao'])
+    ->name('sessoes.show')
+    ->where('id', '[0-9]+');
+
+/**
+ * Obter sessão ativa da sala
+ * GET /salas/{id}/sessao-ativa
+ */
+Route::get('/salas/{id}/sessao-ativa', [SalaController::class, 'getSessaoAtiva'])
+    ->name('salas.sessao-ativa')
+    ->where('id', '[0-9]+');
+
+/**
+ * Finalizar sessão
+ * POST /sessoes/{id}/finalizar
+ */
+Route::post('/sessoes/{id}/finalizar', [SalaController::class, 'finalizarSessao'])
+    ->name('sessoes.finalizar')
+    ->where('id', '[0-9]+');
+
+/**
+ * Entrar em uma sessão já iniciada
+ * POST /sessoes/{id}/entrar
+ */
+Route::post('/sessoes/{id}/entrar', [SalaController::class, 'entrarNaSessao'])
+    ->name('sessoes.entrar')
+    ->where('id', '[0-9]+');
+
+
 // ==================== ROTAS PROTEGIDAS (COM AUTENTICAÇÃO) ====================
 Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->group(function () {
 

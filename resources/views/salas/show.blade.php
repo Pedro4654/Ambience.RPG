@@ -110,6 +110,8 @@
             </div>
         </div>
 
+        
+
         @if($sala->descricao)
             <hr>
             <div>
@@ -119,6 +121,14 @@
         @endif
     </div>
 
+@if($minhas_permissoes->pode_iniciar_sessao)
+    <div id="iniciar-sessao-container-js" class="mt-3 text-end">
+        <button id="btnIniciarSessao" class="btn btn-success btn-lg">
+            <i class="fa-solid fa-play me-2"></i> Iniciar Sessão
+        </button>
+    </div>
+@endif
+    
     <!-- Status de Conexão em Tempo Real -->
     <div class="row g-3">
         <div class="col-12 col-lg-4">
@@ -303,39 +313,55 @@
     </div>
 
     <!-- Informações da Sala -->
-    <div class="row g-3 mt-3">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title mb-3 section-title">Informações</h5>
-                    <div class="row">
-                        <div class="col-12 col-md-4 mb-2">
-                            <div class="text-muted">Criador:</div>
-                            <div>{{ $sala->criador->username ?? 'N/A' }}</div>
-                        </div>
-                        <div class="col-12 col-md-4 mb-2">
-                            <div class="text-muted">Criada em:</div>
-                            <div>{{ \Carbon\Carbon::parse($sala->data_criacao)->format('d/m/Y H:i') }}</div>
-                        </div>
-                        <div class="col-12 col-md-4 mb-2">
-                            <div class="text-muted">Última atividade:</div>
-                            <div>{{ \Carbon\Carbon::parse($sala->data_criacao)->diffForHumans() }}</div>
-                        </div>
-                        <div class="col-12 col-md-4 mb-2">
-                            <div class="text-muted">Status:</div>
-                            <div>{{ $sala->ativa ? 'Ativa' : 'Inativa' }}</div>
-                        </div>
-                    </div>
-
-                    @if($minhas_permissoes && $minhas_permissoes->pode_convidar_usuarios)
-                        <button class="btn btn-outline-primary mt-2" data-bs-toggle="modal" data-bs-target="#modalConvite">
-                            <i class="fa-solid fa-envelope me-1"></i> Convidar Usuário
+    {{-- BOTÕES DE CONTROLE DE SESSÃO --}}
+@if($sessao_ativa)
+    {{-- Há uma sessão ativa --}}
+    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-green-800">
+                    🎮 Sessão em Andamento
+                </h3>
+                <p class="text-sm text-green-600">
+                    {{ $sessao_ativa->nome_sessao }}
+                </p>
+                <p class="text-xs text-green-500">
+                    Status: {{ ucfirst($sessao_ativa->status) }}
+                </p>
+            </div>
+            <div class="flex gap-2">
+                @if($participa_na_sessao)
+                    {{-- Usuário já está na sessão --}}
+                    <a href="{{ route('sessoes.show', ['id' => $sessao_ativa->id]) }}" 
+                       class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
+                        🎲 Ir para Sessão
+                    </a>
+                @else
+                    {{-- Usuário não está na sessão, mostrar botão para entrar --}}
+                    <form action="{{ route('sessoes.entrar', ['id' => $sessao_ativa->id]) }}" 
+                          method="POST" 
+                          class="inline">
+                        @csrf
+                        <button type="submit" 
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+                            🚪 Entrar na Sessão
                         </button>
-                    @endif
-                </div>
+                    </form>
+                @endif
             </div>
         </div>
     </div>
+@else
+    {{-- Não há sessão ativa --}}
+    @if($minhas_permissoes && $minhas_permissoes->pode_iniciar_sessao)
+        <div id="iniciar-sessao-container" 
+             data-sala-id="{{ $sala->id }}" 
+             data-tem-permissao="true" 
+             data-user-id="{{ auth()->id() }}">
+        </div>
+    @endif
+@endif
+
 
     <!-- Modal: Convidar Usuário -->
     <div class="modal fade" id="modalConvite" tabindex="-1" aria-labelledby="modalConviteLabel" aria-hidden="true">
@@ -754,5 +780,97 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
   </div>
 </div>
+<script>
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[Sala] Página carregada, configurando WebSocket...');
+    
+    // Verificar se Echo está disponível
+    if (typeof window.Echo === 'undefined') {
+        console.error('[Sala] Echo não está disponível!');
+        return;
+    }
+
+    // IDs necessários
+    const salaId = {{ $sala->id }};
+    const userId = {{ auth()->id() }};
+    
+    console.log(`[Sala] Conectando ao canal de presença: sala.${salaId}`);
+    
+    // ==================== CONECTAR AO CANAL DE PRESENÇA DA SALA ====================
+    const salaChannel = window.Echo.join(`sala.${salaId}`);
+    
+    // ==================== ESCUTAR EVENTO DE SESSÃO INICIADA ====================
+    salaChannel.listen('.session.started', function(data) {
+        console.log('[Sala] 🎮 SESSÃO INICIADA! Evento recebido:', data);
+        
+        if (!data || !data.redirect_to) {
+            console.error('[Sala] Dados do evento inválidos:', data);
+            return;
+        }
+        
+        // Redirecionar IMEDIATAMENTE
+        console.log('[Sala] Redirecionando para:', data.redirect_to);
+        window.location.href = data.redirect_to;
+    });
+    
+    // ==================== DETECTAR PRESENÇA ====================
+    salaChannel.here((users) => {
+        console.log('[Sala] 👥 Usuários online:', users);
+    });
+    
+    salaChannel.joining((user) => {
+        console.log('[Sala] ✅ Entrou:', user.name || user.username);
+    });
+    
+    salaChannel.leaving((user) => {
+        console.log('[Sala] ❌ Saiu:', user.name || user.username);
+    });
+    
+    salaChannel.error((error) => {
+        console.error('[Sala] ❌ Erro no canal:', error);
+    });
+    
+    console.log('[Sala] ✅ Listener de sessão configurado!');
+});
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('btnIniciarSessao');
+    if (!btn) return;
+
+    btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Iniciando...';
+
+        try {
+            const res = await fetch(`/salas/{{ $sala->id }}/iniciar-sessao`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document
+                        .querySelector('meta[name="csrf-token"]')
+                        .getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ nome_sessao: null, configuracoes: {} })
+            });
+            const data = await res.json();
+            if (data.success) {
+                window.location.href = data.redirect_to;
+            } else {
+                alert(data.message || 'Erro ao iniciar sessão.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-play me-2"></i> Iniciar Sessão';
+            }
+        } catch {
+            alert('Erro ao iniciar sessão. Tente novamente.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-play me-2"></i> Iniciar Sessão';
+        }
+    });
+});
+</script>
 </body>
 </html>
