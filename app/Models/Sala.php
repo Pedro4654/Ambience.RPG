@@ -32,7 +32,10 @@ class Sala extends Model
         'senha_hash',
         'max_participantes',
         'data_criacao',
-        'ativa'
+        'ativa',
+        // campos do banner
+        'banner_url',
+        'banner_color'
     ];
 
     /**
@@ -67,7 +70,7 @@ class Sala extends Model
     public function participantes(): HasMany
     {
         return $this->hasMany(ParticipanteSala::class, 'sala_id')
-                    ->where('ativo', true);
+            ->where('ativo', true);
     }
 
     /**
@@ -133,7 +136,7 @@ class Sala extends Model
      */
     public function scopeComParticipante($query, $userId)
     {
-        return $query->whereHas('participantes', function($q) use ($userId) {
+        return $query->whereHas('participantes', function ($q) use ($userId) {
             $q->where('usuario_id', $userId)->where('ativo', true);
         });
     }
@@ -170,8 +173,8 @@ class Sala extends Model
     public function temParticipante($userId): bool
     {
         return $this->participantes()
-                    ->where('usuario_id', $userId)
-                    ->exists();
+            ->where('usuario_id', $userId)
+            ->exists();
     }
 
     /**
@@ -188,9 +191,9 @@ class Sala extends Model
     public function getPapelUsuario($userId): ?string
     {
         $participante = $this->participantes()
-                            ->where('usuario_id', $userId)
-                            ->first();
-        
+            ->where('usuario_id', $userId)
+            ->first();
+
         return $participante ? $participante->papel : null;
     }
 
@@ -224,8 +227,8 @@ class Sala extends Model
     public function getPermissoesUsuario($userId): ?PermissaoSala
     {
         return $this->permissoes()
-                    ->where('usuario_id', $userId)
-                    ->first();
+            ->where('usuario_id', $userId)
+            ->first();
     }
 
     /**
@@ -234,7 +237,7 @@ class Sala extends Model
     public function usuarioTemPermissao($userId, $permissao): bool
     {
         $permissoes = $this->getPermissoesUsuario($userId);
-        
+
         if (!$permissoes) {
             return false;
         }
@@ -252,7 +255,7 @@ class Sala extends Model
         if ($value && filter_var($value, FILTER_VALIDATE_URL)) {
             return $value;
         }
-        
+
         // Retornar imagem padrão baseada no tipo da sala
         $imagensPadrao = [
             'publica' => asset('images/sala-publica-default.png'),
@@ -325,14 +328,14 @@ class Sala extends Model
     public static function disponiveisPara($userId, $limite = 10)
     {
         return static::ativas()
-                    ->publicas()
-                    ->whereDoesntHave('participantes', function($query) use ($userId) {
-                        $query->where('usuario_id', $userId)->where('ativo', true);
-                    })
-                    ->with(['criador', 'participantes.usuario'])
-                    ->orderBy('data_criacao', 'desc')
-                    ->limit($limite)
-                    ->get();
+            ->publicas()
+            ->whereDoesntHave('participantes', function ($query) use ($userId) {
+                $query->where('usuario_id', $userId)->where('ativo', true);
+            })
+            ->with(['criador', 'participantes.usuario'])
+            ->orderBy('data_criacao', 'desc')
+            ->limit($limite)
+            ->get();
     }
 
     /**
@@ -341,10 +344,10 @@ class Sala extends Model
     public static function doUsuario($userId)
     {
         return static::ativas()
-                    ->comParticipante($userId)
-                    ->with(['criador', 'participantes.usuario'])
-                    ->orderBy('data_criacao', 'desc')
-                    ->get();
+            ->comParticipante($userId)
+            ->with(['criador', 'participantes.usuario'])
+            ->orderBy('data_criacao', 'desc')
+            ->get();
     }
 
     /**
@@ -361,17 +364,17 @@ class Sala extends Model
         ];
     }
     public function getSessaoAtiva()
-{
-    return $this->sessoes()
-        ->whereIn('status', ['ativa', 'pausada'])
-        ->first();
-}
+    {
+        return $this->sessoes()
+            ->whereIn('status', ['ativa', 'pausada'])
+            ->first();
+    }
 
-/**
- * Verificar se há sessão ativa
- */
-public function temSessaoAtiva(): bool
-{
-    return $this->getSessaoAtiva() !== null;
-}
+    /**
+     * Verificar se há sessão ativa
+     */
+    public function temSessaoAtiva(): bool
+    {
+        return $this->getSessaoAtiva() !== null;
+    }
 }

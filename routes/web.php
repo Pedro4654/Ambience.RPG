@@ -147,6 +147,17 @@ Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->g
     Route::get('/salas/{id}', [SalaController::class, 'show'])->name('salas.show')
         ->where('id', '[0-9]+'); // Apenas números
 
+    Route::post('/salas/{id}/banner', [App\Http\Controllers\SalaController::class, 'uploadBanner'])
+        ->name('salas.banner.upload')
+        ->where('id', '[0-9]+');
+
+    Route::post('/salas/{id}/banner/color', [App\Http\Controllers\SalaController::class, 'setBannerColor'])
+        ->name('salas.banner.color')
+        ->where('id', '[0-9]+');
+
+    Route::delete('/salas/{id}/banner', [App\Http\Controllers\SalaController::class, 'removeBanner'])
+        ->name('salas.banner.remove')
+        ->where('id', '[0-9]+');
     /**
      * Sair da sala
      * POST /salas/{id}/sair - Remove usuário da sala (exceto criador)
@@ -165,14 +176,14 @@ Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->g
 
 
     // Exibir permissões do participante (JSON)
-Route::get('/salas/{sala}/participantes/{usuario}/permissoes', [SalaController::class, 'getPermissoesParticipante'])
-    ->name('salas.participantes.permissoes.show')
-    ->where(['sala' => '[0-9]+', 'usuario' => '[0-9]+']);
+    Route::get('/salas/{sala}/participantes/{usuario}/permissoes', [SalaController::class, 'getPermissoesParticipante'])
+        ->name('salas.participantes.permissoes.show')
+        ->where(['sala' => '[0-9]+', 'usuario' => '[0-9]+']);
 
-// Atualizar permissões do participante (JSON)
-Route::post('/salas/{sala}/participantes/{usuario}/permissoes', [SalaController::class, 'updatePermissoesParticipante'])
-    ->name('salas.participantes.permissoes.update')
-    ->where(['sala' => '[0-9]+', 'usuario' => '[0-9]+']);
+    // Atualizar permissões do participante (JSON)
+    Route::post('/salas/{sala}/participantes/{usuario}/permissoes', [SalaController::class, 'updatePermissoesParticipante'])
+        ->name('salas.participantes.permissoes.update')
+        ->where(['sala' => '[0-9]+', 'usuario' => '[0-9]+']);
 
     // ========== ROTAS DE CONVITES ==========
 

@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Laravel\Facades\Image;
 
 /**
  * Controlador do Sistema de Salas de RPG
@@ -1307,25 +1309,114 @@ public function updatePermissoesParticipante(Request $request, $salaId, $usuario
         }
     }
 
-    /**
-     * Método privado para simular teste de WebSocket
-     * Para garantir que o sistema suporte tempo real quando implementado
-     */
-    private function testarWebSocket()
-    {
-        // Simular teste de conectividade WebSocket
-        // Em produção, isso seria uma conexão real com o servidor WebSocket
-        $status = [
-            'connected' => true, // Simulado
-            'ping' => rand(10, 50), // ms simulado
-            'server' => 'ws://localhost:6001', // Endereço do servidor WebSocket
-            'last_check' => now()->toISOString(),
-            'message' => 'WebSocket simulado - conectado com sucesso!'
-        ];
 
-        Log::info('Teste WebSocket simulado', $status);
-        return $status;
+/**
+ * Upload/Replace banner da sala.
+ * Agora o banner deve ser HORIZONTAL (largura > altura) - proporção recomendada 16:9.
+ */
+public function uploadBanner(Request $request, $id)
+{
+    $userId = Auth::id();
+    $sala = Sala::findOrFail($id);
+
+    if ($sala->criador_id != $userId) {
+        return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
     }
+
+    $request->validate([
+        'banner' => 'required|image|mimes:jpeg,png,jpg|max:8192',
+    ]);
+
+    try {
+        $file = $request->file('banner');
+
+        // v3: read() + orientate()
+        $img = Image::read($file->getRealPath());
+
+        $width  = $img->width();
+        $height = $img->height();
+
+        // Exigir horizontal
+        if ($width <= $height) {
+            return response()->json([
+                'success' => false,
+                'message' => 'A imagem precisa estar na orientação horizontal (largura > altura). Recomendado: proporção 16:9.'
+            ], 422);
+        }
+
+        // Garanta 16:9 e tamanho consistente no servidor
+        $img = $img->cover(1600, 900);
+
+        // Salvar sempre como JPG de alta qualidade
+        $filename = 'banner_' . \Illuminate\Support\Str::uuid() . '.jpg';
+        $path = "salas/banners/{$filename}";
+
+        \Illuminate\Support\Facades\Storage::disk('public')->put($path, (string) $img->toJpeg(85));
+
+        // Apagar banner antigo
+        if (!empty($sala->banner_url)) {
+            $oldPath = preg_replace('~^/storage/~', '', parse_url($sala->banner_url, PHP_URL_PATH) ?? '');
+            if ($oldPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($oldPath)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+            }
+        }
+
+        $sala->banner_url = \Illuminate\Support\Facades\Storage::url($path);
+        $sala->save();
+
+        return response()->json(['success' => true, 'message' => 'Banner atualizado.', 'banner_url' => $sala->banner_url]);
+    } catch (\Throwable $e) {
+        \Illuminate\Support\Facades\Log::error('Erro upload banner sala: ' . $e->getMessage(), ['sala_id' => $id, 'user_id' => $userId]);
+        return response()->json(['success' => false, 'message' => 'Erro interno ao enviar banner.'], 500);
+    }
+}
+
+/**
+ * Definir cor fallback do banner (hex).
+ */
+public function setBannerColor(Request $request, $id)
+{
+    $userId = Auth::id();
+    $sala = Sala::findOrFail($id);
+
+    if ($sala->criador_id != $userId) {
+        return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+    }
+
+    $validated = $request->validate([
+        'color' => ['required','regex:/^#[0-9A-Fa-f]{6}$/']
+    ]);
+
+    $sala->banner_color = $validated['color'];
+    $sala->save();
+
+    return response()->json(['success' => true, 'message' => 'Cor do banner atualizada.', 'banner_color' => $sala->banner_color]);
+}
+
+/**
+ * Remove banner atual (apaga arquivo e limpa DB).
+ */
+public function removeBanner(Request $request, $id)
+{
+    $userId = Auth::id();
+    $sala = Sala::findOrFail($id);
+
+    if ($sala->criador_id != $userId) {
+        return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+    }
+
+    if (!empty($sala->banner_url)) {
+        $oldPath = preg_replace('~^/storage/~', '', parse_url($sala->banner_url, PHP_URL_PATH) ?? '');
+        if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+            Storage::disk('public')->delete($oldPath);
+        }
+    }
+
+    $sala->banner_url = null;
+    $sala->save();
+
+    return response()->json(['success' => true, 'message' => 'Banner removido.']);
+}
 
     public function infoSala($id, Request $request)
     {
