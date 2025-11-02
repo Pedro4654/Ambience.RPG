@@ -10,6 +10,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
 
+
     <!-- Vite: carrega app.tsx que importa bootstrap.ts (define window.Echo) -->
     @vite('resources/js/app.tsx')
 
@@ -78,6 +79,57 @@
 
     <!-- Cabeçalho da sala -->
     <div class="sala-header">
+<style>
+    .sala-banner {
+        width: 100%;
+        height: 320px;
+        background-position: center center;
+        background-size: cover;
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+        margin-bottom: 12px;
+    }
+    .sala-banner .banner-edit-btn {
+        position: absolute;
+        right: 12px;
+        top: 12px;
+        z-index: 10;
+    }
+    .sala-banner .banner-fallback {
+        width: 100%;
+        height: 100%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color: rgba(255,255,255,0.95);
+        font-weight:700;
+        font-size:22px;
+    }
+</style>
+
+<div class="sala-banner"
+     @if($sala->banner_url)
+        style="background-image: url('{{ $sala->banner_url }}');"
+     @else
+        style="background-color: {{ $sala->banner_color ?? '#6c757d' }};"
+     @endif
+     data-sala-id="{{ $sala->id }}"
+>
+    @if((int)auth()->id() === (int)$sala->criador_id)
+        <div class="banner-edit-btn">
+            <button class="btn btn-sm btn-light" id="openBannerEditorBtn" data-sala-id="{{ $sala->id }}">
+                <i class="fa-solid fa-image me-1"></i> Editar Banner
+            </button>
+        </div>
+    @endif
+
+    @if(!$sala->banner_url)
+        <div class="banner-fallback">
+            {{ $sala->nome }}
+        </div>
+    @endif
+</div>
         <div class="d-flex align-items-center justify-content-between">
             <div>
                 <h2 class="mb-1">{{ $sala->nome }}</h2>
@@ -780,6 +832,7 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
   </div>
 </div>
+
 <script>
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -872,5 +925,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('openBannerEditorBtn');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    const salaId = btn.getAttribute('data-sala-id');
+    const bannerUrl = "{{ $sala->banner_url }}";
+    const bannerColor = "{{ $sala->banner_color }}";
+
+    if (window.openBannerEditor) {
+      window.openBannerEditor(salaId, bannerUrl || null, bannerColor || null);
+    } else {
+      console.error('openBannerEditor indisponível');
+    }
+  });
+});
+</script>
+
+@include('partials.banner-editor')
 </body>
 </html>

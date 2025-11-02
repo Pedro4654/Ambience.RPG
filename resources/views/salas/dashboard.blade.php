@@ -22,6 +22,35 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
+        .sala-banner-mini {
+    width: 100%;
+    height: 110px; /* reduzido para manter o card compacto */
+    background-position: center center;
+    background-size: cover;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 10px;
+  }
+  .sala-banner-mini .banner-edit-btn {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    z-index: 10;
+  }
+  .sala-banner-mini .banner-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.95);
+    font-weight: 700;
+    font-size: 16px;
+    text-align: center;
+    padding: 0 8px;
+  }
+
         .main-container {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
@@ -410,6 +439,8 @@
             }
         });
 
+        const AUTH_ID = {{ (int) $userId }};
+
         // Classe principal do Sistema de Salas
         class SistemaSalas {
             constructor() {
@@ -500,62 +531,74 @@
 
             // Gerar HTML do card da sala
             generateSalaCard(sala, isMyRoom) {
-                const participantes = sala.participantes || [];
-                const criador = sala.criador || {};
-                const tipoClass = `tipo-${sala.tipo}`;
-                const tipoText = {
-                    'publica': '🌍 Pública',
-                    'privada': '🔒 Privada',
-                    'apenas_convite': '📧 Convite'
-                } [sala.tipo] || sala.tipo;
+  const participantes = sala.participantes;
+  const criador = sala.criador;
+  const tipoClass = `tipo-${sala.tipo}`;
+  const tipoText = sala.tipo === 'publica' ? 'Pública' : (sala.tipo === 'privada' ? 'Privada' : 'Convite');
 
-                const actionButton = isMyRoom ?
-                    `<a href="/salas/${sala.id}" class="btn btn-primary-custom btn-sm">
-                        <i class="fas fa-play me-1"></i>Entrar
-                     </a>` :
-                    `<button class="btn btn-success-custom btn-sm" onclick="sistema.entrarSalaRapida(${sala.id})">
-                        <i class="fas fa-sign-in-alt me-1"></i>Juntar-se
-                     </button>`;
+  const isCreator = criador && parseInt(criador.id) === parseInt(AUTH_ID);
+  const bannerStyle = sala.banner_url
+    ? `background-image:url('${sala.banner_url}');`
+    : `background-color:${sala.banner_color || '#6c757d'};`;
 
-                return `
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="sala-card animate__animated animate__fadeInUp">
-                            <div class="sala-header">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">${sala.nome}</h5>
-                                    <span class="tipo-badge ${tipoClass}">${tipoText}</span>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <p class="text-muted mb-3">${sala.descricao || 'Sem descrição'}</p>
-                                
-                                <div class="row text-center mb-3">
-                                    <div class="col-4">
-                                        <small class="text-muted d-block">ID</small>
-                                        <strong>${sala.id}</strong>
-                                    </div>
-                                    <div class="col-4">
-                                        <small class="text-muted d-block">Participantes</small>
-                                        <strong>${participantes.length}/${sala.max_participantes}</strong>
-                                    </div>
-                                    <div class="col-4">
-                                        <small class="text-muted d-block">Criador</small>
-                                        <strong>${criador.username || 'N/A'}</strong>
-                                    </div>
-                                </div>
-                                
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted">
-                                        <i class="fas fa-clock me-1"></i>
-                                        Criada ${this.formatDate(sala.data_criacao)}
-                                    </small>
-                                    ${actionButton}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
+  const bannerMini = `
+    <div class="sala-banner-mini" style="${bannerStyle}" data-sala-id="${sala.id}">
+      ${isCreator ? `
+        <div class="banner-edit-btn">
+          <button class="btn btn-sm btn-light open-banner-editor-btn"
+                  data-sala-id="${sala.id}"
+                  data-banner-url="${sala.banner_url || ''}"
+                  data-banner-color="${sala.banner_color || ''}">
+            <i class="fa-solid fa-image me-1"></i>Editar
+          </button>
+        </div>` : ``}
+      ${!sala.banner_url ? `<div class="banner-fallback">${sala.nome}</div>` : ``}
+    </div>`;
+
+  const actionButton = isMyRoom
+    ? `<a href="/salas/${sala.id}" class="btn btn-primary-custom btn-sm">
+         <i class="fas fa-play me-1"></i>Entrar
+       </a>`
+    : `<button class="btn btn-success-custom btn-sm" onclick="sistema.entrarSalaRapida(${sala.id})">
+         <i class="fas fa-sign-in-alt me-1"></i>Juntar-se
+       </button>`;
+
+  return `
+    <div class="col-lg-4 col-md-6 mb-4">
+      <div class="sala-card animate__animated animate__fadeInUp">
+        ${bannerMini}
+        <div class="px-3 pt-1 pb-2">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">${sala.nome}</h5>
+            <span class="tipo-badge ${tipoClass}">${tipoText}</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <p class="text-muted mb-3">${sala.descricao || 'Sem descrição'}</p>
+          <div class="row text-center mb-3">
+            <div class="col-4">
+              <small class="text-muted d-block">ID</small>
+              <strong>${sala.id}</strong>
+            </div>
+            <div class="col-4">
+              <small class="text-muted d-block">Participantes</small>
+              <strong>${participantes.length}/${sala.max_participantes}</strong>
+            </div>
+            <div class="col-4">
+              <small class="text-muted d-block">Criador</small>
+              <strong>${(criador && criador.username) || 'N/A'}</strong>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+              <i class="fas fa-clock me-1"></i> Criada ${this.formatDate(sala.data_criacao)}
+            </small>
+            ${actionButton}
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
 
             // Formatar data
             formatDate(dateString) {
@@ -904,12 +947,28 @@
             }
         }
 
+        document.body.addEventListener('click', function(e) {
+  const btn = e.target.closest('.open-banner-editor-btn');
+  if (!btn) return;
+
+  const salaId = btn.getAttribute('data-sala-id');
+  const bannerUrl = btn.getAttribute('data-banner-url') || null;
+  const bannerColor = btn.getAttribute('data-banner-color') || null;
+
+  if (window.openBannerEditor) {
+    window.openBannerEditor(salaId, bannerUrl, bannerColor);
+  } else {
+    console.error('openBannerEditor indisponível');
+  }
+});
+
         // Inicializar sistema quando document estiver pronto
         let sistema;
         $(document).ready(() => {
             sistema = new SistemaSalas();
         });
     </script>
+    @include('partials.banner-editor')
 </body>
 
 </html>
