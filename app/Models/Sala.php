@@ -33,6 +33,8 @@ class Sala extends Model
         'max_participantes',
         'data_criacao',
         'ativa',
+        'profile_photo_url',      
+        'profile_photo_color',    
         // campos do banner
         'banner_url',
         'banner_color'
