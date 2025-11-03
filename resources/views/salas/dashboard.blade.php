@@ -51,6 +51,37 @@
     padding: 0 8px;
   }
 
+  .sala-profile-photo-mini {
+    width: 65px;
+    height: 65px;
+    background-position: center center;
+    background-size: cover;
+    border-radius: 50%;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+  }
+  .sala-profile-photo-mini .photo-edit-btn {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    z-index: 10;
+  }
+  .sala-profile-photo-mini .photo-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.95);
+    font-weight: 700;
+    font-size: 24px;
+    text-transform: uppercase;
+    border-radius: 50%;
+  }
+
         .main-container {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
@@ -348,17 +379,11 @@
                                 <div class="mb-3">
                                     <label for="maxParticipantes" class="form-label">Máx. Participantes</label>
                                     <input type="number" class="form-control" id="maxParticipantes"
-                                        name="max_participantes" value="50" min="2" max="100">
+                                        name="max_participantes" value="10" min="2" max="20">
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="imagemSala" class="form-label">URL da Imagem</label>
-                            <input type="url" class="form-control" id="imagemSala" name="imagem_url"
-                                placeholder="https://exemplo.com/imagem.jpg">
-                            <div class="form-text">Deixe em branco para usar imagem padrão</div>
-                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -555,6 +580,22 @@
       ${!sala.banner_url ? `<div class="banner-fallback">${sala.nome}</div>` : ``}
     </div>`;
 
+  const photoStyle = sala.profile_photo_url
+    ? `background-image:url('${sala.profile_photo_url}');`
+    : `background-color:${sala.profile_photo_color || '#6c757d'};`;
+
+  const profilePhotoMini = `
+    <div class="sala-profile-photo-mini" style="${photoStyle}" data-sala-id="${sala.id}">
+      ${isCreator ? `
+        <button class="btn btn-sm btn-light rounded-circle shadow-sm photo-edit-btn open-profile-photo-editor-btn"
+                data-sala-id="${sala.id}"
+                data-foto-url="${sala.profile_photo_url || ''}"
+                title="Editar foto de perfil">
+          <i class="fa-solid fa-camera"></i>
+        </button>` : ``}
+      ${!sala.profile_photo_url ? `<div class="photo-fallback">${sala.nome.charAt(0).toUpperCase()}</div>` : ``}
+    </div>`;
+
   const actionButton = isMyRoom
     ? `<a href="/salas/${sala.id}" class="btn btn-primary-custom btn-sm">
          <i class="fas fa-play me-1"></i>Entrar
@@ -569,7 +610,10 @@
         ${bannerMini}
         <div class="px-3 pt-1 pb-2">
           <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">${sala.nome}</h5>
+            <div class="d-flex align-items-center gap-2">
+              ${profilePhotoMini}
+              <h5 class="mb-0">${sala.nome}</h5>
+            </div>
             <span class="tipo-badge ${tipoClass}">${tipoText}</span>
           </div>
         </div>
@@ -962,6 +1006,20 @@
   }
 });
 
+        document.body.addEventListener('click', function(e) {
+  const btn = e.target.closest('.open-profile-photo-editor-btn');
+  if (!btn) return;
+
+  const salaId = btn.getAttribute('data-sala-id');
+  const fotoUrl = btn.getAttribute('data-foto-url') || null;
+
+  if (window.openProfilePhotoEditor) {
+    window.openProfilePhotoEditor(salaId, fotoUrl);
+  } else {
+    console.error('openProfilePhotoEditor indisponível');
+  }
+});
+
         // Inicializar sistema quando document estiver pronto
         let sistema;
         $(document).ready(() => {
@@ -969,6 +1027,7 @@
         });
     </script>
     @include('partials.banner-editor')
+    @include('partials.profile-photo-editor')
 </body>
 
 </html>

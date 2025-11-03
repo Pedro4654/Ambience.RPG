@@ -1418,6 +1418,125 @@ public function removeBanner(Request $request, $id)
     return response()->json(['success' => true, 'message' => 'Banner removido.']);
 }
 
+/**
+ * Upload/Replace foto de perfil da sala.
+ * A foto deve ser QUADRADA (1:1) - proporção recomendada 500x500.
+ */
+public function uploadProfilePhoto(Request $request, $id)
+{
+    $userId = Auth::id();
+    $sala = Sala::findOrFail($id);
+    
+    if ($sala->criador_id != $userId) {
+        return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+    }
+
+    $request->validate([
+        'profile_photo' => 'required|image|mimes:jpeg,png,jpg|max:5120', // 5MB
+    ]);
+
+    try {
+        $file = $request->file('profile_photo');
+        
+        // Ler imagem
+        $img = Image::read($file->getRealPath());
+        $width = $img->width();
+        $height = $img->height();
+
+        // Exigir proporção quadrada (ou muito próxima)
+        $ratio = $width / $height;
+        if ($ratio < 0.9 || $ratio > 1.1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'A imagem precisa ter proporção quadrada (1:1). Recomendado: 500x500 pixels.'
+            ], 422);
+        }
+
+        // Redimensionar para 500x500 e fazer crop centralizado
+        $img = $img->cover(500, 500);
+
+        // Salvar sempre como JPG de alta qualidade
+        $filename = 'profile_' . \Illuminate\Support\Str::uuid() . '.jpg';
+        $path = "salas/profiles/{$filename}";
+        \Illuminate\Support\Facades\Storage::disk('public')->put($path, (string) $img->toJpeg(90));
+
+        // Apagar foto antiga
+        if (!empty($sala->profile_photo_url)) {
+            $oldPath = preg_replace('~^/storage/~', '', parse_url($sala->profile_photo_url, PHP_URL_PATH) ?? '');
+            if ($oldPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($oldPath)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+            }
+        }
+
+        $sala->profile_photo_url = \Illuminate\Support\Facades\Storage::url($path);
+        $sala->save();
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Foto de perfil atualizada com sucesso.', 
+            'profile_photo_url' => $sala->profile_photo_url
+        ]);
+        
+    } catch (\Throwable $e) {
+        \Illuminate\Support\Facades\Log::error('Erro upload foto de perfil sala: ' . $e->getMessage(), [
+            'sala_id' => $id, 
+            'user_id' => $userId
+        ]);
+        return response()->json(['success' => false, 'message' => 'Erro interno ao enviar foto de perfil.'], 500);
+    }
+}
+
+/**
+ * Definir cor fallback da foto de perfil (hex).
+ */
+public function setProfilePhotoColor(Request $request, $id)
+{
+    $userId = Auth::id();
+    $sala = Sala::findOrFail($id);
+    
+    if ($sala->criador_id != $userId) {
+        return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+    }
+
+    $validated = $request->validate([
+        'color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/']
+    ]);
+
+    $sala->profile_photo_color = $validated['color'];
+    $sala->save();
+
+    return response()->json([
+        'success' => true, 
+        'message' => 'Cor da foto de perfil atualizada.', 
+        'profile_photo_color' => $sala->profile_photo_color
+    ]);
+}
+
+/**
+ * Remove foto de perfil atual (apaga arquivo e limpa DB).
+ */
+public function removeProfilePhoto(Request $request, $id)
+{
+    $userId = Auth::id();
+    $sala = Sala::findOrFail($id);
+    
+    if ($sala->criador_id != $userId) {
+        return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+    }
+
+    if (!empty($sala->profile_photo_url)) {
+        $oldPath = preg_replace('~^/storage/~', '', parse_url($sala->profile_photo_url, PHP_URL_PATH) ?? '');
+        if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+            Storage::disk('public')->delete($oldPath);
+        }
+    }
+
+    $sala->profile_photo_url = null;
+    $sala->save();
+
+    return response()->json(['success' => true, 'message' => 'Foto de perfil removida.']);
+}
+
     public function infoSala($id, Request $request)
     {
         try {

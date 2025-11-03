@@ -131,27 +131,51 @@
     @endif
 </div>
         <div class="d-flex align-items-center justify-content-between">
-            <div>
-                <h2 class="mb-1">{{ $sala->nome }}</h2>
-                <div class="text-muted">
-                    <span class="me-3">ID: #{{ $sala->id }}</span>
-                    <span class="me-3">
-                        @if($sala->tipo === 'publica')
-                            🌍 Pública
-                        @elseif($sala->tipo === 'privada')
-                            🔒 Privada
-                        @else
-                            🔧 Apenas Convite
-                        @endif
-                    </span>
-                    <span class="me-3">👥 {{ $sala->participantes->count() }}/{{ $sala->max_participantes }}</span>
-                    <span class="me-1">⚔️ {{ ucfirst($meu_papel) }}</span>
+            <div class="d-flex align-items-center">
+                <div class="position-relative me-3">
+                    @if(!empty($sala->profile_photo_url))
+                        <img src="{{ $sala->profile_photo_url }}" alt="Foto da sala" class="rounded-circle border" width="65" height="65">
+                    @else
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white border"
+                             style="width: 65px; height: 65px; background-color: {{ $sala->profile_photo_color ?? '#6c757d' }};">
+                            {{ strtoupper(mb_substr($sala->nome, 0, 1)) }}
+                        </div>
+                    @endif
+
+                    @if((int)auth()->id() === (int)$sala->criador_id)
+                        <button id="openProfilePhotoEditorBtn"
+        type="button"
+        class="btn btn-sm btn-light position-absolute bottom-0 end-0 rounded-circle shadow-sm"
+        data-sala-id="{{ $sala->id }}"
+        data-foto-url="{{ $sala->profile_photo_url ?? '' }}"
+        title="Editar foto de perfil">
+    <i class="fa-solid fa-camera"></i>
+</button>
+                    @endif
+                </div>
+                <div>
+                    <h2 class="mb-1">{{ $sala->nome }}</h2>
+                    <div class="text-muted">
+                        <span class="me-3">ID: #{{ $sala->id }}</span>
+                        <span class="me-3">
+                            @if($sala->tipo === 'publica')
+                                🌍 Pública
+                            @elseif($sala->tipo === 'privada')
+                                🔒 Privada
+                            @else
+                                🔧 Apenas Convite
+                            @endif
+                        </span>
+                        <span class="me-3">👥 {{ $sala->participantes->count() }}/{{ $sala->max_participantes }}</span>
+                        <span class="me-1">⚔️ {{ ucfirst($meu_papel) }}</span>
+                    </div>
                 </div>
             </div>
             <div class="d-flex gap-2">
                 <a href="{{ route('salas.index') }}" class="btn btn-outline-secondary">
                     <i class="fa-solid fa-arrow-left me-1"></i> Voltar às Salas
                 </a>
+
 
                 @if($meu_papel !== 'mestre' && $sala->criador_id !== auth()->id())
     <!-- Botão que abre o modal de confirmação -->
@@ -945,6 +969,25 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('openProfilePhotoEditorBtn');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    const salaId = btn.getAttribute('data-sala-id');
+    const fotoUrl = btn.getAttribute('data-foto-url') || "{{ $sala->foto_perfil_url ?? '' }}";
+
+    if (window.openProfilePhotoEditor) {
+      window.openProfilePhotoEditor(salaId, fotoUrl || null);
+    } else {
+      console.error('openProfilePhotoEditor indisponível');
+    }
+  });
+});
+</script>
+
 @include('partials.banner-editor')
+@include('partials.profile-photo-editor')
 </body>
 </html>

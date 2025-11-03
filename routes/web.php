@@ -158,6 +158,20 @@ Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->g
     Route::delete('/salas/{id}/banner', [App\Http\Controllers\SalaController::class, 'removeBanner'])
         ->name('salas.banner.remove')
         ->where('id', '[0-9]+');
+
+
+    // Rotas de foto de perfil da sala
+    Route::post('/salas/{id}/profile-photo', [App\Http\Controllers\SalaController::class, 'uploadProfilePhoto'])
+        ->name('salas.profile.upload')
+        ->where('id', '[0-9]+');
+
+    Route::post('/salas/{id}/profile-photo/color', [App\Http\Controllers\SalaController::class, 'setProfilePhotoColor'])
+        ->name('salas.profile.color')
+        ->where('id', '[0-9]+');
+
+    Route::delete('/salas/{id}/profile-photo', [App\Http\Controllers\SalaController::class, 'removeProfilePhoto'])
+        ->name('salas.profile.remove')
+        ->where('id', '[0-9]+');
     /**
      * Sair da sala
      * POST /salas/{id}/sair - Remove usuário da sala (exceto criador)
