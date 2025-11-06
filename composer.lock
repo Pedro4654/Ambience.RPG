@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "82f58321265a08de1bf4b5b4ae988a4b",
+    "content-hash": "5c545511581e1a46eccf0bacd3a229cf",
     "packages": [
         {
             "name": "brick/math",
@@ -264,6 +264,56 @@
                 }
             ],
             "time": "2025-01-03T16:18:33+00:00"
+        },
+        {
+            "name": "consoletvs/profanity",
+            "version": "3.5.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ConsoleTVs/Profanity.git",
+                "reference": "1e02619cc10cddfd4a85ac8e30d72d2294092708"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ConsoleTVs/Profanity/zipball/1e02619cc10cddfd4a85ac8e30d72d2294092708",
+                "reference": "1e02619cc10cddfd4a85ac8e30d72d2294092708",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "5.4.*|5.5.*|5.6.*|5.7.*|5.8.*|6.*|7.*|8.*|9.*|10.*|11.*|12.*"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Profanity": "ConsoleTVs\\Profanity\\Facades\\Profanity"
+                    },
+                    "providers": [
+                        "ConsoleTVs\\Profanity\\ProfanityServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ConsoleTVs\\Profanity\\": "."
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Erik Campobadal",
+                    "email": "ConsoleTVs@gmail.com"
+                }
+            ],
+            "description": "PHP library to block bad words in a string",
+            "support": {
+                "issues": "https://github.com/ConsoleTVs/Profanity/issues",
+                "source": "https://github.com/ConsoleTVs/Profanity/tree/3.5.1"
+            },
+            "time": "2025-03-04T19:57:34+00:00"
         },
         {
             "name": "dflydev/dot-access-data",

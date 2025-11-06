@@ -3,6 +3,7 @@
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\SalaController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ModerationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,22 +17,37 @@ use Illuminate\Support\Facades\Route;
 
 // ==================== ROTA PADRÃO ====================
 Route::get('/', function () {
-    // Redirecionar usuários autenticados para o sistema de salas
-    if (auth()->check()) {
-        return redirect()->route('salas.index');
-    }
+    return view('home');
+})->name('home');
 
-    // Usuários não autenticados para login
-    return redirect()->route('usuarios.login');
+// Rotas públicas apenas para visitantes (se estiver logado, middleware redireciona para 'home')
+Route::middleware('guest.custom')->group(function () {
+    Route::get('/login', [UsuarioController::class, 'loginForm'])->name('usuarios.login');
+    Route::post('/login', [UsuarioController::class, 'login'])->name('usuarios.login.post');
+
+    Route::get('/cadastro', [UsuarioController::class, 'create'])->name('usuarios.create');
+    Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
+
+    // Recuperação de senha também como guest
+    Route::get('/esqueci-minha-senha', [UsuarioController::class, 'showForgotPasswordForm'])
+        ->name('usuarios.forgot.form');
+    Route::post('/enviar-token-recuperacao', [UsuarioController::class, 'sendResetToken'])
+        ->name('usuarios.forgot.send');
+    Route::get('/verificar-token', [UsuarioController::class, 'showVerifyTokenForm'])
+        ->name('usuarios.verify.token.form');
+    Route::post('/verificar-token', [UsuarioController::class, 'verifyToken'])
+        ->name('usuarios.verify.token');
+    Route::get('/definir-nova-senha', [UsuarioController::class, 'showResetPasswordForm'])
+        ->name('usuarios.reset.password.form');
+    Route::post('/redefinir-senha', [UsuarioController::class, 'resetPassword'])
+        ->name('usuarios.reset.password');
+    Route::post('/reenviar-token', [UsuarioController::class, 'resendToken'])
+        ->name('usuarios.resend.token');
 });
 
-// ==================== ROTAS PÚBLICAS (SEM AUTENTICAÇÃO) ====================
 
-// Rotas de autenticação
-Route::get('/login', [UsuarioController::class, 'loginForm'])->name('usuarios.login');
-Route::post('/login', [UsuarioController::class, 'login']);
-Route::get('/cadastro', [UsuarioController::class, 'create'])->name('usuarios.create');
-Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
+// Rotas de Moderação
+Route::post('/moderate', [ModerationController::class, 'moderate'])->name('moderate');
 
 // ========== ROTAS DE RECUPERAÇÃO DE SENHA COM TOKEN DE 6 DÍGITOS ==========
 Route::get('/esqueci-minha-senha', [UsuarioController::class, 'showForgotPasswordForm'])
@@ -248,47 +264,3 @@ Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->g
         })->name('salas.permissoes')->where('id', '[0-9]+');
     });
 });
-
-/*
-|--------------------------------------------------------------------------
-| Observações Importantes para Desenvolvimento
-|--------------------------------------------------------------------------
-|
-| 1. SISTEMA COMPLETO IMPLEMENTADO:
-|    ✅ Dashboard de salas com design avançado
-|    ✅ Criação de salas (pública, privada, apenas convite)
-|    ✅ Sistema de entrada com validação
-|    ✅ Interface individual da sala
-|    ✅ Sistema de convites com tokens únicos
-|    ✅ Permissões granulares por usuário
-|    ✅ Logs detalhados para debugging
-|    ✅ Preparação para WebSocket
-|
-| 2. INTEGRAÇÃO REACT PREPARADA:
-|    ✅ Todas as rotas retornam JSON quando solicitado
-|    ✅ Rotas API duplicadas em /api/
-|    ✅ Estrutura de resposta padronizada
-|    ✅ CSRF token configurado
-|    ✅ Tratamento de erros consistente
-|
-| 3. SEGURANÇA IMPLEMENTADA:
-|    ✅ Middleware de autenticação customizado
-|    ✅ Validação de entrada rigorosa
-|    ✅ Verificação de permissões granular
-|    ✅ Sanitização de dados
-|    ✅ Logs de segurança
-|
-| 4. RECURSOS AVANÇADOS:
-|    ✅ Sistema de convites com expiração
-|    ✅ Roles diferenciados (membro, admin_sala, mestre)
-|    ✅ Interface responsiva e moderna
-|    ✅ Indicadores de status em tempo real
-|    ✅ Simulação de WebSocket para demonstração
-|
-| 5. PRÓXIMOS PASSOS PARA PRODUÇÃO:
-|    🔄 Implementar WebSocket real (Laravel WebSockets/Pusher)
-|    🔄 Adicionar notificações em tempo real
-|    🔄 Desenvolver componentes React
-|    🔄 Adicionar testes automatizados
-|
-*/
