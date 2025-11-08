@@ -22,6 +22,11 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+
+        // Registrar aliases de middlewares personalizados
+        $middleware->alias([
+            'guest.custom' => \App\Http\Middleware\RedirectIfAuthenticatedCustom::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

@@ -25,27 +25,43 @@ class UsuarioController extends Controller
 
     // Processar login (REMOVIDO update de data_ultimo_login)
     public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
 
-        $usuario = Usuario::where('email', $request->email)
-            ->where('status', 'ativo')
-            ->first();
+    $usuario = Usuario::where('email', $request->email)
+        ->where('status', 'ativo')
+        ->first();
 
-        if ($usuario && Hash::check($request->password, $usuario->senha_hash)) {
-            Auth::login($usuario);
-            
-            Log::info('Login realizado com sucesso', ['user_id' => $usuario->id, 'email' => $usuario->email]);
-            
-            return redirect()->route('usuarios.index')->with('success', 'Login realizado com sucesso!');
+    if ($usuario && Hash::check($request->password, $usuario->senha_hash)) {
+        Auth::login($usuario);
+
+        Log::info('Login realizado com sucesso', ['user_id' => $usuario->id, 'email' => $usuario->email]);
+
+        if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'redirect' => route('home'),
+                'message' => 'Login realizado com sucesso!'
+            ], 200);
         }
 
-        Log::warning('Tentativa de login falhada', ['email' => $request->email]);
-        return back()->withErrors(['email' => 'Credenciais inválidas.']);
+        return redirect()->route('home')->with('success', 'Login realizado com sucesso!');
     }
+
+    Log::warning('Tentativa de login falhada', ['email' => $request->email]);
+
+    if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Credenciais inválidas.'
+        ], 422);
+    }
+
+    return back()->withErrors(['email' => 'Credenciais inválidas.']);
+}
 
     // Logout
     public function logout(Request $request)
@@ -80,7 +96,7 @@ class UsuarioController extends Controller
     public function store(Request $request)
     {
         Log::info('Iniciando cadastro de usuário', ['email' => $request->email]);
-        
+
         $request->validate([
             'username' => 'required|string|max:50|unique:usuarios',
             'nickname' => 'nullable|string|max:50',
@@ -89,10 +105,11 @@ class UsuarioController extends Controller
             'bio' => 'nullable|string',
             'data_de_nascimento' => 'required|date|before:today',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'accept_terms' => 'required|accepted',
         ]);
 
         $avatarPath = null;
-        
+
         // Processar upload da foto de perfil
         if ($request->hasFile('avatar')) {
             Log::info('Processando upload de avatar no cadastro');
@@ -112,10 +129,19 @@ class UsuarioController extends Controller
         ]);
 
         Log::info('Usuário cadastrado com sucesso', ['user_id' => $usuario->id, 'avatar_path' => $avatarPath]);
-        
+
         Auth::login($usuario);
 
-        return redirect()->route('usuarios.index')->with('success', 'Usuário cadastrado com sucesso!');
+        if ($request->ajax() || $request->wantsJson() || $request->header('Accept') === 'application/json') {
+    return response()->json([
+        'success' => true,
+        'redirect' => route('home'),
+        'message' => 'Usuário cadastrado com sucesso!'
+    ], 200);
+}
+
+
+        return redirect()->route('home')->with('success', 'Usuário cadastrado com sucesso!');
     }
 
     // Exibir usuário específico
@@ -160,11 +186,11 @@ class UsuarioController extends Controller
         // Processar upload de nova foto de perfil
         if ($request->hasFile('avatar')) {
             Log::info('Processando upload de novo avatar');
-            
+
             // Deletar avatar antigo
             $deleted = $usuario->deleteOldAvatar();
             Log::info('Avatar antigo deletado', ['deleted' => $deleted, 'user_id' => $usuario->id]);
-            
+
             // Upload novo avatar
             $data['avatar_url'] = $this->uploadAvatar($request->file('avatar'));
         }
@@ -179,13 +205,13 @@ class UsuarioController extends Controller
     public function destroy(Usuario $usuario)
     {
         $this->authorize('delete', $usuario);
-        
+
         Log::info('Iniciando desativação do usuário', ['user_id' => $usuario->id]);
-        
+
         // Deletar avatar antes de inativar
         $deleted = $usuario->deleteOldAvatar();
         Log::info('Avatar deletado antes da desativação', ['deleted' => $deleted, 'user_id' => $usuario->id]);
-        
+
         $usuario->update(['status' => 'inativo']);
 
         if (Auth::id() === $usuario->id) {
@@ -206,21 +232,21 @@ class UsuarioController extends Controller
             mkdir($avatarsPath, 0755, true);
             Log::info('Pasta avatars criada', ['path' => $avatarsPath]);
         }
-        
+
         // CORRIGIDO: Gerar nome único sempre, mesmo que o arquivo seja igual
         $fileName = Str::random(40) . '_' . time() . '.' . $file->getClientOriginalExtension();
         $destinationPath = $avatarsPath . '/' . $fileName;
-        
+
         Log::info('Fazendo upload do avatar', [
             'original_name' => $file->getClientOriginalName(),
             'new_name' => $fileName,
             'destination' => $destinationPath,
             'file_size' => $file->getSize()
         ]);
-        
+
         // Mover o arquivo diretamente para o local correto
         $moved = $file->move($avatarsPath, $fileName);
-        
+
         if ($moved) {
             chmod($destinationPath, 0644);
             Log::info('Avatar uploaded com sucesso', ['path' => 'avatars/' . $fileName]);
@@ -234,23 +260,23 @@ class UsuarioController extends Controller
 
 
 
-  // Método para deletar avatar
-public function deleteAvatar(Usuario $usuario)
-{
-    $this->authorize('update', $usuario);
-    
-    Log::info('Iniciando deleção manual do avatar', ['user_id' => $usuario->id]);
-    
-    $deleted = $usuario->deleteOldAvatar();
-    $usuario->update(['avatar_url' => null]);
-    
-    Log::info('Avatar removido manualmente', ['deleted' => $deleted, 'user_id' => $usuario->id]);
-    
-    return back()->with('success', 'Foto de perfil removida com sucesso!');
-}
+    // Método para deletar avatar
+    public function deleteAvatar(Usuario $usuario)
+    {
+        $this->authorize('update', $usuario);
+
+        Log::info('Iniciando deleção manual do avatar', ['user_id' => $usuario->id]);
+
+        $deleted = $usuario->deleteOldAvatar();
+        $usuario->update(['avatar_url' => null]);
+
+        Log::info('Avatar removido manualmente', ['deleted' => $deleted, 'user_id' => $usuario->id]);
+
+        return back()->with('success', 'Foto de perfil removida com sucesso!');
+    }
 
     // ========== MÉTODOS PARA RECUPERAÇÃO DE SENHA COM TOKEN DE 6 DÍGITOS ==========
-    
+
     /**
      * Exibir formulário "Esqueci minha senha"
      */
@@ -276,15 +302,15 @@ public function deleteAvatar(Usuario $usuario)
         if (Usuario::isEmailBlocked($request->email)) {
             $usuario = Usuario::where('email', $request->email)->first();
             $minutesRemaining = $usuario->getBlockTimeRemaining();
-            
+
             return back()->withErrors([
                 'email' => "Muitas tentativas. Tente novamente em {$minutesRemaining} minutos."
             ]);
         }
 
         $usuario = Usuario::where('email', $request->email)
-                         ->where('status', 'ativo')
-                         ->first();
+            ->where('status', 'ativo')
+            ->first();
 
         if (!$usuario) {
             return back()->withErrors(['email' => 'Usuário não encontrado ou inativo.']);
@@ -296,7 +322,7 @@ public function deleteAvatar(Usuario $usuario)
         // Enviar email com token
         try {
             $this->sendResetTokenEmail($usuario, $token);
-            
+
             Log::info('Token de recuperação enviado', [
                 'email' => $request->email,
                 'user_id' => $usuario->id,
@@ -304,15 +330,14 @@ public function deleteAvatar(Usuario $usuario)
             ]);
 
             return redirect()->route('usuarios.verify.token.form')
-                           ->with('email', $request->email)
-                           ->with('status', 'Token de 6 dígitos enviado para seu email!');
-            
+                ->with('email', $request->email)
+                ->with('status', 'Token de 6 dígitos enviado para seu email!');
         } catch (\Exception $e) {
             Log::error('Erro ao enviar email com token', [
                 'error' => $e->getMessage(),
                 'email' => $request->email
             ]);
-            
+
             return back()->withErrors(['email' => 'Erro ao enviar email. Tente novamente.']);
         }
     }
@@ -324,7 +349,7 @@ public function deleteAvatar(Usuario $usuario)
     {
         if (!session('email')) {
             return redirect()->route('usuarios.forgot.form')
-                           ->withErrors(['error' => 'Sessão expirada. Solicite um novo token.']);
+                ->withErrors(['error' => 'Sessão expirada. Solicite um novo token.']);
         }
 
         return view('usuarios.verify-token');
@@ -345,8 +370,8 @@ public function deleteAvatar(Usuario $usuario)
         ]);
 
         $usuario = Usuario::where('email', $request->email)
-                         ->where('status', 'ativo')
-                         ->first();
+            ->where('status', 'ativo')
+            ->first();
 
         if (!$usuario) {
             return back()->withErrors(['token' => 'Usuário não encontrado.']);
@@ -363,7 +388,7 @@ public function deleteAvatar(Usuario $usuario)
         // Verificar se o token está correto e válido
         if (!$usuario->isValidResetToken($request->token)) {
             $usuario->incrementResetAttempts();
-            
+
             Log::warning('Token incorreto ou expirado', [
                 'email' => $request->email,
                 'token_provided' => $request->token,
@@ -371,7 +396,7 @@ public function deleteAvatar(Usuario $usuario)
             ]);
 
             return back()->withErrors(['token' => 'Código incorreto ou expirado.'])
-                        ->with('email', $request->email);
+                ->with('email', $request->email);
         }
 
         // Token válido - redirecionar para definir nova senha
@@ -381,8 +406,8 @@ public function deleteAvatar(Usuario $usuario)
         ]);
 
         return redirect()->route('usuarios.reset.password.form')
-                       ->with('verified_email', $request->email)
-                       ->with('verified_token', $request->token);
+            ->with('verified_email', $request->email)
+            ->with('verified_token', $request->token);
     }
 
     /**
@@ -392,7 +417,7 @@ public function deleteAvatar(Usuario $usuario)
     {
         if (!session('verified_email') || !session('verified_token')) {
             return redirect()->route('usuarios.forgot.form')
-                           ->withErrors(['error' => 'Sessão expirada. Comece o processo novamente.']);
+                ->withErrors(['error' => 'Sessão expirada. Comece o processo novamente.']);
         }
 
         return view('usuarios.reset-password');
@@ -414,8 +439,8 @@ public function deleteAvatar(Usuario $usuario)
         ]);
 
         $usuario = Usuario::where('email', $request->email)
-                         ->where('status', 'ativo')
-                         ->first();
+            ->where('status', 'ativo')
+            ->first();
 
         if (!$usuario) {
             return back()->withErrors(['password' => 'Usuário não encontrado.']);
@@ -424,7 +449,7 @@ public function deleteAvatar(Usuario $usuario)
         // Verificar token uma última vez
         if (!$usuario->isValidResetToken($request->token)) {
             return redirect()->route('usuarios.forgot.form')
-                           ->withErrors(['error' => 'Token inválido. Solicite um novo.']);
+                ->withErrors(['error' => 'Token inválido. Solicite um novo.']);
         }
 
         // Atualizar senha e limpar dados de reset
@@ -440,7 +465,7 @@ public function deleteAvatar(Usuario $usuario)
         session()->forget(['verified_email', 'verified_token', 'email']);
 
         return redirect()->route('usuarios.login')
-                        ->with('success', 'Senha alterada com sucesso! Faça login com sua nova senha.');
+            ->with('success', 'Senha alterada com sucesso! Faça login com sua nova senha.');
     }
 
     /**
@@ -451,8 +476,8 @@ public function deleteAvatar(Usuario $usuario)
         $request->validate(['email' => 'required|email']);
 
         $usuario = Usuario::where('email', $request->email)
-                         ->where('status', 'ativo')
-                         ->first();
+            ->where('status', 'ativo')
+            ->first();
 
         if (!$usuario) {
             return back()->withErrors(['email' => 'Usuário não encontrado.']);
@@ -471,14 +496,13 @@ public function deleteAvatar(Usuario $usuario)
 
         try {
             $this->sendResetTokenEmail($usuario, $token);
-            
+
             Log::info('Token reenviado', [
                 'email' => $request->email,
                 'user_id' => $usuario->id
             ]);
 
             return back()->with('status', 'Novo código enviado para seu email!');
-            
         } catch (\Exception $e) {
             Log::error('Erro ao reenviar token', ['error' => $e->getMessage()]);
             return back()->withErrors(['email' => 'Erro ao enviar email.']);
@@ -496,13 +520,9 @@ public function deleteAvatar(Usuario $usuario)
             'expires_at' => $usuario->reset_token_expires_at
         ];
 
-        Mail::send('emails.reset-token', $data, function($message) use ($usuario) {
+        Mail::send('emails.reset-token', $data, function ($message) use ($usuario) {
             $message->to($usuario->email, $usuario->username)
-                   ->subject('🔐 Código de Recuperação - Ambience RPG');
+                ->subject('🔐 Código de Recuperação - Ambience RPG');
         });
     }
-
-
-
-
 }

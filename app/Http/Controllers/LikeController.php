@@ -53,7 +53,7 @@ class LikeController extends Controller {
         return response()->json([
             'success' => true,
             'message' => 'Curtido com sucesso!',
-            'total_curtidas' => $post->total_curtidas()
+            'total_curtidas' => $post->curtidas()->count()
         ]);
     }
 
@@ -69,7 +69,7 @@ class LikeController extends Controller {
         return response()->json([
             'success' => true,
             'message' => 'Curtida removida!',
-            'total_curtidas' => $post->total_curtidas()
+            'total_curtidas' => $post->curtidas()->count()
         ]);
     }
 }

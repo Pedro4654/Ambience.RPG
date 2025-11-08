@@ -88,20 +88,19 @@
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
         <div class="grid grid-cols-4 gap-4 text-center">
             <div>
-                <p class="text-2xl font-bold text-red-500">{{ $post->total_curtidas }}</p>
-                <p class="text-gray-600 text-sm">Curtidas</p>
+               
+                <p class="text-gray-600 text-sm">Curtidas: </p>
+                 <p class="text-2xl font-bold text-red-500">{{ $post->curtidas()->count() }}</p>
             </div>
             <div>
-                <p class="text-2xl font-bold text-blue-500">{{ $post->total_comentarios }}</p>
-                <p class="text-gray-600 text-sm">Comentários</p>
+                
+                <p class="text-gray-600 text-sm">Comentários: </p>
+                <p class="text-2xl font-bold text-blue-500">{{ $post->comentarios()->count() }}</p>
             </div>
             <div>
-                <p class="text-2xl font-bold text-green-500">{{ $post->total_salvamentos }}</p>
-                <p class="text-gray-600 text-sm">Salvos</p>
-            </div>
-            <div>
-                <p class="text-2xl font-bold text-purple-500">{{ $post->visualizacoes }}</p>
-                <p class="text-gray-600 text-sm">Visualizações</p>
+                
+                <p class="text-gray-600 text-sm">Salvos: </p>
+                <p class="text-2xl font-bold text-green-500">{{ $post->salvos()->count() }}</p>
             </div>
         </div>
     </div>

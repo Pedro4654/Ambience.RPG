@@ -9,6 +9,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\CommentController;
 
+use App\Http\Controllers\ModerationController;
+
+
 /*
 |--------------------------------------------------------------------------
 | Rotas Web - Sistema Ambience RPG
@@ -21,22 +24,37 @@ use App\Http\Controllers\CommentController;
 
 // ==================== ROTA PADRÃO ====================
 Route::get('/', function () {
-    // Redirecionar usuários autenticados para o sistema de salas
-    if (auth()->check()) {
-        return redirect()->route('salas.index');
-    }
+    return view('home');
+})->name('home');
 
-    // Usuários não autenticados para login
-    return redirect()->route('usuarios.login');
+// Rotas públicas apenas para visitantes (se estiver logado, middleware redireciona para 'home')
+Route::middleware('guest.custom')->group(function () {
+    Route::get('/login', [UsuarioController::class, 'loginForm'])->name('usuarios.login');
+    Route::post('/login', [UsuarioController::class, 'login'])->name('usuarios.login.post');
+
+    Route::get('/cadastro', [UsuarioController::class, 'create'])->name('usuarios.create');
+    Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
+
+    // Recuperação de senha também como guest
+    Route::get('/esqueci-minha-senha', [UsuarioController::class, 'showForgotPasswordForm'])
+        ->name('usuarios.forgot.form');
+    Route::post('/enviar-token-recuperacao', [UsuarioController::class, 'sendResetToken'])
+        ->name('usuarios.forgot.send');
+    Route::get('/verificar-token', [UsuarioController::class, 'showVerifyTokenForm'])
+        ->name('usuarios.verify.token.form');
+    Route::post('/verificar-token', [UsuarioController::class, 'verifyToken'])
+        ->name('usuarios.verify.token');
+    Route::get('/definir-nova-senha', [UsuarioController::class, 'showResetPasswordForm'])
+        ->name('usuarios.reset.password.form');
+    Route::post('/redefinir-senha', [UsuarioController::class, 'resetPassword'])
+        ->name('usuarios.reset.password');
+    Route::post('/reenviar-token', [UsuarioController::class, 'resendToken'])
+        ->name('usuarios.resend.token');
 });
 
-// ==================== ROTAS PÚBLICAS (SEM AUTENTICAÇÃO) ====================
 
-// Rotas de autenticação
-Route::get('/login', [UsuarioController::class, 'loginForm'])->name('usuarios.login');
-Route::post('/login', [UsuarioController::class, 'login']);
-Route::get('/cadastro', [UsuarioController::class, 'create'])->name('usuarios.create');
-Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
+// Rotas de Moderação
+Route::post('/moderate', [ModerationController::class, 'moderate'])->name('moderate');
 
 // ========== ROTAS DE RECUPERAÇÃO DE SENHA COM TOKEN DE 6 DÍGITOS ==========
 Route::get('/esqueci-minha-senha', [UsuarioController::class, 'showForgotPasswordForm'])
@@ -255,6 +273,7 @@ Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->g
 
 
 
+
  // ============================================================
  // ROTAS DA COMUNIDADE (adicionar em routes/web.php)
  // ============================================================
@@ -292,6 +311,7 @@ Route::prefix('comunidade')->name('comunidade.')->group(function () {
     // ========== LIKES ==========
     Route::post('/curtir', [LikeController::class, 'store'])->name('curtir');
     Route::delete('/curtir/{post_id}', [LikeController::class, 'destroy'])->name('descurtir');
+    
     
     // ========== COMENTÁRIOS ==========
     Route::post('/comentar', [CommentController::class, 'store'])->name('comentar');

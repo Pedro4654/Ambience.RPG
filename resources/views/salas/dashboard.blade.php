@@ -32,6 +32,23 @@
     position: relative;
     margin-bottom: 10px;
   }
+
+  .input-warn {
+    border: 2px solid #e0556b !important;
+    background: #fff6f7;
+}
+
+.moderation-warning {
+    display: none;
+    color: #e0556b;
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
+.moderation-warning.show {
+    display: block;
+}
+
   .sala-banner-mini .banner-edit-btn {
     position: absolute;
     right: 8px;
@@ -1026,6 +1043,127 @@
             sistema = new SistemaSalas();
         });
     </script>
+
+<script src="{{ asset('js/moderation.js') }}" defer></script>
+
+<script>
+    // Inicialização da moderação de texto
+    async function initModeration() {
+        try {
+            // Inicializa o sistema de moderação
+            const state = await window.Moderation.init({
+                csrfToken: $('meta[name="csrf-token"]').attr('content'),
+                endpoint: '/moderate',
+                debounceMs: 120,
+                customWords: ['merda', 'bunda', 'caralho', 'porra', 'cu', 'buceta', 
+                             'viado', 'puta', 'safado', 'arrombado', 'babaca']
+            });
+
+            console.log('🛡️ Sistema de moderação inicializado:', state);
+
+            // Função auxiliar para aplicar avisos visuais
+            function applyWarning(selector, res) {
+                const el = document.querySelector(selector);
+                const warnId = selector.replace('#', '') + '-warning';
+                let warn = document.getElementById(warnId);
+                
+                if (!el) return;
+
+                // Criar elemento de aviso se não existir
+                if (!warn) {
+                    warn = document.createElement('small');
+                    warn.id = warnId;
+                    warn.className = 'moderation-warning';
+                    warn.textContent = 'Conteúdo inapropriado detectado';
+                    el.parentNode.appendChild(warn);
+                }
+
+                if (res && res.inappropriate) {
+                    el.classList.add('input-warn');
+                    warn.classList.add('show');
+                } else {
+                    el.classList.remove('input-warn');
+                    warn.classList.remove('show');
+                }
+            }
+
+            // Conectar campo nome da sala
+            window.Moderation.attachInput('#nomeSala', 'nome', {
+                onLocal: (res) => {
+                    applyWarning('#nomeSala', res);
+                    if (res.inappropriate) {
+                        console.warn('⚠️ Nome da sala com conteúdo inapropriado:', res.matches);
+                    }
+                },
+                onServer: (srv) => {
+                    if (srv && srv.data && srv.data.inappropriate) {
+                        applyWarning('#nomeSala', { inappropriate: true });
+                        console.warn('⚠️ Servidor detectou conteúdo inapropriado no nome');
+                    }
+                }
+            });
+
+            // Conectar campo descrição da sala
+            window.Moderation.attachInput('#descricaoSala', 'descricao', {
+                onLocal: (res) => {
+                    applyWarning('#descricaoSala', res);
+                    if (res.inappropriate) {
+                        console.warn('⚠️ Descrição com conteúdo inapropriado:', res.matches);
+                    }
+                },
+                onServer: (srv) => {
+                    if (srv && srv.data && srv.data.inappropriate) {
+                        applyWarning('#descricaoSala', { inappropriate: true });
+                        console.warn('⚠️ Servidor detectou conteúdo inapropriado na descrição');
+                    }
+                }
+            });
+
+            // Interceptar submit do formulário
+            const formHook = window.Moderation.attachFormSubmit('#formCriarSala', [
+                { selector: '#nomeSala', fieldName: 'nome' },
+                { selector: '#descricaoSala', fieldName: 'descricao' }
+            ]);
+
+            // Listener adicional para bloquear submit se houver conteúdo inapropriado
+            document.getElementById('formCriarSala').addEventListener('moderation:blocked', (e) => {
+                console.error('🚫 Formulário bloqueado por conteúdo inapropriado:', e.detail);
+                sistema.showAlert(
+                    'Conteúdo inapropriado detectado. Por favor, revise os campos marcados antes de criar a sala.', 
+                    'danger'
+                );
+            });
+
+            // Verificação adicional no submit do formulário
+            const originalCriarSala = sistema.criarSala.bind(sistema);
+            sistema.criarSala = function() {
+                // Verificar se há campos com avisos
+                const hasWarnings = document.querySelector('.input-warn');
+                if (hasWarnings) {
+                    sistema.showAlert(
+                        'Corrija os campos com conteúdo inapropriado antes de criar a sala.', 
+                        'warning'
+                    );
+                    return;
+                }
+                // Chamar função original
+                originalCriarSala();
+            };
+
+        } catch (error) {
+            console.error('❌ Erro ao inicializar moderação:', error);
+        }
+    }
+
+    // Inicializar quando o documento estiver pronto
+    $(document).ready(() => {
+        // Aguardar a inicialização do sistema de salas
+        setTimeout(() => {
+            initModeration();
+        }, 100);
+    });
+</script>
+    
     @include('partials.banner-editor')
     @include('partials.profile-photo-editor')
 </body>

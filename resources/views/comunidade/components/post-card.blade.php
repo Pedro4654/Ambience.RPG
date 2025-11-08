@@ -84,9 +84,8 @@
     <div class="bg-gray-50 px-4 py-3 border-t border-gray-200">
         <!-- Estatísticas -->
         <div class="flex gap-4 text-gray-600 text-sm mb-3">
-            <span>❤️ {{ $post->total_curtidas }} curtidas</span>
-            <span>💬 {{ $post->total_comentarios }} comentários</span>
-            <span>👁️ {{ $post->visualizacoes }} visualizações</span>
+            <span>❤️ {{ $post->curtidas()->count() }} curtidas</span>
+            <span>💬 {{ $post->comentarios()->count() }} comentários</span>
         </div>
 
         <!-- Botões de Ação -->
