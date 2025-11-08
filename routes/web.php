@@ -3,6 +3,11 @@
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\SalaController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\SavedPostController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\LikeController;
+use App\Http\Controllers\CommentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -247,7 +252,97 @@ Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->g
             return response()->json($permissoes);
         })->name('salas.permissoes')->where('id', '[0-9]+');
     });
+
+
+
+ // ============================================================
+ // ROTAS DA COMUNIDADE (adicionar em routes/web.php)
+ // ============================================================
+
+  // ==================== MÓDULO DE COMUNIDADE ====================
+
+Route::prefix('comunidade')->name('comunidade.')->group(function () {
+    
+    // Feed Principal
+    Route::get('/', [PostController::class, 'index'])->name('feed');
+    Route::get('/feed', [PostController::class, 'index'])->name('feed');
+    
+    // Buscar Postagens
+    Route::get('/buscar', [PostController::class, 'buscar'])->name('buscar');
+    
+    // Criar Postagem
+    Route::get('/criar', [PostController::class, 'create'])->name('create');
+    Route::post('/criar', [PostController::class, 'store'])->name('store');
+    
+    // Visualizar Postagem
+    Route::get('/{slug}', [PostController::class, 'show'])->name('post.show');
+    
+    // Editar Postagem
+    Route::get('/{id}/editar', [PostController::class, 'edit'])->name('post.edit');
+    Route::put('/{id}', [PostController::class, 'update'])->name('post.update');
+    
+    // Deletar Postagem
+    Route::delete('/{id}', [PostController::class, 'destroy'])->name('post.destroy');
+    
+    // ========== POSTS SALVOS ==========
+    Route::get('/salvos', [SavedPostController::class, 'index'])->name('salvos');
+    Route::post('/salvar', [SavedPostController::class, 'store'])->name('salvar');
+    Route::delete('/salvar/{post_id}', [SavedPostController::class, 'destroy'])->name('desalvar');
+    
+    // ========== LIKES ==========
+    Route::post('/curtir', [LikeController::class, 'store'])->name('curtir');
+    Route::delete('/curtir/{post_id}', [LikeController::class, 'destroy'])->name('descurtir');
+    
+    // ========== COMENTÁRIOS ==========
+    Route::post('/comentar', [CommentController::class, 'store'])->name('comentar');
+    Route::delete('/comentario/{id}', [CommentController::class, 'destroy'])->name('comentario.destroy');
 });
+
+// ==================== PERFIL DE USUÁRIO ====================
+
+Route::prefix('perfil')->name('perfil.')->group(function () {
+    
+    // Meu Perfil (Redireciona para perfil do usuário)
+    Route::get('/meu-perfil', [ProfileController::class, 'meu_perfil'])->name('meu');
+    
+    // Editar Perfil
+    Route::get('/editar', [ProfileController::class, 'editarPerfil'])->name('editar');
+    Route::put('/editar', [ProfileController::class, 'update'])->name('update');
+    
+    // Ver Perfil (Por username)
+    Route::get('/{username}', [ProfileController::class, 'show'])->name('show');
+    
+    // Seguir / Deixar de Seguir
+    Route::post('/{usuario_id}/seguir', [ProfileController::class, 'seguir'])->name('seguir');
+    Route::delete('/{usuario_id}/deixar-de-seguir', [ProfileController::class, 'deixar_de_seguir'])
+        ->name('deixar_de_seguir');
+    
+    // Seguidores e Seguindo
+    Route::get('/{usuario_id}/seguidores', [ProfileController::class, 'seguidores'])
+        ->name('seguidores');
+    Route::get('/{usuario_id}/seguindo', [ProfileController::class, 'seguindo'])
+        ->name('seguindo');
+});
+    
+});
+
+// API Routes para integração com frontend JavaScript/React
+
+Route::prefix('api/comunidade')->name('api.comunidade.')->middleware('auth')->group(function () {
+    Route::get('/feed', [\App\Http\Controllers\PostController::class, 'index']);
+    Route::post('/posts', [\App\Http\Controllers\PostController::class, 'store']);
+    Route::get('/posts/{slug}', [\App\Http\Controllers\PostController::class, 'show']);
+    Route::post('/likes', [\App\Http\Controllers\LikeController::class, 'store']);
+    Route::delete('/likes/{post_id}', [\App\Http\Controllers\LikeController::class, 'destroy']);
+    Route::post('/comments', [\App\Http\Controllers\CommentController::class, 'store']);
+    Route::post('/saved', [\App\Http\Controllers\SavedPostController::class, 'store']);
+    Route::delete('/saved/{post_id}', [\App\Http\Controllers\SavedPostController::class, 'destroy']);
+    Route::get('/saved', [\App\Http\Controllers\SavedPostController::class, 'index']);
+});
+
+
+
+
 
 /*
 |--------------------------------------------------------------------------
