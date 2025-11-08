@@ -338,4 +338,97 @@ class Usuario extends Authenticatable
     {
         return $this->nickname ?: $this->username;
     }
+
+
+      // ============================================================
+    // RELATIONSHIPS - COMUNIDADE
+    // ============================================================
+    
+    /**
+     * Posts do usuário
+     */
+    public function posts() {
+        return $this->hasMany(Post::class, 'usuario_id', 'id');
+    }
+    
+    /**
+     * Posts salvos pelo usuário
+     */
+    public function saved_posts() {
+        return $this->hasMany(SavedPost::class, 'usuario_id', 'id')
+            ->with('post');
+    }
+    
+    /**
+     * Curtidas feitas pelo usuário
+     */
+    public function curtidas() {
+        return $this->hasMany(Like::class, 'usuario_id', 'id');
+    }
+    
+    /**
+     * Comentários do usuário
+     */
+    public function comentarios() {
+        return $this->hasMany(Comment::class, 'usuario_id', 'id');
+    }
+    
+    /**
+     * Usuários que seguem este usuário
+     */
+    public function seguidores() {
+        return $this->hasMany(UserFollower::class, 'seguido_id', 'id')
+            ->with('seguidor');
+    }
+    
+    /**
+     * Usuários que este usuário segue
+     */
+    public function seguindo() {
+        return $this->hasMany(UserFollower::class, 'seguidor_id', 'id')
+            ->with('seguido');
+    }
+    
+    /**
+     * Relação many-to-many com posts salvos (alternativa)
+     */
+    public function posts_salvos() {
+        return $this->belongsToMany(
+            Post::class,
+            'saved_posts',
+            'usuario_id',
+            'post_id'
+        )->withTimestamps();
+    }
+    
+    /**
+     * Relação many-to-many de seguidores
+     */
+    public function followers() {
+        return $this->belongsToMany(
+            Usuario::class,
+            'user_followers',
+            'seguido_id',
+            'seguidor_id',
+            'id',
+            'id'
+        )->as('follower')
+         ->withTimestamps();
+    }
+    
+    /**
+     * Relação many-to-many de seguindo
+     */
+    public function following() {
+        return $this->belongsToMany(
+            Usuario::class,
+            'user_followers',
+            'seguidor_id',
+            'seguido_id',
+            'id',
+            'id'
+        )->as('following')
+         ->withTimestamps();
+    }
+
 }

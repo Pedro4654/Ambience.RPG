@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Broadcast; // ← ADICIONAR ESTE USE
 use App\Models\Usuario;
 use App\Policies\UsuarioPolicy;
+use App\Models\Post;
+use App\Policies\PostPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,4 +32,9 @@ class AppServiceProvider extends ServiceProvider
         // ADICIONE ESTAS LINHAS:
         Broadcast::routes(['middleware' => ['web', 'auth']]);
     }
+
+    protected $policies = [
+    Post::class => PostPolicy::class,
+];
+
 }
