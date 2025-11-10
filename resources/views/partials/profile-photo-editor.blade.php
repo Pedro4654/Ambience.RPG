@@ -1,31 +1,29 @@
 {{-- resources/views/partials/profile-photo-editor.blade.php --}}
-{{-- Mesmo padrão do editor de banner, ajustado para 1:1 e endpoints de foto de perfil --}}
-
 
 <!-- Cropper (mesma versão usada no banner) -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
+<!-- Módulos NSFW Detector (só carrega uma vez) -->
 
 <div class="modal fade" id="modalProfileEditor" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
-
 
       <div class="modal-header">
         <h5 class="modal-title">Editar Foto de Perfil (1:1)</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
       </div>
 
-
       <div class="modal-body">
         <div id="profileEditorMessageContainer" class="mb-2"></div>
 
+        <!-- ALERTA NSFW -->
+        <div id="profileNsfwAlert" style="display:none;"></div>
 
         <div class="mb-2 text-muted">
           A imagem precisa ser quadrada (1:1). Recomendado 500x500. Formatos: JPG/PNG. Máx 5MB.
         </div>
-
 
         <div class="row">
           <div class="col-md-8">
@@ -35,11 +33,9 @@
             </div>
           </div>
 
-
           <div class="col-md-4">
             <label class="form-label">Escolher arquivo (png/jpg - máx 5MB)</label>
             <input type="file" id="profileFileInput" accept="image/png,image/jpeg" class="form-control mb-2">
-
 
             <div class="mb-2">
               <h6>Pré-visualização</h6>
@@ -49,14 +45,12 @@
               </div>
             </div>
 
-
             <div class="mb-2">
               <button id="btnUploadProfile" class="btn btn-primary w-100" disabled>Salvar Foto</button>
               <button id="btnRemoveProfile" class="btn btn-outline-danger w-100 mt-2">Remover Foto</button>
             </div>
 
-
-            <!-- Confirmação de remoção (oculta até acionar) -->
+            <!-- Confirmação de remoção -->
             <div id="profileRemoveConfirm" class="mt-2" style="display:none;">
               <div class="alert alert-warning d-flex justify-content-between align-items-center mb-2" role="alert">
                 <div>Confirma remoção da foto de perfil desta sala?</div>
@@ -67,9 +61,7 @@
               </div>
             </div>
 
-
             <hr>
-
 
             <label class="form-label">Ou definir cor de fundo (hex)</label>
             <input type="text" id="profileColorInput" class="form-control" placeholder="aabbcc">
@@ -77,19 +69,18 @@
           </div>
         </div>
 
-
         <input type="hidden" id="profileSalaId" value="">
       </div>
     </div>
   </div>
 </div>
 
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   let cropper = null;
+  let currentFile = null;
+  let nsfwAnalysisResult = null;
 
-  // pega CSRF via meta
   const csrftoken = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
 
   const modalEl = document.getElementById('modalProfileEditor');
@@ -170,8 +161,15 @@ document.addEventListener('DOMContentLoaded', function () {
   window.openProfileEditor = function (salaId, photoUrl = null, photoColor = null) {
     salaIdInput.value = salaId;
     fileInput.value = '';
+    currentFile = null;
+    nsfwAnalysisResult = null;
+    
     if (cropper) { cropper.destroy(); cropper = null; }
     clearMessage();
+    // Limpa qualquer alerta visual do NSFW (se existir) — não mostramos detalhes ao usuário
+    if (window.NSFWAlert && typeof window.NSFWAlert.clear === 'function') {
+      NSFWAlert.clear('profileNsfwAlert');
+    }
     removeConfirm.style.display = 'none';
     btnUpload.disabled = true;
     colorInput.value = photoColor || '';
@@ -199,7 +197,33 @@ document.addEventListener('DOMContentLoaded', function () {
     return window.openProfileEditor(salaId, photoUrl, photoColor);
   };
 
-  fileInput.addEventListener('change', function (e) {
+  // === ANÁLISE NSFW (mensagens mínimas conforme solicitado) ===
+  async function analyzeImageNSFW(file) {
+    try {
+      // Não exibimos loading/percentuais/motivos para o usuário.
+      const result = await NSFWDetector.analyze(file);
+      nsfwAnalysisResult = result;
+
+      // Se bloqueado, desabilita upload e mostra apenas a mensagem solicitada.
+      if (result && result.isBlocked) {
+        btnUpload.disabled = true;
+        showMessage('danger', 'A imagem foi identificada como inapropriada. Se você acha que isso é um erro, contate o suporte.');
+      } else {
+        // Se for safe (ou não bloqueado), não mostramos nenhuma mensagem ao usuário e habilitamos o upload.
+        btnUpload.disabled = false;
+      }
+
+      return result;
+    } catch (error) {
+      // Em caso de erro na análise, não mostramos mensagem ao usuário — apenas permitimos o upload.
+      console.error('Erro na análise NSFW:', error);
+      btnUpload.disabled = false;
+      nsfwAnalysisResult = null;
+      return null;
+    }
+  }
+
+  fileInput.addEventListener('change', async function (e) {
     const f = e.target.files && e.target.files[0];
     if (!f) return;
 
@@ -212,6 +236,12 @@ document.addEventListener('DOMContentLoaded', function () {
       showMessage('danger', 'Arquivo muito grande. Máx 5MB.');
       this.value = '';
       return;
+    }
+
+    currentFile = f;
+    clearMessage();
+    if (window.NSFWAlert && typeof window.NSFWAlert.clear === 'function') {
+      NSFWAlert.clear('profileNsfwAlert');
     }
 
     const url = URL.createObjectURL(f);
@@ -230,8 +260,10 @@ document.addEventListener('DOMContentLoaded', function () {
       crop() { updatePreview(); },
     });
 
-    btnUpload.disabled = false;
-    clearMessage();
+    btnUpload.disabled = true;
+
+    // ANALISAR NSFW — se for safe, não mostramos nada; se bloqueado, mostramos a mensagem curta.
+    await analyzeImageNSFW(f);
   });
 
   function updatePreview() {
@@ -261,56 +293,56 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   btnUpload.addEventListener('click', async function () {
-  if (!cropper) { showMessage('danger', 'Nenhuma imagem selecionada.'); return; }
+    if (!cropper) { showMessage('danger', 'Nenhuma imagem selecionada.'); return; }
 
-  const salaId = salaIdInput.value;
-  const canvas = cropper.getCroppedCanvas({ width: 800, height: 800 });
-  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
-  if (!blob) { showMessage('danger', 'Erro ao processar a imagem.'); return; }
-
-  const fd = new FormData();
-  // campo _token para Laravel
-  fd.append('_token', csrftoken);
-  // **NOME CORRIGIDO DO CAMPO**: backend espera 'profile_photo'
-  fd.append('profile_photo', blob, 'profile.jpg');
-
-  // Debug rápido: lista os nomes/valores do FormData no console (apenas durante testes)
-  for (const pair of fd.entries()) {
-    console.debug('[ProfileUpload] FormData:', pair[0], pair[1]);
-  }
-
-  try {
-    const res = await fetch(`/salas/${salaId}/profile-photo`, {
-      method: 'POST',
-      credentials: 'same-origin',
-      body: fd,
-      headers: {
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    });
-
-    if (handleCommonHttpStatuses(res.status)) return;
-
-    const parsed = await parseJsonSafe(res);
-    if (parsed && parsed.__unexpected_text) {
-      console.error('Resposta inesperada (HTML):', parsed.text);
-      showMessage('danger', 'Resposta inesperada do servidor (HTML). Verifique sessão/rota/erros.');
+    // Verificar se análise NSFW bloqueou
+    if (nsfwAnalysisResult && nsfwAnalysisResult.isBlocked) {
+      // Mensagem conforme solicitado (apenas uma mensagem curta)
+      showMessage('danger', 'A imagem foi identificada como inapropriada. Se você acha que isso é um erro, contate o suporte.');
       return;
     }
 
-    const json = parsed;
-    if (res.ok && json.success) {
-      showMessage('success', 'Foto salva!');
-      setTimeout(() => { modal.hide(); location.reload(); }, 700);
-    } else {
-      showMessage('danger', json.message || 'Erro ao salvar foto.');
+    const salaId = salaIdInput.value;
+    const canvas = cropper.getCroppedCanvas({ width: 800, height: 800 });
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+    if (!blob) { showMessage('danger', 'Erro ao processar a imagem.'); return; }
+
+    const fd = new FormData();
+    fd.append('_token', csrftoken);
+    fd.append('profile_photo', blob, 'profile.jpg');
+
+    try {
+      const res = await fetch(`/salas/${salaId}/profile-photo`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: fd,
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+
+      if (handleCommonHttpStatuses(res.status)) return;
+
+      const parsed = await parseJsonSafe(res);
+      if (parsed && parsed.__unexpected_text) {
+        console.error('Resposta inesperada (HTML):', parsed.text);
+        showMessage('danger', 'Resposta inesperada do servidor (HTML). Verifique sessão/rota/erros.');
+        return;
+      }
+
+      const json = parsed;
+      if (res.ok && json.success) {
+        showMessage('success', 'Foto salva!');
+        setTimeout(() => { modal.hide(); location.reload(); }, 700);
+      } else {
+        showMessage('danger', json.message || 'Erro ao salvar foto.');
+      }
+    } catch (e) {
+      console.error(e);
+      showMessage('danger', 'Erro de rede ao enviar foto.');
     }
-  } catch (e) {
-    console.error(e);
-    showMessage('danger', 'Erro de rede ao enviar foto.');
-  }
-});
+  });
 
   btnRemove.addEventListener('click', function () {
     clearMessage();
@@ -370,49 +402,49 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   btnSetColor.addEventListener('click', async function () {
-  const salaId = salaIdInput.value;
-  let color = colorInput.value.trim();
+    const salaId = salaIdInput.value;
+    let color = colorInput.value.trim();
 
-  if (!/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.test(color)) {
-    showMessage('danger', 'Hex inválido. Ex.: #aabbcc ou aabbcc');
-    return;
-  }
-
-  if (!color.startsWith('#')) color = '#' + color;
-
-  try {
-    const res = await fetch(`/salas/${salaId}/profile-photo/color`, {   // <-- ROTA CORRIGIDA
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': csrftoken,
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      body: JSON.stringify({ color })
-    });
-
-    if (handleCommonHttpStatuses(res.status)) return;
-
-    const parsed = await parseJsonSafe(res);
-    if (parsed && parsed.__unexpected_text) {
-      console.error('Resposta inesperada (HTML):', parsed.text);
-      showMessage('danger', 'Resposta inesperada ao salvar cor. Verifique o console/rede.');
+    if (!/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.test(color)) {
+      showMessage('danger', 'Hex inválido. Ex.: #aabbcc ou aabbcc');
       return;
     }
 
-    const json = parsed;
-    if (res.ok && json.success) {
-      showMessage('success', 'Cor salva.');
-      setTimeout(() => { modal.hide(); location.reload(); }, 700);
-    } else {
-      showMessage('danger', json.message || 'Erro ao salvar cor.');
+    if (!color.startsWith('#')) color = '#' + color;
+
+    try {
+      const res = await fetch(`/salas/${salaId}/profile-photo/color`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrftoken,
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ color })
+      });
+
+      if (handleCommonHttpStatuses(res.status)) return;
+
+      const parsed = await parseJsonSafe(res);
+      if (parsed && parsed.__unexpected_text) {
+        console.error('Resposta inesperada (HTML):', parsed.text);
+        showMessage('danger', 'Resposta inesperada ao salvar cor. Verifique o console/rede.');
+        return;
+      }
+
+      const json = parsed;
+      if (res.ok && json.success) {
+        showMessage('success', 'Cor salva.');
+        setTimeout(() => { modal.hide(); location.reload(); }, 700);
+      } else {
+        showMessage('danger', json.message || 'Erro ao salvar cor.');
+      }
+    } catch (e) {
+      console.error(e);
+      showMessage('danger', 'Erro de rede.');
     }
-  } catch (e) {
-    console.error(e);
-    showMessage('danger', 'Erro de rede.');
-  }
-});
+  });
 });
 </script>
