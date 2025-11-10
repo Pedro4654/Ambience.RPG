@@ -989,5 +989,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
 @include('partials.banner-editor')
 @include('partials.profile-photo-editor')
+<!-- nsfwjs já traz o TF necessário (minified UMD) -->
+<script src="https://unpkg.com/nsfwjs@2.4.2/dist/nsfwjs.min.js"></script>
+
+<!-- depois seus scripts que usam nsfw (nsfw-detector.js, nsfw-alert.js) -->
+<script src="{{ asset('js/nsfw-detector.js') }}"></script>
+<script src="{{ asset('js/nsfw-alert.js') }}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    // Proteção: não pre-carrega se a conexão for péssima ou o usuário pediu economia de dados
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (conn && (conn.saveData || /2g/.test(conn.effectiveType || ''))) {
+      console.log('Pulando pre-load do modelo (conexão lenta / save-data).');
+      return;
+    }
+    // Informa visualmente (opcional)
+    if (window.NSFWAlert) window.NSFWAlert.showLoading('profileNsfwAlert', 'Pré-carregando modelo NSFW...');
+    // Inicia load (usa o modelPath já configurado no seu nsfw-detector.js)
+    window.NSFWDetector.loadModel()
+      .then(() => {
+        console.log('Modelo NSFW pré-carregado.');
+        if (window.NSFWAlert) window.NSFWAlert.clear('profileNsfwAlert');
+      })
+      .catch(err => {
+        console.warn('Falha ao pré-carregar modelo NSFW:', err);
+        if (window.NSFWAlert) window.NSFWAlert.showError('profileNsfwAlert', 'Falha ao pré-carregar modelo.');
+      });
+  } catch (e) { console.warn('Erro no preloader NSFW:', e); }
+});
+</script>
 </body>
 </html>
