@@ -9,6 +9,8 @@
     <!-- Bootstrap CSS e Font Awesome (opcional, mantenha se já usa no projeto) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script>
+
 
 
     <!-- Vite: carrega app.tsx que importa bootstrap.ts (define window.Echo) -->
@@ -175,6 +177,12 @@
                 <a href="{{ route('salas.index') }}" class="btn btn-outline-secondary">
                     <i class="fa-solid fa-arrow-left me-1"></i> Voltar às Salas
                 </a>
+
+                @if((int)auth()->id() === (int)$sala->criador_id || ($minhas_permissoes && $minhas_permissoes->pode_convidar_usuarios))
+        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#inviteLinksModal">
+            <i class="fa-solid fa-link me-1"></i> Links de Convite
+        </button>
+    @endif
 
 
                 @if($meu_papel !== 'mestre' && $sala->criador_id !== auth()->id())
@@ -989,6 +997,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 @include('partials.banner-editor')
 @include('partials.profile-photo-editor')
+@include('partials.invite-links-manager')
 <!-- nsfwjs já traz o TF necessário (minified UMD) -->
 <script src="https://unpkg.com/nsfwjs@2.4.2/dist/nsfwjs.min.js"></script>
 
