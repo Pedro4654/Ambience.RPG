@@ -9,6 +9,7 @@ use App\Models\ParticipanteSessao;
 use App\Models\ParticipanteSala;
 use App\Models\PermissaoSala;
 use App\Models\ConviteSala;
+use App\Models\LinkConviteSala;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -1371,6 +1372,501 @@ public function uploadBanner(Request $request, $id)
     }
 }
 
+
+/**
+ * Criar novo link de convite para sala
+ * POST /salas/{id}/links-convite
+ */
+public function criarLinkConvite(Request $request, $id)
+{
+    try {
+        $userId = Auth::id();
+        $sala = Sala::findOrFail($id);
+
+        // Verificar se é criador ou tem permissão
+        $ehCriador = (int)$sala->criador_id === (int)$userId;
+        $permissao = PermissaoSala::where('sala_id', $id)
+            ->where('usuario_id', $userId)
+            ->first();
+
+        if (!$ehCriador && (!$permissao || !$permissao->pode_convidar_usuarios)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Você não tem permissão para criar links de convite.'
+            ], 403);
+        }
+
+        // Validar entrada
+        $validated = $request->validate([
+            'validade' => 'required|in:1h,1d,1w,1m,never',
+            'max_usos' => 'nullable|integer|min:1|max:1000'
+        ]);
+
+        // Calcular data de expiração
+        $dataExpiracao = null;
+        switch ($validated['validade']) {
+            case '1h':
+                $dataExpiracao = now()->addHour();
+                break;
+            case '1d':
+                $dataExpiracao = now()->addDay();
+                break;
+            case '1w':
+                $dataExpiracao = now()->addWeek();
+                break;
+            case '1m':
+                $dataExpiracao = now()->addMonth();
+                break;
+            case 'never':
+                $dataExpiracao = null;
+                break;
+        }
+
+        // Criar link
+        $link = LinkConviteSala::create([
+            'sala_id' => $id,
+            'criador_id' => $userId,
+            'codigo' => LinkConviteSala::gerarCodigoUnico(),
+            'max_usos' => $validated['max_usos'] ?? null,
+            'usos_atual' => 0,
+            'data_criacao' => now(),
+            'data_expiracao' => $dataExpiracao,
+            'ativo' => true
+        ]);
+
+        Log::info('Link de convite criado', [
+            'link_id' => $link->id,
+            'sala_id' => $id,
+            'criador_id' => $userId,
+            'codigo' => $link->codigo
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Link de convite criado com sucesso!',
+            'link' => [
+                'id' => $link->id,
+                'codigo' => $link->codigo,
+                'url' => $link->getLinkCompleto(),
+                'validade' => $link->getTempoRestante(),
+                'max_usos' => $link->max_usos,
+                'usos_atual' => $link->usos_atual,
+                'criado_em' => $link->data_criacao->format('d/m/Y H:i')
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Erro ao criar link de convite', [
+            'error' => $e->getMessage(),
+            'sala_id' => $id,
+            'user_id' => Auth::id()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro ao criar link de convite.'
+        ], 500);
+    }
+}
+
+/**
+ * Listar links de convite ativos da sala - VERSÃO SIMPLIFICADA
+ * GET /salas/{id}/links-convite
+ */
+public function listarLinksConvite($id)
+{
+    try {
+        $userId = Auth::id();
+
+        // Verificar acesso
+        $participante = ParticipanteSala::where('sala_id', $id)
+            ->where('usuario_id', $userId)
+            ->where('ativo', true)
+            ->exists();
+
+        if (!$participante) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Você não tem acesso a esta sala.'
+            ], 403);
+        }
+
+        // Buscar links com JOIN manual para evitar problemas
+        $links = \DB::table('links_convite_sala as lcs')
+            ->leftJoin('usuarios as u', 'u.id', '=', 'lcs.criador_id')
+            ->where('lcs.sala_id', $id)
+            ->where('lcs.ativo', true)
+            ->select(
+                'lcs.id',
+                'lcs.codigo',
+                'lcs.max_usos',
+                'lcs.usos_atual',
+                'lcs.data_criacao',
+                'lcs.data_expiracao',
+                'u.username as criador_username'
+            )
+            ->orderBy('lcs.data_criacao', 'desc')
+            ->get()
+            ->map(function ($link) {
+                // Calcular URL completo
+                $url = url("/convite/{$link->codigo}");
+
+                // Calcular validade
+                $validade = 'Nunca expira';
+                if ($link->data_expiracao) {
+                    $expiracao = \Carbon\Carbon::parse($link->data_expiracao);
+                    if ($expiracao->isPast()) {
+                        $validade = 'Expirado';
+                    } else {
+                        $validade = $expiracao->diffForHumans();
+                    }
+                }
+
+                // Calcular usos restantes
+                $usosRestantes = null;
+                if ($link->max_usos) {
+                    $usosRestantes = max(0, $link->max_usos - $link->usos_atual);
+                }
+
+                // Verificar se está válido
+                $estaValido = true;
+                if ($link->data_expiracao && \Carbon\Carbon::parse($link->data_expiracao)->isPast()) {
+                    $estaValido = false;
+                }
+                if ($link->max_usos && $link->usos_atual >= $link->max_usos) {
+                    $estaValido = false;
+                }
+
+                return [
+                    'id' => $link->id,
+                    'codigo' => $link->codigo,
+                    'url' => $url,
+                    'criador' => $link->criador_username ?? 'Desconhecido',
+                    'validade' => $validade,
+                    'max_usos' => $link->max_usos,
+                    'usos_atual' => $link->usos_atual,
+                    'usos_restantes' => $usosRestantes,
+                    'criado_em' => \Carbon\Carbon::parse($link->data_criacao)->format('d/m/Y H:i'),
+                    'esta_valido' => $estaValido
+                ];
+            });
+
+        Log::info('Links de convite listados', [
+            'sala_id' => $id,
+            'total' => $links->count()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'links' => $links
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Erro ao listar links', [
+            'error' => $e->getMessage(),
+            'line' => $e->getLine(),
+            'file' => $e->getFile(),
+            'sala_id' => $id
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro ao buscar links: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+/**
+ * Revogar (deletar) link de convite
+ * DELETE /salas/{id}/links-convite/{linkId}
+ */
+public function revogarLinkConvite($id, $linkId)
+{
+    try {
+        $userId = Auth::id();
+        $sala = Sala::findOrFail($id);
+        $link = LinkConviteSala::findOrFail($linkId);
+
+        // Verificar se o link pertence à sala
+        if ($link->sala_id != $id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Link não pertence a esta sala.'
+            ], 400);
+        }
+
+        // Verificar se é criador da sala, criador do link, ou tem permissão
+        $ehCriadorSala = (int)$sala->criador_id === (int)$userId;
+        $ehCriadorLink = (int)$link->criador_id === (int)$userId;
+        
+        $permissao = PermissaoSala::where('sala_id', $id)
+            ->where('usuario_id', $userId)
+            ->first();
+
+        $temPermissao = $permissao && $permissao->pode_convidar_usuarios;
+
+        if (!$ehCriadorSala && !$ehCriadorLink && !$temPermissao) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Você não tem permissão para revogar este link.'
+            ], 403);
+        }
+
+        // Revogar link
+        $link->revogar();
+
+        Log::info('Link de convite revogado', [
+            'link_id' => $linkId,
+            'sala_id' => $id,
+            'revogado_por' => $userId
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Link de convite revogado com sucesso!'
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Erro ao revogar link de convite', [
+            'error' => $e->getMessage(),
+            'sala_id' => $id,
+            'link_id' => $linkId,
+            'user_id' => Auth::id()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro ao revogar link.'
+        ], 500);
+    }
+}
+
+/**
+ * Exibir página de convite (estilo Discord)
+ * GET /convite/{codigo}
+ */
+public function mostrarConvite($codigo)
+{
+    try {
+        // Buscar link
+        $link = LinkConviteSala::where('codigo', $codigo)
+            ->with([
+                'sala.criador',
+                'sala.participantes' => function ($query) {
+                    $query->where('ativo', true);
+                }
+            ])
+            ->first();
+
+        if (!$link) {
+            return view('convites.invalido', [
+                'mensagem' => 'Link de convite não encontrado.'
+            ]);
+        }
+
+        $sala = $link->sala;
+
+        // Verificar se o link ainda é válido
+        if (!$link->estaValido()) {
+            $motivo = 'expirado';
+            if ($link->expirou()) {
+                $motivo = 'expirado por tempo';
+            } elseif ($link->max_usos && $link->usos_atual >= $link->max_usos) {
+                $motivo = 'limite de usos atingido';
+            } elseif (!$link->ativo) {
+                $motivo = 'revogado';
+            }
+
+            return view('convites.invalido', [
+                'mensagem' => 'Este link de convite está inválido.',
+                'motivo' => $motivo,
+                'sala' => $sala
+            ]);
+        }
+
+        // Se não estiver logado, salvar o código na sessão e redirecionar para login
+        if (!Auth::check()) {
+            session(['redirect_after_login' => "/convite/{$codigo}"]);
+            return redirect()->route('usuarios.login')
+                ->with('info', 'Faça login para aceitar o convite.');
+        }
+
+        $userId = Auth::id();
+
+        // Verificar se já é participante
+        $jaParticipa = ParticipanteSala::where('sala_id', $sala->id)
+            ->where('usuario_id', $userId)
+            ->where('ativo', true)
+            ->exists();
+
+        if ($jaParticipa) {
+            return redirect()->route('salas.show', ['id' => $sala->id])
+                ->with('info', 'Você já participa desta sala!');
+        }
+
+        // Dados para a view
+        $dados = [
+            'sala' => $sala,
+            'link' => $link,
+            'num_membros' => $sala->participantes->count(),
+            'data_criacao' => $sala->data_criacao->format('d/m/Y'),
+            'codigo' => $codigo
+        ];
+
+        return view('convites.mostrar', $dados);
+
+    } catch (\Exception $e) {
+        Log::error('Erro ao mostrar convite', [
+            'error' => $e->getMessage(),
+            'codigo' => $codigo
+        ]);
+
+        return view('convites.invalido', [
+            'mensagem' => 'Erro ao processar convite.'
+        ]);
+    }
+}
+
+/**
+ * Aceitar convite via link
+ * POST /convite/{codigo}/aceitar
+ */
+/**
+ * Aceitar convite via link
+ * POST /convite/{codigo}/aceitar
+ */
+/**
+ * Aceitar convite via link
+ * POST /convite/{codigo}/aceitar
+ */
+public function aceitarConviteLink(Request $request, $codigo)
+{
+    try {
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Você precisa estar logado.',
+                'redirect_to' => route('usuarios.login')
+            ], 401);
+        }
+
+        $userId = Auth::id();
+
+        // Buscar link válido
+        $link = LinkConviteSala::buscarValidoPorCodigo($codigo);
+
+        if (!$link) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Link de convite inválido ou expirado.'
+            ], 400);
+        }
+
+        $sala = $link->sala;
+
+        // Verificar se já é participante ATIVO
+        $jaParticipa = ParticipanteSala::where('sala_id', $sala->id)
+            ->where('usuario_id', $userId)
+            ->where('ativo', true)
+            ->exists();
+
+        if ($jaParticipa) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Você já participa desta sala!',
+                'redirect_to' => route('salas.show', ['id' => $sala->id])
+            ]);
+        }
+
+        // Verificar limite de participantes
+        if ($sala->estaLotada()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Esta sala está lotada.'
+            ], 400);
+        }
+
+        // Buscar participante existente (mesmo que inativo) para reativar
+        $participante = ParticipanteSala::where('sala_id', $sala->id)
+            ->where('usuario_id', $userId)
+            ->first();
+
+        if ($participante) {
+            // Reativar participante existente
+            $participante->ativo = true;
+            $participante->data_entrada = now();
+            if (empty($participante->papel)) {
+                $participante->papel = 'membro';
+            }
+            $participante->save();
+        } else {
+            // Criar novo participante (somente se não existir nenhum registro)
+            ParticipanteSala::create([
+                'sala_id' => $sala->id,
+                'usuario_id' => $userId,
+                'papel' => 'membro',
+                'data_entrada' => now(),
+                'ativo' => true
+            ]);
+        }
+
+        // Criar permissões padrão (somente se não existir)
+        $permExists = PermissaoSala::where('sala_id', $sala->id)
+            ->where('usuario_id', $userId)
+            ->exists();
+
+        if (!$permExists) {
+            PermissaoSala::create([
+                'sala_id' => $sala->id,
+                'usuario_id' => $userId,
+                'pode_criar_conteudo' => true,
+                'pode_editar_grid' => false,
+                'pode_iniciar_sessao' => false,
+                'pode_moderar_chat' => false,
+                'pode_convidar_usuarios' => false
+            ]);
+        }
+
+        // Incrementar uso do link
+        $link->incrementarUso();
+
+        Log::info('Convite aceito via link', [
+            'user_id' => $userId,
+            'sala_id' => $sala->id,
+            'link_id' => $link->id,
+            'codigo' => $codigo,
+            'reativado' => isset($participante) && $participante->wasChanged()
+        ]);
+
+        // Disparar evento WebSocket (se configurado)
+        try {
+            // CORREÇÃO: Buscar o objeto Usuario completo e passar na ordem correta
+            $usuario = Usuario::find($userId);
+            broadcast(new \App\Events\UserJoinedRoom($usuario, $sala))->toOthers();
+        } catch (\Exception $e) {
+            Log::warning('Erro ao disparar evento de entrada', ['error' => $e->getMessage()]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Bem-vindo(a) à sala {$sala->nome}!",
+            'redirect_to' => route('salas.show', ['id' => $sala->id])
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Erro ao aceitar convite via link', [
+            'error' => $e->getMessage(),
+            'codigo' => $codigo,
+            'user_id' => Auth::id()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro ao aceitar convite.'
+        ], 500);
+    }
+}
+
 /**
  * Definir cor fallback do banner (hex).
  */
@@ -1585,8 +2081,7 @@ public function removeProfilePhoto(Request $request, $id)
                     'tipo' => $sala->tipo,
                     'participantes_atuais' => $participantesAtivos,
                     'max_participantes' => $sala->max_participantes,
-                    'precisa_senha' => $sala->tipo === 'privada',
-                    'apenas_convite' => $sala->tipo === 'apenas_convite'
+                    'precisa_senha' => $sala->tipo === 'privada'
                 ]
             ]);
         } catch (\Exception $e) {

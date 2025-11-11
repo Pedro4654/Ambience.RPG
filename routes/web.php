@@ -52,6 +52,27 @@ Route::middleware('guest.custom')->group(function () {
         ->name('usuarios.resend.token');
 });
 
+// ========== ROTAS PÚBLICAS DE CONVITE (FORA DO MIDDLEWARE AUTH) ==========
+
+/**
+ * Exibir página de convite (estilo Discord)
+ * GET /convite/{codigo}
+ * Rota pública - não requer autenticação para visualizar
+ */
+Route::get('/convite/{codigo}', [SalaController::class, 'mostrarConvite'])
+    ->name('convite.mostrar')
+    ->where('codigo', '[a-zA-Z0-9]{10}');
+
+/**
+ * Aceitar convite via link
+ * POST /convite/{codigo}/aceitar
+ * Requer autenticação
+ */
+Route::post('/convite/{codigo}/aceitar', [SalaController::class, 'aceitarConviteLink'])
+    ->middleware('auth')
+    ->name('convite.aceitar')
+    ->where('codigo', '[a-zA-Z0-9]{10}');
+
 
 // Rotas de Moderação
 Route::post('/moderate', [ModerationController::class, 'moderate'])->name('moderate');
@@ -203,6 +224,33 @@ Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->g
     Route::post('/salas/{id}/sair', [SalaController::class, 'sairSala'])->name('salas.sair')
         ->where('id', '[0-9]+');
 
+
+    // ========== ROTAS DE LINKS DE CONVITE (ESTILO DISCORD) ==========
+
+    /**
+     * Criar novo link de convite
+     * POST /salas/{id}/links-convite
+     */
+    Route::post('/salas/{id}/links-convite', [SalaController::class, 'criarLinkConvite'])
+        ->name('salas.links-convite.criar')
+        ->where('id', '[0-9]+');
+
+    /**
+     * Listar links de convite ativos da sala
+     * GET /salas/{id}/links-convite
+     */
+    Route::get('/salas/{id}/links-convite', [SalaController::class, 'listarLinksConvite'])
+        ->name('salas.links-convite.listar')
+        ->where('id', '[0-9]+');
+
+    /**
+     * Revogar (deletar) link de convite
+     * DELETE /salas/{id}/links-convite/{linkId}
+     */
+    Route::delete('/salas/{id}/links-convite/{linkId}', [SalaController::class, 'revogarLinkConvite'])
+        ->name('salas.links-convite.revogar')
+        ->where(['id' => '[0-9]+', 'linkId' => '[0-9]+']);
+
     /**
      * Sistema de convites para salas
      * POST /salas/{id}/convidar - Gera convite com token único e expiração
@@ -274,76 +322,75 @@ Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->g
 
 
 
- // ============================================================
- // ROTAS DA COMUNIDADE (adicionar em routes/web.php)
- // ============================================================
+    // ============================================================
+    // ROTAS DA COMUNIDADE (adicionar em routes/web.php)
+    // ============================================================
 
-  // ==================== MÓDULO DE COMUNIDADE ====================
+    // ==================== MÓDULO DE COMUNIDADE ====================
 
-Route::prefix('comunidade')->name('comunidade.')->group(function () {
-    
-    // Feed Principal
-    Route::get('/', [PostController::class, 'index'])->name('feed');
-    Route::get('/feed', [PostController::class, 'index'])->name('feed');
-    
-    // Buscar Postagens
-    Route::get('/buscar', [PostController::class, 'buscar'])->name('buscar');
-    
-    // Criar Postagem
-    Route::get('/criar', [PostController::class, 'create'])->name('create');
-    Route::post('/criar', [PostController::class, 'store'])->name('store');
-    
-    // Visualizar Postagem
-    Route::get('/{slug}', [PostController::class, 'show'])->name('post.show');
-    
-    // Editar Postagem
-    Route::get('/{id}/editar', [PostController::class, 'edit'])->name('post.edit');
-    Route::put('/{id}', [PostController::class, 'update'])->name('post.update');
-    
-    // Deletar Postagem
-    Route::delete('/{id}', [PostController::class, 'destroy'])->name('post.destroy');
-    
-    // ========== POSTS SALVOS ==========
-    Route::get('/salvos', [SavedPostController::class, 'index'])->name('salvos');
-    Route::post('/salvar', [SavedPostController::class, 'store'])->name('salvar');
-    Route::delete('/salvar/{post_id}', [SavedPostController::class, 'destroy'])->name('desalvar');
-    
-    // ========== LIKES ==========
-    Route::post('/curtir', [LikeController::class, 'store'])->name('curtir');
-    Route::delete('/curtir/{post_id}', [LikeController::class, 'destroy'])->name('descurtir');
-    
-    
-    // ========== COMENTÁRIOS ==========
-    Route::post('/comentar', [CommentController::class, 'store'])->name('comentar');
-    Route::delete('/comentario/{id}', [CommentController::class, 'destroy'])->name('comentario.destroy');
-});
+    Route::prefix('comunidade')->name('comunidade.')->group(function () {
 
-// ==================== PERFIL DE USUÁRIO ====================
+        // Feed Principal
+        Route::get('/', [PostController::class, 'index'])->name('feed');
+        Route::get('/feed', [PostController::class, 'index'])->name('feed');
 
-Route::prefix('perfil')->name('perfil.')->group(function () {
-    
-    // Meu Perfil (Redireciona para perfil do usuário)
-    Route::get('/meu-perfil', [ProfileController::class, 'meu_perfil'])->name('meu');
-    
-    // Editar Perfil
-    Route::get('/editar', [ProfileController::class, 'editarPerfil'])->name('editar');
-    Route::put('/editar', [ProfileController::class, 'update'])->name('update');
-    
-    // Ver Perfil (Por username)
-    Route::get('/{username}', [ProfileController::class, 'show'])->name('show');
-    
-    // Seguir / Deixar de Seguir
-    Route::post('/{usuario_id}/seguir', [ProfileController::class, 'seguir'])->name('seguir');
-    Route::delete('/{usuario_id}/deixar-de-seguir', [ProfileController::class, 'deixar_de_seguir'])
-        ->name('deixar_de_seguir');
-    
-    // Seguidores e Seguindo
-    Route::get('/{usuario_id}/seguidores', [ProfileController::class, 'seguidores'])
-        ->name('seguidores');
-    Route::get('/{usuario_id}/seguindo', [ProfileController::class, 'seguindo'])
-        ->name('seguindo');
-});
-    
+        // Buscar Postagens
+        Route::get('/buscar', [PostController::class, 'buscar'])->name('buscar');
+
+        // Criar Postagem
+        Route::get('/criar', [PostController::class, 'create'])->name('create');
+        Route::post('/criar', [PostController::class, 'store'])->name('store');
+
+        // Visualizar Postagem
+        Route::get('/{slug}', [PostController::class, 'show'])->name('post.show');
+
+        // Editar Postagem
+        Route::get('/{id}/editar', [PostController::class, 'edit'])->name('post.edit');
+        Route::put('/{id}', [PostController::class, 'update'])->name('post.update');
+
+        // Deletar Postagem
+        Route::delete('/{id}', [PostController::class, 'destroy'])->name('post.destroy');
+
+        // ========== POSTS SALVOS ==========
+        Route::get('/salvos', [SavedPostController::class, 'index'])->name('salvos');
+        Route::post('/salvar', [SavedPostController::class, 'store'])->name('salvar');
+        Route::delete('/salvar/{post_id}', [SavedPostController::class, 'destroy'])->name('desalvar');
+
+        // ========== LIKES ==========
+        Route::post('/curtir', [LikeController::class, 'store'])->name('curtir');
+        Route::delete('/curtir/{post_id}', [LikeController::class, 'destroy'])->name('descurtir');
+
+
+        // ========== COMENTÁRIOS ==========
+        Route::post('/comentar', [CommentController::class, 'store'])->name('comentar');
+        Route::delete('/comentario/{id}', [CommentController::class, 'destroy'])->name('comentario.destroy');
+    });
+
+    // ==================== PERFIL DE USUÁRIO ====================
+
+    Route::prefix('perfil')->name('perfil.')->group(function () {
+
+        // Meu Perfil (Redireciona para perfil do usuário)
+        Route::get('/meu-perfil', [ProfileController::class, 'meu_perfil'])->name('meu');
+
+        // Editar Perfil
+        Route::get('/editar', [ProfileController::class, 'editarPerfil'])->name('editar');
+        Route::put('/editar', [ProfileController::class, 'update'])->name('update');
+
+        // Ver Perfil (Por username)
+        Route::get('/{username}', [ProfileController::class, 'show'])->name('show');
+
+        // Seguir / Deixar de Seguir
+        Route::post('/{usuario_id}/seguir', [ProfileController::class, 'seguir'])->name('seguir');
+        Route::delete('/{usuario_id}/deixar-de-seguir', [ProfileController::class, 'deixar_de_seguir'])
+            ->name('deixar_de_seguir');
+
+        // Seguidores e Seguindo
+        Route::get('/{usuario_id}/seguidores', [ProfileController::class, 'seguidores'])
+            ->name('seguidores');
+        Route::get('/{usuario_id}/seguindo', [ProfileController::class, 'seguindo'])
+            ->name('seguindo');
+    });
 });
 
 // API Routes para integração com frontend JavaScript/React
