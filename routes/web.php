@@ -370,6 +370,55 @@ Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->g
     Route::post('/salas/{id}/sair', [SalaController::class, 'sairSala'])->name('salas.sair')
         ->where('id', '[0-9]+');
 
+        // ========== ROTAS CRUD STAFF (APENAS MODERADORES/ADMINS) ==========
+    
+    /**
+     * Editar sala (staff)
+     * GET /salas/{id}/staff/edit
+     */
+    Route::get('/salas/{id}/staff/edit', [SalaController::class, 'staffEdit'])
+        ->middleware(App\Http\Middleware\VerificarStaff::class)
+        ->name('salas.staff.edit')
+        ->where('id', '[0-9]+');
+
+    /**
+     * Atualizar sala (staff)
+     * PUT /salas/{id}/staff/update
+     */
+    Route::put('/salas/{id}/staff/update', [SalaController::class, 'staffUpdate'])
+        ->middleware(App\Http\Middleware\VerificarStaff::class)
+        ->name('salas.staff.update')
+        ->where('id', '[0-9]+');
+
+    /**
+     * Deletar sala (staff)
+     * DELETE /salas/{id}/staff/delete
+     */
+    Route::delete('/salas/{id}/staff/delete', [SalaController::class, 'staffDestroy'])
+        ->middleware(App\Http\Middleware\VerificarStaff::class)
+        ->name('salas.staff.delete')
+        ->where('id', '[0-9]+');
+
+    /**
+     * Ativar/Desativar sala (staff)
+     * POST /salas/{id}/staff/toggle-status
+     */
+    Route::post('/salas/{id}/staff/toggle-status', [SalaController::class, 'staffToggleStatus'])
+        ->middleware(App\Http\Middleware\VerificarStaff::class)
+        ->name('salas.staff.toggle-status')
+        ->where('id', '[0-9]+');
+
+        /**
+ * Obter salas desativadas (apenas staff)
+ * GET /api/salas/desativadas
+ */
+Route::get('/api/salas/desativadas', [SalaController::class, 'getSalasDesativadas'])
+    ->middleware(App\Http\Middleware\VerificarStaff::class)
+    ->name('salas.desativadas');
+
+    Route::get('/api/salas/minhas-desativadas', [SalaController::class, 'getMinhasSalasDesativadas'])
+    ->middleware('auth')
+    ->name('salas.minhas-desativadas');
 
     // ========== ROTAS DE LINKS DE CONVITE (ESTILO DISCORD) ==========
 
