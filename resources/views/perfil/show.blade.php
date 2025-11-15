@@ -305,5 +305,6 @@ function mostrarAba(aba) {
         tabSalvos.classList.add('border-b-2', 'border-purple-600', 'text-purple-600');
     }
 }
+
 </script>
 @endsection
