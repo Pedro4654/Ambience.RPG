@@ -1,197 +1,212 @@
 @extends('layout.app')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50">
+<div class="min-h-screen">
     
-    <!-- Header com Banner -->
-    <div class="bg-gradient-to-r from-blue-600 to-purple-600 h-48 relative">
-        <button class="absolute top-4 left-4 text-white hover:text-gray-200" onclick="history.back()">
+    <!-- Banner do Perfil -->
+    <div class="relative h-64 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 overflow-hidden">
+        <!-- Padrão decorativo -->
+        <div class="absolute inset-0 opacity-20">
+            <div class="absolute top-10 left-10 w-32 h-32 bg-white rounded-full blur-3xl"></div>
+            <div class="absolute bottom-10 right-10 w-40 h-40 bg-white rounded-full blur-3xl"></div>
+        </div>
+        
+        <!-- Botão Voltar -->
+        <button onclick="history.back()" class="absolute top-6 left-6 px-4 py-2 bg-white/20 backdrop-blur-md text-white rounded-lg hover:bg-white/30 transition-all font-medium">
             ← Voltar
         </button>
     </div>
 
-    <div class="container mx-auto px-4 max-w-5xl -mt-24 relative z-10">
+    <div class="container mx-auto px-4 max-w-5xl -mt-32 relative z-10">
         
-        <!-- Card de Perfil -->
-        <div class="bg-white rounded-2xl shadow-2xl p-8 mb-8">
-            <div class="flex flex-col md:flex-row gap-8 items-start">
-                
-                <!-- Avatar e Info -->
-                <div class="flex flex-col items-center md:items-start">
-                    <img 
-                        src="{{ $usuario->avatar_url ?? asset('images/default-avatar.png') }}" 
-                        alt="{{ $usuario->username }}"
-                        class="w-32 h-32 rounded-full object-cover ring-4 ring-blue-200 mb-4"
-                    >
-                    <h1 class="text-3xl font-bold text-gray-800">{{ $usuario->username }}</h1>
-                </div>
-
-                <!-- Bio e Stats -->
-                <div class="flex-1">
-                    @if($usuario->bio)
-                        <p class="text-gray-700 mb-4">{{ $usuario->bio }}</p>
-                    @endif
+        <!-- Card do Perfil -->
+        <div class="glassmorphism rounded-3xl shadow-2xl overflow-hidden mb-8">
+            <div class="p-8">
+                <div class="flex flex-col md:flex-row gap-8 items-start">
                     
-                    @if($usuario->website)
-                        <a href="{{ $usuario->website }}" target="_blank" class="text-blue-600 hover:underline mb-4 block">
-                            🔗 {{ $usuario->website }}
-                        </a>
-                    @endif
-
-                    <!-- Estatísticas -->
-                    <div class="grid grid-cols-3 gap-4 mt-6">
-                        <div class="text-center">
-                         
-                            <p class="text-sm text-gray-500">Postagens: </p>
-                               <p class="text-2xl font-bold text-blue-600">{{ $posts->total() }}</p>
+                    <!-- Avatar e Info Básica -->
+                    <div class="flex flex-col items-center md:items-start">
+                        <div class="relative group">
+                            <img 
+                                src="{{ $usuario->avatar_url ?? asset('images/default-avatar.png') }}" 
+                                alt="{{ $usuario->username }}"
+                                class="w-32 h-32 rounded-full object-cover ring-4 ring-white shadow-2xl mb-4 group-hover:scale-105 transition-transform"
+                            >
+                            @if(Auth::check() && Auth::id() === $usuario->id)
+                                <button class="absolute bottom-4 right-0 w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:scale-110 transition-transform">
+                                    📷
+                                </button>
+                            @endif
                         </div>
-                        <div class="text-center">
-                            
-                            <p class="text-sm text-gray-500">Seguidores: </p>
-                            <p class="text-2xl font-bold text-blue-600">{{ $usuario->seguidores()->count() }}</p>
-                        </div>
-                        <div class="text-center">
-                           
-                            <p class="text-sm text-gray-500">Seguindo: </p>
-                             <p class="text-2xl font-bold text-blue-600">{{ $usuario->seguindo()->count() }}</p>
-                        </div>
+                        <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ $usuario->username }}</h1>
+                        
+                        <!-- Badge de Privacidade -->
+                        @if($usuario->privacidade_perfil === 'privado')
+                            <span class="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-xs font-bold">
+                                🔒 Perfil Privado
+                            </span>
+                        @else
+                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+                                🌍 Perfil Público
+                            </span>
+                        @endif
                     </div>
 
-
-                    <!-- Botões de Ação -->
-                    <div class="flex gap-3 mt-6">
-                        @auth
-                            @if(Auth::id() === $usuario->id)
-                                <!-- Botões para Meu Perfil -->
-                                <a 
-                                    href="{{ route('perfil.editar') }}" 
-                                    class="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg font-bold transition-all"
-                                >
-                                    ✏️ Editar Perfil
-                                </a>
-                                <a 
-                                    href="{{ route('comunidade.feed') }}" 
-                                    class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-bold transition-all"
-                                >
-                                    📰 Ver Feed
-                                </a>
-                            @else
-                                <!-- Botões para Outro Usuário -->
-                                @if($esta_seguindo)
-                                    <form action="{{ route('perfil.deixar_de_seguir', $usuario->id) }}" method="POST" class="flex-1">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="w-full px-6 py-2 bg-red-500 text-white rounded-lg hover:shadow-lg font-bold transition-all">
-                                            ✓ Deixar de Seguir
-                                        </button>
-                                    </form>
-                                @else
-                                    <form action="{{ route('perfil.seguir', $usuario->id) }}" method="POST" class="flex-1">
-                                        @csrf
-                                        <button type="submit" class="w-full px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg font-bold transition-all">
-                                            + Seguir
-                                        </button>
-                                    </form>
-                                @endif
-                            @endif
+                    <!-- Bio e Informações -->
+                    <div class="flex-1">
+                        @if($usuario->bio)
+                            <p class="text-gray-700 text-lg leading-relaxed mb-4">{{ $usuario->bio }}</p>
                         @else
-                            <a href="{{ route('usuarios.login') }}" class="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg font-bold transition-all">
-                                🔐 Fazer Login
+                            <p class="text-gray-400 italic mb-4">Sem bio ainda...</p>
+                        @endif
+                        
+                        @if($usuario->website)
+                            <a href="{{ $usuario->website }}" target="_blank" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium mb-6">
+                                🔗 {{ $usuario->website }}
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
                             </a>
-                        @endauth
+                        @endif
+
+                        <!-- Estatísticas -->
+                        <div class="grid grid-cols-3 gap-6 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl mb-6">
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-blue-600 mb-1">{{ $posts->total() }}</div>
+                                <p class="text-sm text-gray-600 font-medium">📝 Posts</p>
+                            </div>
+                            <a href="{{ route('perfil.seguidores', $usuario->id) }}" class="text-center hover:scale-105 transition-transform">
+                                <div class="text-3xl font-bold text-purple-600 mb-1">{{ $usuario->seguidores()->count() }}</div>
+                                <p class="text-sm text-gray-600 font-medium">👥 Seguidores</p>
+                            </a>
+                            <a href="{{ route('perfil.seguindo', $usuario->id) }}" class="text-center hover:scale-105 transition-transform">
+                                <div class="text-3xl font-bold text-pink-600 mb-1">{{ $usuario->seguindo()->count() }}</div>
+                                <p class="text-sm text-gray-600 font-medium">💫 Seguindo</p>
+                            </a>
+                        </div>
+
+                        <!-- Botões de Ação -->
+                        <div class="flex flex-wrap gap-3">
+                            @auth
+                                @if(Auth::id() === $usuario->id)
+                                    <!-- Botões para o Próprio Perfil -->
+                                    <a href="{{ route('perfil.editar') }}" class="flex-1 min-w-[200px] py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-2xl font-bold text-center transition-all">
+                                        ✏️ Editar Perfil
+                                    </a>
+                                    <a href="{{ route('comunidade.feed') }}" class="flex-1 min-w-[200px] py-3 bg-white text-gray-700 rounded-xl hover:shadow-lg font-bold text-center transition-all border-2 border-gray-200">
+                                        📰 Ver Feed
+                                    </a>
+                                @else
+                                    <!-- Botões para Outro Perfil -->
+                                    @if($esta_seguindo)
+                                        <form action="{{ route('perfil.deixar_de_seguir', $usuario->id) }}" method="POST" class="flex-1 min-w-[200px]">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="w-full py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 font-bold transition-all">
+                                                ✓ Seguindo
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form action="{{ route('perfil.seguir', $usuario->id) }}" method="POST" class="flex-1 min-w-[200px]">
+                                            @csrf
+                                            <button type="submit" class="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-2xl font-bold transition-all">
+                                                + Seguir
+                                            </button>
+                                        </form>
+                                    @endif
+                                    <button class="px-6 py-3 bg-white text-gray-700 rounded-xl hover:shadow-lg font-bold transition-all border-2 border-gray-200">
+                                        💬 Mensagem
+                                    </button>
+                                @endif
+                            @else
+                                <a href="{{ route('usuarios.login') }}" class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-2xl font-bold text-center transition-all">
+                                    🔑 Fazer Login para Seguir
+                                </a>
+                            @endauth
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Abas: Postagens e Salvos -->
-        @auth
-            @if(Auth::id() === $usuario->id)
-              
-                <!-- Links -->
-                <div class="mt-6 pt-6 border-t space-y-2">
-                    <a href="{{ route('perfil.seguidores', $usuario->id) }}" class="block text-blue-600 hover:text-blue-800 text-sm font-medium">
-                        Ver Seguidores ({{ $num_seguidores }})
-                    </a>
-                    <a href="{{ route('perfil.seguindo', $usuario->id) }}" class="block text-blue-600 hover:text-blue-800 text-sm font-medium">
-                        Ver Seguindo ({{ $num_seguindo }})
-                    </a>
-                </div>
+        <!-- Tabs de Conteúdo -->
+        <div class="glassmorphism rounded-2xl shadow-lg mb-8 overflow-hidden">
+            <div class="flex border-b border-gray-200">
+                <button onclick="mostrarAba('posts')" id="tab-posts" class="flex-1 py-4 px-6 font-bold text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all border-b-2 border-blue-600">
+                    📝 Postagens
+                </button>
+                @auth
+                    @if(Auth::id() === $usuario->id)
+                        <button onclick="mostrarAba('salvos')" id="tab-salvos" class="flex-1 py-4 px-6 font-bold text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-all">
+                            💾 Salvos
+                        </button>
+                    @endif
+                @endauth
             </div>
-            @endif
-        @endauth
+        </div>
 
-        <!-- Aba Postagens -->
-        <div id="aba-posts" class="space-y-6">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">📰 Postagens</h2>
-            
+        <!-- Conteúdo da Aba Posts -->
+        <div id="aba-posts">
             @if($posts->count() > 0)
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     @foreach($posts as $post)
-                        <div class="bg-white rounded-2xl shadow-md hover:shadow-2xl overflow-hidden transition-all duration-300 transform hover:-translate-y-1">
+                        <a href="{{ route('comunidade.post.show', $post->slug) }}" class="group glassmorphism rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2">
                             
                             <!-- Preview -->
-                            @if($post->arquivos->first())
-                                @if($post->arquivos->first()->tipo === 'imagem')
-                                    <div class="relative h-48 overflow-hidden bg-gray-900">
+                            <div class="relative h-48 overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600">
+                                @if($post->arquivos->first())
+                                    @if($post->arquivos->first()->tipo === 'imagem')
                                         <img 
                                             src="{{ $post->arquivos->first()->url }}" 
                                             alt="{{ $post->titulo }}"
-                                            class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                         >
-                                    </div>
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center text-white text-6xl">
+                                            📦
+                                        </div>
+                                    @endif
                                 @else
-                                    <div class="h-48 flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
-                                        <span class="text-white text-6xl">📦</span>
+                                    <div class="w-full h-full flex items-center justify-center text-white text-6xl">
+                                        📝
                                     </div>
                                 @endif
-                            @else
-                                <div class="h-48 flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
-                                    <span class="text-white text-6xl">📝</span>
-                                </div>
-                            @endif
-
-                            <!-- Conteúdo -->
-                            <div class="p-5">
-                                <span class="inline-block px-3 py-1 text-xs font-bold bg-blue-100 text-blue-700 rounded-full mb-3">
+                                
+                                <!-- Badge do Tipo -->
+                                <span class="absolute top-3 right-3 px-3 py-1 bg-white/90 backdrop-blur-sm text-gray-800 rounded-full text-xs font-bold">
                                     {{ ucfirst(str_replace('_', ' ', $post->tipo_conteudo)) }}
                                 </span>
-                                
-                                <h3 class="font-bold text-gray-800 text-lg mb-2 line-clamp-2">
+                            </div>
+
+                            <!-- Info -->
+                            <div class="p-5">
+                                <h3 class="font-bold text-gray-800 text-lg mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
                                     {{ $post->titulo }}
                                 </h3>
-                                
                                 <p class="text-gray-600 text-sm line-clamp-2 mb-4">{{ $post->conteudo }}</p>
                                 
-                                <!-- Footer -->
-                                <div class="flex justify-between items-center pt-3 border-t border-gray-200">
-                                    <div class="flex gap-3 text-xs text-gray-500">
-                                        <span>❤️ {{ $post->curtidas()->count() }}</span>
-                                        <span>💬 {{ $post->comentarios()->count() }}</span>
-                                    </div>
-                                    <a 
-                                        href="{{ route('comunidade.post.show', $post->slug) }}" 
-                                        class="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs font-bold rounded-lg hover:shadow-lg transition-all"
-                                    >
-                                        Ver →
-                                    </a>
+                                <!-- Stats -->
+                                <div class="flex gap-4 text-sm text-gray-500">
+                                    <span>❤️ {{ $post->curtidas()->count() }}</span>
+                                    <span>💬 {{ $post->comentarios()->count() }}</span>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
 
+                <!-- Paginação -->
                 <div class="mt-8">
                     {{ $posts->links() }}
                 </div>
             @else
-                <div class="bg-white rounded-2xl shadow-md p-12 text-center">
-                    <p class="text-6xl mb-4">📝</p>
-                    <p class="text-gray-500 text-xl font-bold mb-2">Nenhuma postagem ainda</p>
-                    <p class="text-gray-400 mb-6">Comece a compartilhar conteúdo com a comunidade</p>
+                <div class="glassmorphism rounded-2xl p-16 text-center shadow-lg">
+                    <div class="text-8xl mb-4">📝</div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Nenhuma postagem ainda</h3>
+                    <p class="text-gray-600 mb-6">Compartilhe conteúdo com a comunidade</p>
                     @auth
                         @if(Auth::id() === $usuario->id)
-                            <a href="{{ route('comunidade.create') }}" class="inline-block px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg font-bold transition-all">
+                            <a href="{{ route('comunidade.create') }}" class="inline-block px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-2xl font-bold transition-all">
                                 ✨ Criar Primeira Postagem
                             </a>
                         @endif
@@ -200,77 +215,52 @@
             @endif
         </div>
 
-        <!-- Aba Salvos (Apenas para próprio perfil) -->
+        <!-- Conteúdo da Aba Salvos -->
         @auth
             @if(Auth::id() === $usuario->id)
-                <div id="aba-salvos" class="hidden space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6">💾 Posts Salvos</h2>
-                    
+                <div id="aba-salvos" class="hidden">
                     @if($usuario->saved_posts()->count() > 0)
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                             @foreach($usuario->saved_posts as $saved)
                                 @php $post = $saved->post; @endphp
-                                <div class="bg-white rounded-2xl shadow-md hover:shadow-2xl overflow-hidden transition-all duration-300 transform hover:-translate-y-1">
+                                <div class="group glassmorphism rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2">
                                     
-                                    <!-- Preview -->
-                                    @if($post->arquivos->first())
-                                        @if($post->arquivos->first()->tipo === 'imagem')
-                                            <div class="relative h-48 overflow-hidden bg-gray-900">
-                                                <img 
-                                                    src="{{ $post->arquivos->first()->url }}" 
-                                                    alt="{{ $post->titulo }}"
-                                                    class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                                                >
-                                                <div class="absolute top-3 right-3 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                                                    💾 Salvo
-                                                </div>
-                                            </div>
+                                    <!-- Preview com Badge Salvo -->
+                                    <div class="relative h-48 overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600">
+                                        @if($post->arquivos->first() && $post->arquivos->first()->tipo === 'imagem')
+                                            <img 
+                                                src="{{ $post->arquivos->first()->url }}" 
+                                                alt="{{ $post->titulo }}"
+                                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                            >
                                         @else
-                                            <div class="h-48 flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 relative">
-                                                <span class="text-white text-6xl">📦</span>
-                                                <div class="absolute top-3 right-3 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                                                    💾 Salvo
-                                                </div>
+                                            <div class="w-full h-full flex items-center justify-center text-white text-6xl">
+                                                📝
                                             </div>
                                         @endif
-                                    @else
-                                        <div class="h-48 flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 relative">
-                                            <span class="text-white text-6xl">📝</span>
-                                            <div class="absolute top-3 right-3 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                                                💾 Salvo
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    <!-- Conteúdo -->
-                                    <div class="p-5">
-                                        <span class="inline-block px-3 py-1 text-xs font-bold bg-purple-100 text-purple-700 rounded-full mb-3">
-                                            {{ ucfirst(str_replace('_', ' ', $post->tipo_conteudo)) }}
-                                        </span>
                                         
+                                        <span class="absolute top-3 right-3 px-3 py-1 bg-yellow-400 text-yellow-900 rounded-full text-xs font-bold shadow-lg">
+                                            💾 Salvo
+                                        </span>
+                                    </div>
+
+                                    <!-- Info -->
+                                    <div class="p-5">
                                         <h3 class="font-bold text-gray-800 text-lg mb-2 line-clamp-2">
                                             {{ $post->titulo }}
                                         </h3>
-                                        
                                         <p class="text-gray-600 text-sm line-clamp-2 mb-4">{{ $post->conteudo }}</p>
                                         
-                                        <!-- Footer -->
-                                        <div class="flex gap-2 pt-3 border-t border-gray-200">
-                                            <a 
-                                                href="{{ route('comunidade.post.show', $post->slug) }}" 
-                                                class="flex-1 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-bold rounded-lg hover:shadow-lg transition-all text-center"
-                                            >
+                                        <!-- Botões -->
+                                        <div class="flex gap-2">
+                                            <a href="{{ route('comunidade.post.show', $post->slug) }}" class="flex-1 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-bold rounded-lg hover:shadow-lg transition-all text-center">
                                                 Ver Post
                                             </a>
                                             <form action="{{ route('comunidade.desalvar', $post->id) }}" method="POST" class="flex-1">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button 
-                                                    type="submit" 
-                                                    class="w-full py-2 bg-red-100 text-red-600 text-sm font-bold rounded-lg hover:bg-red-200 transition-all"
-                                                    onclick="return confirm('Remover dos salvos?')"
-                                                >
-                                                    🗑️ Remover
+                                                <button type="submit" class="w-full py-2 bg-red-100 text-red-600 text-sm font-bold rounded-lg hover:bg-red-200 transition-all" onclick="return confirm('Remover dos salvos?')">
+                                                    🗑️
                                                 </button>
                                             </form>
                                         </div>
@@ -279,11 +269,11 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="bg-white rounded-2xl shadow-md p-12 text-center">
-                            <p class="text-6xl mb-4">💾</p>
-                            <p class="text-gray-500 text-xl font-bold mb-2">Nenhuma postagem salva</p>
-                            <p class="text-gray-400 mb-6">Salve suas postagens favoritas para acessá-las rapidamente</p>
-                            <a href="{{ route('comunidade.feed') }}" class="inline-block px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg font-bold transition-all">
+                        <div class="glassmorphism rounded-2xl p-16 text-center shadow-lg">
+                            <div class="text-8xl mb-4">💾</div>
+                            <h3 class="text-2xl font-bold text-gray-800 mb-2">Nenhuma postagem salva</h3>
+                            <p class="text-gray-600 mb-6">Salve suas postagens favoritas para acessá-las rapidamente</p>
+                            <a href="{{ route('comunidade.feed') }}" class="inline-block px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-2xl font-bold transition-all">
                                 Explorar Feed →
                             </a>
                         </div>
@@ -295,14 +285,25 @@
 </div>
 
 <script>
-function mostrarAbaPosts() {
-    document.getElementById('aba-posts').classList.remove('hidden');
-    document.getElementById('aba-salvos').classList.add('hidden');
-}
-
-function mostrarAbaSalvos() {
+function mostrarAba(aba) {
+    // Esconde todas as abas
     document.getElementById('aba-posts').classList.add('hidden');
-    document.getElementById('aba-salvos').classList.remove('hidden');
+    const abaSalvos = document.getElementById('aba-salvos');
+    if (abaSalvos) abaSalvos.classList.add('hidden');
+    
+    // Remove destaque de todos os tabs
+    document.getElementById('tab-posts').classList.remove('border-b-2', 'border-blue-600', 'text-blue-600');
+    const tabSalvos = document.getElementById('tab-salvos');
+    if (tabSalvos) tabSalvos.classList.remove('border-b-2', 'border-purple-600', 'text-purple-600');
+    
+    // Mostra aba selecionada
+    if (aba === 'posts') {
+        document.getElementById('aba-posts').classList.remove('hidden');
+        document.getElementById('tab-posts').classList.add('border-b-2', 'border-blue-600', 'text-blue-600');
+    } else if (aba === 'salvos' && abaSalvos) {
+        abaSalvos.classList.remove('hidden');
+        tabSalvos.classList.add('border-b-2', 'border-purple-600', 'text-purple-600');
+    }
 }
 </script>
 @endsection
