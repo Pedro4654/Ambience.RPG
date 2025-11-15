@@ -431,4 +431,85 @@ class Usuario extends Authenticatable
          ->withTimestamps();
     }
 
+    /**
+ * Verificar se usuário é staff (moderador ou admin)
+ */
+public function isStaff()
+{
+    return in_array($this->nivel_usuario, ['moderador', 'admin']);
+}
+
+/**
+ * Verificar se é moderador
+ */
+public function isModerador()
+{
+    return $this->nivel_usuario === 'moderador';
+}
+
+/**
+ * Verificar se é admin
+ */
+public function isAdmin()
+{
+    return $this->nivel_usuario === 'admin';
+}
+
+/**
+ * Verificar se pode moderar tickets
+ */
+public function podeModerar()
+{
+    return $this->isStaff();
+}
+
+/**
+ * Tickets criados pelo usuário
+ */
+public function tickets()
+{
+    return $this->hasMany(Ticket::class, 'usuario_id');
+}
+
+/**
+ * Tickets atribuídos ao usuário (se for staff)
+ */
+public function ticketsAtribuidos()
+{
+    return $this->hasMany(Ticket::class, 'atribuido_a');
+}
+
+/**
+ * Denúncias contra este usuário
+ */
+public function denunciasRecebidas()
+{
+    return $this->hasMany(Ticket::class, 'usuario_denunciado_id')
+        ->where('categoria', 'denuncia');
+}
+
+/**
+ * Notificações de tickets
+ */
+public function notificacoesTickets()
+{
+    return $this->hasMany(TicketNotificacao::class, 'usuario_id');
+}
+
+/**
+ * Notificações não lidas de tickets
+ */
+public function notificacoesTicketsNaoLidas()
+{
+    return $this->notificacoesTickets()->where('lida', false);
+}
+
+/**
+ * Obter total de notificações não lidas
+ */
+public function getTotalNotificacoesNaoLidas()
+{
+    return $this->notificacoesTicketsNaoLidas()->count();
+}
+
 }

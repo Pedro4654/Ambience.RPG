@@ -27,6 +27,168 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
+Route::middleware(['auth'])->prefix('suporte')->name('suporte.')->group(function () {
+    
+    // ========== ROTAS PARA USUÁRIOS NORMAIS ==========
+    
+    /**
+     * Dashboard de suporte (lista de tickets do usuário)
+     * GET /suporte
+     */
+    Route::get('/', [App\Http\Controllers\SuporteController::class, 'index'])
+        ->name('index');
+    
+    /**
+     * Formulário de criação de ticket
+     * GET /suporte/criar
+     */
+    Route::get('/criar', [App\Http\Controllers\SuporteController::class, 'create'])
+        ->name('create');
+    
+    /**
+     * Criar novo ticket
+     * POST /suporte
+     */
+    Route::post('/', [App\Http\Controllers\SuporteController::class, 'store'])
+        ->name('store');
+    
+    /**
+     * Visualizar ticket específico
+     * GET /suporte/{id}
+     */
+    Route::get('/{id}', [App\Http\Controllers\SuporteController::class, 'show'])
+        ->name('show')
+        ->where('id', '[0-9]+');
+    
+    /**
+     * Adicionar resposta ao ticket
+     * POST /suporte/{id}/responder
+     */
+    Route::post('/{id}/responder', [App\Http\Controllers\SuporteController::class, 'responder'])
+        ->name('responder')
+        ->where('id', '[0-9]+');
+    
+    /**
+     * Buscar usuários para denúncia (AJAX)
+     * GET /suporte/buscar-usuarios?termo=username
+     */
+    Route::get('/api/buscar-usuarios', [App\Http\Controllers\SuporteController::class, 'buscarUsuarios'])
+        ->name('buscar-usuarios');
+    
+    /**
+     * Download de anexo
+     * GET /suporte/anexos/{id}/download
+     */
+    Route::get('/anexos/{id}/download', [App\Http\Controllers\SuporteController::class, 'downloadAnexo'])
+        ->name('anexos.download')
+        ->where('id', '[0-9]+');
+    
+    
+    // ========== ROTAS PARA MODERADORES/ADMINS ==========
+    // Protegidas pelo middleware VerificarStaff
+    
+    Route::middleware([App\Http\Middleware\VerificarStaff::class])
+        ->prefix('moderacao')
+        ->name('moderacao.')
+        ->group(function () {
+        
+        /**
+         * Dashboard de moderação (estatísticas)
+         * GET /suporte/moderacao/dashboard
+         */
+        Route::get('/dashboard', [App\Http\Controllers\ModeracaoSuporteController::class, 'dashboard'])
+            ->name('dashboard');
+        
+        /**
+         * Painel de moderação (lista de todos os tickets com filtros)
+         * GET /suporte/moderacao
+         */
+        Route::get('/', [App\Http\Controllers\ModeracaoSuporteController::class, 'index'])
+            ->name('index');
+        
+        /**
+         * Atribuir ticket a um staff
+         * POST /suporte/moderacao/{id}/atribuir
+         */
+        Route::post('/{id}/atribuir', [App\Http\Controllers\ModeracaoSuporteController::class, 'atribuir'])
+            ->name('atribuir')
+            ->where('id', '[0-9]+');
+        
+        /**
+         * Alterar status do ticket
+         * POST /suporte/moderacao/{id}/status
+         */
+        Route::post('/{id}/status', [App\Http\Controllers\ModeracaoSuporteController::class, 'alterarStatus'])
+            ->name('status')
+            ->where('id', '[0-9]+');
+        
+        /**
+         * Alterar prioridade do ticket
+         * POST /suporte/moderacao/{id}/prioridade
+         */
+        Route::post('/{id}/prioridade', [App\Http\Controllers\ModeracaoSuporteController::class, 'alterarPrioridade'])
+            ->name('prioridade')
+            ->where('id', '[0-9]+');
+        
+        /**
+         * Fechar ticket
+         * POST /suporte/moderacao/{id}/fechar
+         */
+        Route::post('/{id}/fechar', [App\Http\Controllers\ModeracaoSuporteController::class, 'fechar'])
+            ->name('fechar')
+            ->where('id', '[0-9]+');
+        
+        /**
+         * Reabrir ticket
+         * POST /suporte/moderacao/{id}/reabrir
+         */
+        Route::post('/{id}/reabrir', [App\Http\Controllers\ModeracaoSuporteController::class, 'reabrir'])
+            ->name('reabrir')
+            ->where('id', '[0-9]+');
+        
+        /**
+         * Marcar como spam
+         * POST /suporte/moderacao/{id}/marcar-spam
+         */
+        Route::post('/{id}/marcar-spam', [App\Http\Controllers\ModeracaoSuporteController::class, 'marcarSpam'])
+            ->name('marcar-spam')
+            ->where('id', '[0-9]+');
+    });
+});
+
+// ============================================================
+// ROTAS API PARA INTEGRAÇÃO COM REACT/VUE (OPCIONAL)
+// ============================================================
+
+Route::middleware(['auth'])->prefix('api/suporte')->name('api.suporte.')->group(function () {
+    
+    // Lista de tickets do usuário
+    Route::get('/tickets', [App\Http\Controllers\SuporteController::class, 'index']);
+    
+    // Criar ticket
+    Route::post('/tickets', [App\Http\Controllers\SuporteController::class, 'store']);
+    
+    // Ver ticket específico
+    Route::get('/tickets/{id}', [App\Http\Controllers\SuporteController::class, 'show']);
+    
+    // Responder ticket
+    Route::post('/tickets/{id}/responder', [App\Http\Controllers\SuporteController::class, 'responder']);
+    
+    // Buscar usuários
+    Route::get('/buscar-usuarios', [App\Http\Controllers\SuporteController::class, 'buscarUsuarios']);
+    
+    // Rotas de moderação (apenas staff)
+    Route::middleware([App\Http\Middleware\VerificarStaff::class])->group(function () {
+        Route::get('/moderacao/tickets', [App\Http\Controllers\ModeracaoSuporteController::class, 'index']);
+        Route::post('/moderacao/tickets/{id}/atribuir', [App\Http\Controllers\ModeracaoSuporteController::class, 'atribuir']);
+        Route::post('/moderacao/tickets/{id}/status', [App\Http\Controllers\ModeracaoSuporteController::class, 'alterarStatus']);
+        Route::post('/moderacao/tickets/{id}/prioridade', [App\Http\Controllers\ModeracaoSuporteController::class, 'alterarPrioridade']);
+        Route::post('/moderacao/tickets/{id}/fechar', [App\Http\Controllers\ModeracaoSuporteController::class, 'fechar']);
+        Route::post('/moderacao/tickets/{id}/reabrir', [App\Http\Controllers\ModeracaoSuporteController::class, 'reabrir']);
+        Route::get('/moderacao/dashboard', [App\Http\Controllers\ModeracaoSuporteController::class, 'dashboard']);
+    });
+});
+
 // Rotas públicas apenas para visitantes (se estiver logado, middleware redireciona para 'home')
 Route::middleware('guest.custom')->group(function () {
     Route::get('/login', [UsuarioController::class, 'loginForm'])->name('usuarios.login');
@@ -76,22 +238,6 @@ Route::post('/convite/{codigo}/aceitar', [SalaController::class, 'aceitarConvite
 
 // Rotas de Moderação
 Route::post('/moderate', [ModerationController::class, 'moderate'])->name('moderate');
-
-// ========== ROTAS DE RECUPERAÇÃO DE SENHA COM TOKEN DE 6 DÍGITOS ==========
-Route::get('/esqueci-minha-senha', [UsuarioController::class, 'showForgotPasswordForm'])
-    ->name('usuarios.forgot.form');
-Route::post('/enviar-token-recuperacao', [UsuarioController::class, 'sendResetToken'])
-    ->name('usuarios.forgot.send');
-Route::get('/verificar-token', [UsuarioController::class, 'showVerifyTokenForm'])
-    ->name('usuarios.verify.token.form');
-Route::post('/verificar-token', [UsuarioController::class, 'verifyToken'])
-    ->name('usuarios.verify.token');
-Route::get('/definir-nova-senha', [UsuarioController::class, 'showResetPasswordForm'])
-    ->name('usuarios.reset.password.form');
-Route::post('/redefinir-senha', [UsuarioController::class, 'resetPassword'])
-    ->name('usuarios.reset.password');
-Route::post('/reenviar-token', [UsuarioController::class, 'resendToken'])
-    ->name('usuarios.resend.token');
 
 Route::post('/salas/{id}/iniciar-sessao', [SalaController::class, 'iniciarSessao'])
     ->name('salas.iniciar-sessao')
