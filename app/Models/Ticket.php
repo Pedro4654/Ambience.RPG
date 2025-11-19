@@ -406,7 +406,8 @@ class Ticket extends Model
             'denuncia' => 'Denúncia',
             'problema_tecnico' => 'Problema Técnico',
             'sugestao' => 'Sugestão',
-            'outro' => 'Outro'
+            'outro' => 'Outro',
+            'recurso_ip_ban' => '🛡️ Recurso de IP Ban'
         ];
 
         return $labels[$this->categoria] ?? $this->categoria;

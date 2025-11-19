@@ -8,7 +8,8 @@ use App\Http\Controllers\SavedPostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\CommentController;
-
+use App\Http\Controllers\ModeracaoUsuarioController;
+use App\Http\Controllers\IpBanRecursoController;
 use App\Http\Controllers\ModerationController;
 
 
@@ -26,6 +27,121 @@ use App\Http\Controllers\ModerationController;
 Route::get('/', function () {
     return view('home');
 })->name('home');
+
+Route::get('/ban-ip', [App\Http\Controllers\ModeracaoUsuarioController::class, 'mostrarIpBan'])
+    ->name('public.ip_ban'); // rota pública para mostrar IP ban para visitantes/guests
+
+    // ========================================
+// ROTAS PÚBLICAS DE RECURSO DE IP BAN
+// ========================================
+Route::prefix('ip-ban')->name('ip-ban.')->group(function () {
+    // Formulário de recurso (público, não requer autenticação)
+    Route::get('/recurso', [IpBanRecursoController::class, 'showRecursoForm'])
+        ->name('recurso.form');
+    
+    // Enviar recurso (público)
+    Route::post('/recurso', [IpBanRecursoController::class, 'submitRecurso'])
+        ->name('recurso.submit');
+    
+    // Verificar status do recurso (público)
+    Route::get('/recurso/status/{numero_ticket}', [IpBanRecursoController::class, 'verificarStatus'])
+        ->name('recurso.status');
+});
+
+// ==================== ROTAS PÚBLICAS DE PUNIÇÕES ====================
+// Rotas públicas de punições (não requerem permissões, apenas autenticação)
+// ==================== ROTAS PÚBLICAS DE PUNIÇÕES ====================
+// Estas rotas são acessíveis mesmo para usuários punidos
+Route::middleware(['auth'])->prefix('moderacao')->name('moderacao.')->group(function () {
+    
+    /**
+     * Tela de Warning
+     * GET /moderacao/warning
+     */
+    Route::get('/warning', [ModeracaoUsuarioController::class, 'mostrarWarning'])
+        ->name('warning.show');
+    
+    /**
+     * Reativar conta após warning
+     * POST /moderacao/warning/reativar
+     */
+    Route::post('/warning/reativar', [ModeracaoUsuarioController::class, 'reativarAposWarning'])
+        ->name('warning.reativar');
+    
+    /**
+     * Tela de Ban
+     * GET /moderacao/ban
+     */
+    Route::get('/ban', [ModeracaoUsuarioController::class, 'mostrarBan'])
+        ->name('ban.show');
+    
+    /**
+     * Tela de IP Ban
+     * GET /moderacao/ip-ban
+     */
+    Route::get('/ip-ban', [ModeracaoUsuarioController::class, 'mostrarIpBan'])
+        ->name('ip-ban.show');
+    
+    /**
+     * Tela de Account Deleted
+     * GET /moderacao/account-deleted
+     */
+    Route::get('/account-deleted', [ModeracaoUsuarioController::class, 'mostrarAccountDeleted'])
+        ->name('account-deleted.show');
+});
+
+// ==================== ROTAS DE APLICAÇÃO DE PUNIÇÕES (APENAS STAFF) ====================
+Route::middleware(['auth', App\Http\Middleware\VerificarStaff::class])
+    ->prefix('moderacao/usuarios')
+    ->name('moderacao.usuarios.')
+    ->group(function () {
+    
+    // ========== DASHBOARD ==========
+    Route::get('/dashboard', [ModeracaoUsuarioController::class, 'dashboard'])
+        ->name('dashboard');
+    
+    // ========== CRUD DE USUÁRIOS ==========
+    Route::get('/', [ModeracaoUsuarioController::class, 'index'])
+        ->name('index');
+    
+    Route::get('/{id}', [ModeracaoUsuarioController::class, 'show'])
+        ->name('show')
+        ->where('id', '[0-9]+');
+    
+    Route::get('/{id}/editar', [ModeracaoUsuarioController::class, 'edit'])
+        ->name('edit')
+        ->where('id', '[0-9]+');
+    
+    Route::put('/{id}', [ModeracaoUsuarioController::class, 'update'])
+        ->name('update')
+        ->where('id', '[0-9]+');
+    
+    // ========== APLICAR PUNIÇÕES ==========
+    Route::post('/{id}/warning', [ModeracaoUsuarioController::class, 'aplicarWarning'])
+        ->name('warning');
+    
+    Route::post('/{id}/ban-temporario', [ModeracaoUsuarioController::class, 'aplicarBanTemporario'])
+        ->name('ban-temporario');
+    
+    Route::post('/{id}/perma-ban', [ModeracaoUsuarioController::class, 'aplicarPermaBan'])
+        ->name('perma-ban');
+    
+    Route::post('/{id}/ip-ban', [ModeracaoUsuarioController::class, 'aplicarIpBan'])
+        ->middleware(App\Http\Middleware\VerificarAdmin::class)
+        ->name('ip-ban');
+    
+    Route::post('/{id}/deletar-conta', [ModeracaoUsuarioController::class, 'deletarConta'])
+        ->name('deletar-conta');
+    
+    // ========== REATIVAR USUÁRIO (Apenas Admins) ==========
+    Route::post('/{id}/reativar', [ModeracaoUsuarioController::class, 'reativar'])
+        ->middleware(App\Http\Middleware\VerificarAdmin::class)
+        ->name('reativar');
+
+        Route::post('{id}/remover-ip-ban', [ModeracaoUsuarioController::class, 'removerIpBan'])
+            ->name('remover-ip-ban')
+            ->middleware('admin');
+});
 
 Route::middleware(['auth'])->prefix('suporte')->name('suporte.')->group(function () {
     
@@ -601,51 +717,3 @@ Route::prefix('api/comunidade')->name('api.comunidade.')->middleware('auth')->gr
     Route::delete('/saved/{post_id}', [\App\Http\Controllers\SavedPostController::class, 'destroy']);
     Route::get('/saved', [\App\Http\Controllers\SavedPostController::class, 'index']);
 });
-
-
-
-
-
-/*
-|--------------------------------------------------------------------------
-| Observações Importantes para Desenvolvimento
-|--------------------------------------------------------------------------
-|
-| 1. SISTEMA COMPLETO IMPLEMENTADO:
-|    ✅ Dashboard de salas com design avançado
-|    ✅ Criação de salas (pública, privada, apenas convite)
-|    ✅ Sistema de entrada com validação
-|    ✅ Interface individual da sala
-|    ✅ Sistema de convites com tokens únicos
-|    ✅ Permissões granulares por usuário
-|    ✅ Logs detalhados para debugging
-|    ✅ Preparação para WebSocket
-|
-| 2. INTEGRAÇÃO REACT PREPARADA:
-|    ✅ Todas as rotas retornam JSON quando solicitado
-|    ✅ Rotas API duplicadas em /api/
-|    ✅ Estrutura de resposta padronizada
-|    ✅ CSRF token configurado
-|    ✅ Tratamento de erros consistente
-|
-| 3. SEGURANÇA IMPLEMENTADA:
-|    ✅ Middleware de autenticação customizado
-|    ✅ Validação de entrada rigorosa
-|    ✅ Verificação de permissões granular
-|    ✅ Sanitização de dados
-|    ✅ Logs de segurança
-|
-| 4. RECURSOS AVANÇADOS:
-|    ✅ Sistema de convites com expiração
-|    ✅ Roles diferenciados (membro, admin_sala, mestre)
-|    ✅ Interface responsiva e moderna
-|    ✅ Indicadores de status em tempo real
-|    ✅ Simulação de WebSocket para demonstração
-|
-| 5. PRÓXIMOS PASSOS PARA PRODUÇÃO:
-|    🔄 Implementar WebSocket real (Laravel WebSockets/Pusher)
-|    🔄 Adicionar notificações em tempo real
-|    🔄 Desenvolver componentes React
-|    🔄 Adicionar testes automatizados
-|
-*/

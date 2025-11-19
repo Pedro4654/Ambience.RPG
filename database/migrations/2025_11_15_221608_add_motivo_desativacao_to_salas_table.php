@@ -6,26 +6,48 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    /**
+     * Adiciona as colunas de desativação na tabela salas.
+     */
+    public function up()
     {
         Schema::table('salas', function (Blueprint $table) {
-            $table->text('motivo_desativacao')->nullable()->after('ativa');
-            $table->unsignedBigInteger('desativada_por')->nullable()->after('motivo_desativacao');
-            $table->timestamp('data_desativacao')->nullable()->after('desativada_por');
-            
-            // Foreign key para o staff que desativou
-            $table->foreign('desativada_por')
-                  ->references('id')
-                  ->on('usuarios')
-                  ->onDelete('set null');
+
+            // motivo_desativacao
+            if (!Schema::hasColumn('salas', 'motivo_desativacao')) {
+                $table->text('motivo_desativacao')->nullable()->after('ativa');
+            }
+
+            // desativada_por
+            if (!Schema::hasColumn('salas', 'desativada_por')) {
+                $table->unsignedBigInteger('desativada_por')->nullable()->after('motivo_desativacao');
+            }
+
+            // data_desativacao
+            if (!Schema::hasColumn('salas', 'data_desativacao')) {
+                $table->timestamp('data_desativacao')->nullable()->after('desativada_por');
+            }
         });
     }
 
-    public function down(): void
+    /**
+     * Remove as colunas caso a migration seja revertida.
+     */
+    public function down()
     {
         Schema::table('salas', function (Blueprint $table) {
-            $table->dropForeign(['desativada_por']);
-            $table->dropColumn(['motivo_desativacao', 'desativada_por', 'data_desativacao']);
+
+            if (Schema::hasColumn('salas', 'data_desativacao')) {
+                $table->dropColumn('data_desativacao');
+            }
+
+            if (Schema::hasColumn('salas', 'desativada_por')) {
+                $table->dropColumn('desativada_por');
+            }
+
+            if (Schema::hasColumn('salas', 'motivo_desativacao')) {
+                $table->dropColumn('motivo_desativacao');
+            }
         });
     }
 };

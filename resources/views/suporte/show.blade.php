@@ -1705,6 +1705,42 @@
                     </dl>
                 </div>
 
+                   <!-- Ações Rápidas de Usuário (se for denúncia) -->
+                @if(auth()->user()->isStaff() && $ticket->ehDenuncia() && $ticket->usuarioDenunciado)
+                    <div class="sidebar-card" style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-left: 4px solid #ef4444;">
+                        <h3 style="color: #991b1b;">👤 Ações do Usuário Denunciado</h3>
+                        
+                        <a href="{{ route('moderacao.usuarios.show', $ticket->usuarioDenunciado->id) }}" class="btn-action" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; width: 100%; padding: 12px; margin-bottom: 12px; text-align: center; text-decoration: none; border-radius: 10px; display: inline-block; font-weight: 600;">
+                            👁️ Ver Perfil Completo
+                        </a>
+
+                        @if(!$ticket->usuarioDenunciado->warning_ativo && !$ticket->usuarioDenunciado->ban_tipo)
+                            <button onclick="openPunishmentModal('warning', {{ $ticket->usuarioDenunciado->id }}, {{ $ticket->id }})" class="btn-action" style="width: 100%; padding: 12px; background: #f59e0b; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; margin-bottom: 8px;">
+                                ⚠️ Aplicar Warning
+                            </button>
+
+                            <button onclick="openPunishmentModal('ban-temp', {{ $ticket->usuarioDenunciado->id }}, {{ $ticket->id }})" class="btn-action" style="width: 100%; padding: 12px; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; margin-bottom: 8px;">
+                                🚫 Ban Temporário
+                            </button>
+
+                            <button onclick="openPunishmentModal('perma-ban', {{ $ticket->usuarioDenunciado->id }}, {{ $ticket->id }})" class="btn-action" style="width: 100%; padding: 12px; background: #991b1b; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                                ⛔ Ban Permanente
+                            </button>
+                        @else
+                            <div style="background: #fef3c7; padding: 16px; border-radius: 10px; font-size: 14px; color: #92400e; text-align: center;">
+                                ⚠️ Usuário já possui punição ativa
+                            </div>
+                        @endif
+
+                        <div style="margin-top: 16px; padding-top: 16px; border-top: 2px solid #fee2e2;">
+                            <div style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">
+                                <strong>Tickets criados:</strong> {{ $ticket->usuarioDenunciado->tickets_count ?? 0 }}<br>
+                                <strong>Denúncias recebidas:</strong> {{ $ticket->usuarioDenunciado->denuncias_recebidas_count ?? 0 }}
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Staff Actions -->
                 @if(auth()->user()->isStaff())
                     <div class="sidebar-card">
@@ -2119,5 +2155,211 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
     </script>
+
+
+<script>
+/**
+ * ========================================
+ * SISTEMA DE PUNIÇÃO INTEGRADO COM TICKETS
+ * ========================================
+ */
+
+// Função para abrir modal de punição a partir do ticket
+function openPunishmentModal(type, userId, ticketId) {
+    // Criar modal dinamicamente se não existir
+    let modal = document.getElementById('punishment-modal-ticket');
+    
+    if (!modal) {
+        modal = createPunishmentModal();
+        document.body.appendChild(modal);
+    }
+
+    // Configurar modal baseado no tipo de punição
+    const form = modal.querySelector('#punishment-form-ticket');
+    const title = modal.querySelector('#punishment-modal-title');
+    const diasGroup = modal.querySelector('#punishment-dias-group');
+    const diasInput = modal.querySelector('#punishment-dias-input');
+    const submitBtn = modal.querySelector('#punishment-submit-btn');
+
+    // Resetar formulário
+    form.reset();
+    diasGroup.style.display = 'none';
+    diasInput.required = false;
+
+    // Adicionar ticket_id como campo hidden
+    let ticketInput = form.querySelector('input[name="ticket_id"]');
+    if (!ticketInput) {
+        ticketInput = document.createElement('input');
+        ticketInput.type = 'hidden';
+        ticketInput.name = 'ticket_id';
+        form.appendChild(ticketInput);
+    }
+    ticketInput.value = ticketId;
+
+    // Configurar ação e título
+    switch(type) {
+        case 'warning':
+            form.action = `/moderacao/usuarios/${userId}/warning`;
+            title.textContent = '⚠️ Aplicar Warning';
+            submitBtn.textContent = 'Aplicar Warning';
+            submitBtn.style.background = '#f59e0b';
+            break;
+
+        case 'ban-temp':
+            form.action = `/moderacao/usuarios/${userId}/ban-temporario`;
+            title.textContent = '🚫 Aplicar Ban Temporário';
+            submitBtn.textContent = 'Aplicar Ban';
+            submitBtn.style.background = '#ef4444';
+            diasGroup.style.display = 'block';
+            diasInput.required = true;
+            break;
+
+        case 'perma-ban':
+            form.action = `/moderacao/usuarios/${userId}/perma-ban`;
+            title.textContent = '⛔ Ban Permanente';
+            submitBtn.textContent = 'Aplicar Ban Permanente';
+            submitBtn.style.background = '#991b1b';
+            break;
+
+        case 'ip-ban':
+            form.action = `/moderacao/usuarios/${userId}/ip-ban`;
+            title.textContent = '🛡️ IP Ban';
+            submitBtn.textContent = 'Aplicar IP Ban';
+            submitBtn.style.background = '#7f1d1d';
+            break;
+    }
+
+    // Mostrar modal
+    modal.style.display = 'flex';
+}
+
+// Criar estrutura do modal
+function createPunishmentModal() {
+    const modal = document.createElement('div');
+    modal.id = 'punishment-modal-ticket';
+    modal.style.cssText = `
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+    `;
+
+    modal.innerHTML = `
+        <div style="background: white; border-radius: 16px; padding: 32px; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3);" onclick="event.stopPropagation()">
+            <h2 id="punishment-modal-title" style="font-size: 24px; font-weight: 700; color: #1a202c; margin-bottom: 20px;">Aplicar Punição</h2>
+            
+            <form id="punishment-form-ticket" method="POST">
+                <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').content}">
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">
+                        Motivo *
+                    </label>
+                    <textarea name="motivo" 
+                              id="punishment-motivo-input"
+                              required 
+                              minlength="10" 
+                              maxlength="1000" 
+                              placeholder="Descreva o motivo da punição..."
+                              style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 15px; font-family: inherit; resize: vertical; min-height: 100px;"></textarea>
+                    <small style="display: block; margin-top: 4px; color: #6b7280; font-size: 12px;">
+                        Mínimo 10 caracteres
+                    </small>
+                </div>
+
+                <div id="punishment-dias-group" style="margin-bottom: 20px; display: none;">
+                    <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">
+                        Duração (dias) *
+                    </label>
+                    <input type="number" 
+                           name="dias" 
+                           id="punishment-dias-input"
+                           min="1" 
+                           max="365" 
+                           placeholder="Ex: 7"
+                           style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 15px;">
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" 
+                            onclick="closePunishmentModal()"
+                            style="flex: 1; padding: 14px; background: #e5e7eb; color: #374151; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                            id="punishment-submit-btn"
+                            style="flex: 1; padding: 14px; background: #667eea; color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                        Confirmar
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    // Event listeners
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closePunishmentModal();
+        }
+    });
+
+    // Validação do form
+    const form = modal.querySelector('#punishment-form-ticket');
+    form.addEventListener('submit', function(e) {
+        const motivo = modal.querySelector('#punishment-motivo-input').value.trim();
+        const diasGroup = modal.querySelector('#punishment-dias-group');
+        const diasInput = modal.querySelector('#punishment-dias-input');
+
+        if (motivo.length < 10) {
+            e.preventDefault();
+            alert('O motivo deve ter no mínimo 10 caracteres.');
+            return false;
+        }
+
+        if (diasGroup.style.display !== 'none') {
+            const dias = parseInt(diasInput.value);
+            if (!dias || dias < 1 || dias > 365) {
+                e.preventDefault();
+                alert('A duração deve ser entre 1 e 365 dias.');
+                return false;
+            }
+        }
+
+        if (!confirm('Tem certeza que deseja aplicar esta punição?')) {
+            e.preventDefault();
+            return false;
+        }
+
+        // Desabilitar botão
+        const submitBtn = modal.querySelector('#punishment-submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Enviando...';
+    });
+
+    return modal;
+}
+
+function closePunishmentModal() {
+    const modal = document.getElementById('punishment-modal-ticket');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Fechar com ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closePunishmentModal();
+    }
+});
+
+console.log('✅ Sistema de punição via ticket carregado');
+</script>
 </body>
 </html>
