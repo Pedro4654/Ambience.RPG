@@ -7,6 +7,8 @@ use App\Models\Post;
 use App\Models\UserFollower;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Notificacao; // ✅ NOVO
+use Illuminate\Support\Facades\Log; // ✅ NOVO
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 /**
@@ -127,6 +129,19 @@ class ProfileController extends Controller {
         
         // Atualizar contador
         $usuario->increment('total_seguidores');
+        
+        // ✅ NOVA NOTIFICAÇÃO
+        try {
+            Notificacao::notificarNovoSeguidor(Auth::id(), $usuario_id);
+            Log::info('Notificação de seguidor criada', [
+                'seguidor_id' => Auth::id(),
+                'seguido_id' => $usuario_id
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Erro ao criar notificação de seguidor', [
+                'error' => $e->getMessage()
+            ]);
+        }
         
         return back()->with('success', 'Agora você está seguindo ' . $usuario->username);
     }

@@ -322,6 +322,8 @@ class ModeracaoUsuarioController extends Controller
             'username' => 'required|string|max:50|unique:usuarios,username,' . $id,
             'nickname' => 'nullable|string|max:50',
             'email' => 'required|email|max:100|unique:usuarios,email,' . $id,
+            'genero' => 'required|in:masculino,feminino',
+        'classe_personagem' => 'required|in:ladino,barbaro,paladino,arqueiro,bardo,mago',
             'bio' => 'nullable|string|max:500',
             'nivel_usuario' => 'required|in:usuario,moderador,admin',
             'status' => 'required|in:ativo,inativo'
