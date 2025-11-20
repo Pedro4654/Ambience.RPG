@@ -27,6 +27,8 @@ return Application::configure(basePath: dirname(__DIR__))
             VerificarPunicoes::class,
         ]);
 
+        $middleware->redirectGuestsTo('login');
+
         // Adicionar middleware de verificação de punições
         $middleware->append(VerificarPunicoes::class);
 

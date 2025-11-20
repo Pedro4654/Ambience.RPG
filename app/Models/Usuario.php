@@ -33,6 +33,8 @@ class Usuario extends Authenticatable
         'pontos_reputacao',
         'ranking_posicao',
         'verificado',
+        'genero',              // ✅ NOVO
+        'classe_personagem',   // ✅ NOVO
         // Recuperação de senha
         'reset_token',
         'reset_token_expires_at',
@@ -90,6 +92,28 @@ class Usuario extends Authenticatable
         'account_hard_delete_at' => 'datetime'
     ];
 
+
+    /**
+     * Retorna o caminho do avatar padrão baseado em gênero e classe
+     */
+    public static function getDefaultAvatar($genero, $classe): string
+    {
+        $generoValido = in_array($genero, ['masculino', 'feminino']) ? $genero : 'masculino';
+        
+        $classesValidas = ['ladino', 'barbaro', 'paladino', 'arqueiro', 'bardo', 'mago'];
+        $classeValida = in_array($classe, $classesValidas) ? $classe : 'ladino';
+        
+        $path = "images/avatars/default/{$generoValido}/{$classeValida}.png";
+        
+        // Verificar se o arquivo existe
+        if (!file_exists(public_path($path))) {
+            Log::warning("Avatar padrão não encontrado: {$path}");
+            return 'images/default-avatar.png'; // Fallback
+        }
+        
+        return $path;
+    }
+
     public function getAuthPassword()
     {
         return $this->senha_hash;
@@ -142,27 +166,64 @@ class Usuario extends Authenticatable
     // MÉTODOS DE AVATAR
     // ============================================================
 
-    public function getAvatarUrlAttribute($value)
-    {
-        Log::info('Verificando avatar_url', ['value' => $value, 'user_id' => $this->id]);
+    /**
+ * ✅ CORRIGIDO: Retorna avatar personalizado OU padrão baseado em gênero/classe
+ */
+public function getAvatarUrlAttribute($value)
+{
+    Log::info('🔍 Verificando avatar_url', [
+        'value' => $value,
+        'user_id' => $this->id,
+        'genero' => $this->genero,
+        'classe' => $this->classe_personagem
+    ]);
 
-        if ($value) {
+    // Se tem avatar personalizado
+    if ($value) {
+        // Se for um avatar padrão (path começa com 'avatars/default/')
+        if (str_starts_with($value, 'avatars/default/')) {
             $fullPath = storage_path('app/public/' . $value);
-            Log::info('Caminho completo do avatar', ['path' => $fullPath, 'exists' => file_exists($fullPath)]);
-
+            
             if (file_exists($fullPath)) {
                 $url = asset('storage/' . $value);
-                Log::info('URL do avatar gerada', ['url' => $url]);
+                Log::info('✅ Avatar padrão encontrado no storage', ['url' => $url]);
                 return $url;
-            } else {
-                Log::warning('Arquivo de avatar não encontrado', ['path' => $fullPath]);
             }
         }
+        // Se for um avatar customizado (upload do usuário)
+        else {
+            $fullPath = storage_path('app/public/' . $value);
+            
+            if (file_exists($fullPath)) {
+                $url = asset('storage/' . $value);
+                Log::info('✅ Avatar customizado encontrado', ['url' => $url]);
+                return $url;
+            } else {
+                Log::warning('⚠️ Avatar customizado não encontrado', ['path' => $fullPath]);
+            }
+        }
+    }
 
-        $defaultUrl = asset('images/default-avatar.png');
-        Log::info('Usando avatar padrão', ['url' => $defaultUrl]);
+    // 🆕 USAR AVATAR PADRÃO BASEADO EM GÊNERO E CLASSE
+    if ($this->genero && $this->classe_personagem) {
+        $defaultPath = self::getDefaultAvatar($this->genero, $this->classe_personagem);
+        $defaultUrl = asset($defaultPath);
+        
+        Log::info('🎭 Usando avatar padrão baseado em gênero/classe', [
+            'genero' => $this->genero,
+            'classe' => $this->classe_personagem,
+            'path' => $defaultPath,
+            'url' => $defaultUrl
+        ]);
+        
         return $defaultUrl;
     }
+
+    // Fallback final (caso não tenha gênero/classe)
+    $fallbackUrl = asset('images/default-avatar.png');
+    Log::warning('⚠️ Usando fallback geral', ['url' => $fallbackUrl]);
+    return $fallbackUrl;
+}
 
     public function deleteOldAvatar()
     {

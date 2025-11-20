@@ -112,17 +112,21 @@ class UsuarioController extends Controller
             'password' => ['required', Password::min(8)->letters()->numbers()],
             'bio' => 'nullable|string',
             'data_de_nascimento' => 'required|date|before:today',
+            'genero' => 'required|in:masculino,feminino',                    // ✅ NOVO
+            'classe_personagem' => 'required|in:ladino,barbaro,paladino,arqueiro,bardo,mago', // ✅ NOVO
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'accept_terms' => 'required|accepted',
         ]);
 
         $avatarPath = null;
 
-        // Processar upload da foto de perfil
+        // Processar upload da foto de perfil (OPCIONAL AGORA)
         if ($request->hasFile('avatar')) {
             Log::info('Processando upload de avatar no cadastro');
             $avatarPath = $this->uploadAvatar($request->file('avatar'));
         }
+        // ✅ NOVO: Se não tiver avatar, deixar null
+        // O Model automaticamente retornará o avatar padrão baseado em gênero + classe
 
         DB::beginTransaction();
         try {
@@ -133,7 +137,9 @@ class UsuarioController extends Controller
                 'senha_hash' => Hash::make($request->password),
                 'bio' => $request->bio,
                 'data_de_nascimento' => $request->data_de_nascimento,
-                'avatar_url' => $avatarPath,
+                'genero' => $request->genero,                          // ✅ NOVO
+                'classe_personagem' => $request->classe_personagem,    // ✅ NOVO
+                'avatar_url' => $avatarPath, // Null se não enviou foto
                 'data_criacao' => now(),
                 'status' => 'ativo',
             ]);
@@ -145,7 +151,10 @@ class UsuarioController extends Controller
 
             Log::info('Usuário cadastrado com sucesso', [
                 'user_id' => $usuario->id,
+                'genero' => $usuario->genero,
+                'classe' => $usuario->classe_personagem,
                 'avatar_path' => $avatarPath,
+                'avatar_url_final' => $usuario->avatar_url, // Este já retornará o padrão se for null
                 'fingerprint' => DeviceFingerprint::generateFingerprint($request)
             ]);
 
@@ -203,6 +212,8 @@ class UsuarioController extends Controller
             'password' => ['nullable', Password::min(8)->letters()->numbers()],
             'bio' => 'nullable|string',
             'data_de_nascimento' => 'required|date|before:today',
+            'genero' => 'required|in:masculino,feminino',                    // ✅ NOVO
+            'classe_personagem' => 'required|in:ladino,barbaro,paladino,arqueiro,bardo,mago', // ✅ NOVO
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
@@ -218,18 +229,27 @@ class UsuarioController extends Controller
         if ($request->hasFile('avatar')) {
             Log::info('Processando upload de novo avatar');
 
-            // Deletar avatar antigo
-            $deleted = $usuario->deleteOldAvatar();
-            Log::info('Avatar antigo deletado', ['deleted' => $deleted, 'user_id' => $usuario->id]);
+            // Deletar avatar antigo SOMENTE se não for um avatar padrão
+            if ($usuario->getOriginal('avatar_url') && 
+                !str_contains($usuario->getOriginal('avatar_url'), 'avatars/default/')) {
+                $deleted = $usuario->deleteOldAvatar();
+                Log::info('Avatar antigo deletado', ['deleted' => $deleted, 'user_id' => $usuario->id]);
+            }
 
             // Upload novo avatar
             $data['avatar_url'] = $this->uploadAvatar($request->file('avatar'));
         }
 
         $usuario->update($data);
-        Log::info('Usuário atualizado com sucesso', ['user_id' => $usuario->id]);
+        
+        Log::info('Usuário atualizado com sucesso', [
+            'user_id' => $usuario->id,
+            'genero' => $usuario->genero,
+            'classe' => $usuario->classe_personagem
+        ]);
 
-        return redirect()->route('usuarios.show', $usuario)->with('success', 'Usuário atualizado com sucesso!');
+        return redirect()->route('usuarios.show', $usuario)
+            ->with('success', 'Perfil atualizado com sucesso!');
     }
 
     // Excluir usuário

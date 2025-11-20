@@ -31,6 +31,16 @@ Route::get('/', function () {
 Route::get('/ban-ip', [App\Http\Controllers\ModeracaoUsuarioController::class, 'mostrarIpBan'])
     ->name('public.ip_ban'); // rota pública para mostrar IP ban para visitantes/guests
 
+
+    // ==================== ROTAS DE NOTIFICAÇÕES ====================
+Route::middleware(['auth'])->prefix('api/notificacoes')->name('api.notificacoes.')->group(function () {
+    Route::get('/', [App\Http\Controllers\NotificacaoController::class, 'index'])->name('index');
+    Route::get('/count', [App\Http\Controllers\NotificacaoController::class, 'count'])->name('count');
+    Route::post('/{id}/marcar-lida', [App\Http\Controllers\NotificacaoController::class, 'marcarComoLida'])->name('marcar-lida');
+    Route::post('/marcar-todas-lidas', [App\Http\Controllers\NotificacaoController::class, 'marcarTodasComoLidas'])->name('marcar-todas-lidas');
+    Route::delete('/{id}', [App\Http\Controllers\NotificacaoController::class, 'destroy'])->name('destroy');
+});
+
     // ========================================
 // ROTAS PÚBLICAS DE RECURSO DE IP BAN
 // ========================================

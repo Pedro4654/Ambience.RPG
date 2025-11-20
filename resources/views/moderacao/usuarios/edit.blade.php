@@ -264,6 +264,32 @@
                     <div class="form-hint">Máximo 500 caracteres</div>
                 </div>
 
+                <!-- ✅ NOVO: Gênero -->
+                <div class="form-group">
+                    <label for="genero" class="form-label">Gênero *</label>
+                    <select name="genero" id="genero" class="form-select" required>
+                        <option value="">Selecione</option>
+                        <option value="masculino" {{ old('genero', $usuario->genero) == 'masculino' ? 'selected' : '' }}>Masculino</option>
+                        <option value="feminino" {{ old('genero', $usuario->genero) == 'feminino' ? 'selected' : '' }}>Feminino</option>
+                    </select>
+                    <div class="form-hint">⚠️ Alterar o gênero pode mudar o avatar padrão</div>
+                </div>
+
+                <!-- ✅ NOVO: Classe do Personagem -->
+                <div class="form-group">
+                    <label for="classe_personagem" class="form-label">Classe do Personagem *</label>
+                    <select name="classe_personagem" id="classe_personagem" class="form-select" required>
+                        <option value="">Selecione</option>
+                        <option value="ladino" {{ old('classe_personagem', $usuario->classe_personagem) == 'ladino' ? 'selected' : '' }}>🗡️ Ladino</option>
+                        <option value="barbaro" {{ old('classe_personagem', $usuario->classe_personagem) == 'barbaro' ? 'selected' : '' }}>🪓 Bárbaro</option>
+                        <option value="paladino" {{ old('classe_personagem', $usuario->classe_personagem) == 'paladino' ? 'selected' : '' }}>🛡️ Paladino</option>
+                        <option value="arqueiro" {{ old('classe_personagem', $usuario->classe_personagem) == 'arqueiro' ? 'selected' : '' }}>🏹 Arqueiro</option>
+                        <option value="bardo" {{ old('classe_personagem', $usuario->classe_personagem) == 'bardo' ? 'selected' : '' }}>🎵 Bardo</option>
+                        <option value="mago" {{ old('classe_personagem', $usuario->classe_personagem) == 'mago' ? 'selected' : '' }}>🔮 Mago</option>
+                    </select>
+                    <div class="form-hint">⚠️ Alterar a classe pode mudar o avatar padrão</div>
+                </div>
+
                 @if(auth()->user()->isAdmin())
                     <div class="form-group">
                         <label for="nivel_usuario" class="form-label">Nível de Usuário *</label>
