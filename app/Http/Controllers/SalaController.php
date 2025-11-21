@@ -147,6 +147,7 @@ class SalaController extends Controller
             // Preparar dados para criação
             $dadosSala = [
                 'nome' => $request->nome,
+                'sessao_id' => Str::uuid()->toString(),
                 'descricao' => $request->descricao,
                 'criador_id' => Auth::id(),
                 'tipo' => $request->tipo,

@@ -8,7 +8,7 @@ use App\Http\Controllers\SavedPostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\CommentController;
-
+use App\Http\Controllers\SessaoController;
 use App\Http\Controllers\ModerationController;
 
 
@@ -26,6 +26,8 @@ use App\Http\Controllers\ModerationController;
 Route::get('/', function () {
     return view('home');
 })->name('home');
+
+Broadcast::routes(['middleware' => ['web', 'auth']]);
 
 // Rotas públicas apenas para visitantes (se estiver logado, middleware redireciona para 'home')
 Route::middleware('guest.custom')->group(function () {
@@ -51,6 +53,8 @@ Route::middleware('guest.custom')->group(function () {
     Route::post('/reenviar-token', [UsuarioController::class, 'resendToken'])
         ->name('usuarios.resend.token');
 });
+
+
 
 
 // Rotas de Moderação
@@ -80,9 +84,7 @@ Route::post('/salas/{id}/iniciar-sessao', [SalaController::class, 'iniciarSessao
  * Visualizar sala de sessão
  * GET /sessoes/{id}
  */
-Route::get('/sessoes/{id}', [SalaController::class, 'showSessao'])
-    ->name('sessoes.show')
-    ->where('id', '[0-9]+');
+
 
 /**
  * Obter sessão ativa da sala
@@ -110,6 +112,11 @@ Route::post('/sessoes/{id}/entrar', [SalaController::class, 'entrarNaSessao'])
 
 
 // ==================== ROTAS PROTEGIDAS (COM AUTENTICAÇÃO) ====================
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/sessoes/{id}', [SessaoController::class, 'show'])->name('sessoes.show');
+});
+
 Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->group(function () {
 
     // ========== ROTAS DE USUÁRIOS ==========
