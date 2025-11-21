@@ -166,6 +166,12 @@ class SessaoJogo extends Model
         $this->status = 'ativa';
         return $this->save();
     }
+        public function grids()
+    {
+        return $this->belongsToMany(Grid::class, 'grid_sessao', 'sessao_id', 'grid_id')
+            ->withPivot('is_primary')
+            ->withTimestamps();
+    }
 
     /**
      * Contar participantes ativos
