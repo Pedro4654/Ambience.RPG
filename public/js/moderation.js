@@ -3,6 +3,7 @@
    ========================================
    Versão com palavras customizadas EMBUTIDAS
    Não é mais necessário passar customWords no init()!
+   CORRIGIDO: Falsos positivos removidos
    ======================================== */
 
 (function (global) {
@@ -70,7 +71,6 @@
       "chupou",
       "porra",
       "crossdresser",
-      "cu",
       "cuecao",
       "custozinha",
       "cuzao",
@@ -208,6 +208,7 @@
       "xexeca",
       "xibio",
       "xoroca",
+      "gay",
       "xota",
       "xotinha",
       "xoxota",
@@ -507,9 +508,11 @@
       return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
+    // CORRIGIDO: Regex agora usa word boundaries para evitar falsos positivos
     function looseRegexFromWord(word) {
       const parts = Array.from(word).map(ch => escapeRegExp(ch));
-      return new RegExp(parts.join('[^a-z0-9]*'), 'i');
+      // Adiciona word boundary no início e fim
+      return new RegExp('\\b' + parts.join('[^a-z0-9]*') + '\\b', 'i');
     }
 
     function _tokenize(text) {
@@ -536,7 +539,8 @@
         s = collapseRepeats(s);
         return s;
       }).filter(Boolean)))
-      .filter(token => token.length > 1);
+      // CORRIGIDO: Filtra palavras muito curtas que causam falsos positivos
+      .filter(token => token.length >= 3);
       return norm;
     }
 
@@ -566,17 +570,26 @@
       let norm = original.toLowerCase();
       norm = removeDiacritics(norm);
       const leeted = applyLeetMap(norm);
-      const alnum = leeted.replace(/[^a-z0-9]+/g, '');
+      const alnum = leeted.replace(/[^a-z0-9\s]+/g, ' '); // Mantém espaços
       const collapsed = collapseRepeats(alnum);
 
       const normDict = buildNormalizedDict();
       const matchesSet = new Set();
 
       normDict.forEach(bad => {
-        if (!bad) return;
-        if (collapsed.indexOf(bad) !== -1) {
+        if (!bad || bad.length < 3) return; // Ignora palavras muito curtas
+        
+        // CORRIGIDO: Usa split por espaços para buscar palavras completas
+        const words = collapsed.split(/\s+/);
+        
+        // Verifica se a palavra ruim aparece como palavra completa
+        if (words.includes(bad)) {
           matchesSet.add(bad);
-        } else {
+          return;
+        }
+        
+        // Para palavras maiores, verifica com regex com word boundaries
+        if (bad.length >= 4) {
           const loose = looseRegexFromWord(bad);
           if (loose.test(leeted)) {
             matchesSet.add(bad);
@@ -681,22 +694,51 @@
         return null;
       }
       const handler = async function(e){
+        // Prevenir submit padrão temporariamente
+        e.preventDefault();
+        
+        // Fazer checagem local primeiro (mais rápida)
+        let hasLocalIssues = false;
+        const localResults = [];
+        
+        fields.forEach(f => {
+          const el = document.querySelector(f.selector);
+          const text = el ? el.value || '' : '';
+          const localCheck = checkLocal(text);
+          
+          if (localCheck.inappropriate) {
+            hasLocalIssues = true;
+            localResults.push({ field: f.fieldName, result: localCheck });
+          }
+        });
+        
+        // Se detectou problema localmente, bloquear
+        if (hasLocalIssues) {
+          form.dispatchEvent(new CustomEvent('moderation:blocked', { detail: localResults }));
+          return false;
+        }
+        
+        // Se passou na checagem local, verificar no servidor
         const checks = fields.map(f => {
           const el = document.querySelector(f.selector);
           const text = el ? el.value || '' : '';
           return moderateServer(text).then(r => ({ field: f.fieldName, result: r }));
         });
+        
         const results = await Promise.all(checks);
         const blocked = results.some(r => {
-          if (!r.result.ok) return true;
+          if (!r.result.ok) return false; // Erro de rede não bloqueia
           return r.result.data && r.result.data.inappropriate;
         });
+        
         if (blocked) {
-          e.preventDefault();
           form.dispatchEvent(new CustomEvent('moderation:blocked', { detail: results }));
           return false;
         }
+        
+        // Tudo OK, submeter o formulário
         form.dispatchEvent(new CustomEvent('moderation:ok', { detail: results }));
+        form.submit(); // Submit real
         return true;
       };
       form.addEventListener('submit', handler);

@@ -1,0 +1,50 @@
+<?php 
+
+// ===== app/Mail/RespostaUsuarioStaffMail.php =====
+
+namespace App\Mail;
+
+use App\Models\Ticket;
+use App\Models\TicketResposta;
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\SerializesModels;
+
+class RespostaUsuarioStaffMail extends Mailable
+{
+    use Queueable, SerializesModels;
+
+    public $ticket;
+    public $resposta;
+
+    public function __construct(Ticket $ticket, TicketResposta $resposta)
+    {
+        $this->ticket = $ticket;
+        $this->resposta = $resposta;
+    }
+
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: "💬 Usuário Respondeu no Ticket #{$this->ticket->numero_ticket} - Ambience RPG",
+        );
+    }
+
+    public function content(): Content
+    {
+        return new Content(
+            view: 'emails.resposta-usuario-staff',
+            with: [
+                'ticket' => $this->ticket,
+                'resposta' => $this->resposta,
+            ]
+        );
+    }
+
+    public function attachments(): array
+    {
+        return [];
+    }
+}

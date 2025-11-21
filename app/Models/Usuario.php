@@ -33,20 +33,42 @@ class Usuario extends Authenticatable
         'pontos_reputacao',
         'ranking_posicao',
         'verificado',
-        // ============ NOVOS CAMPOS PARA RECUPERAÇÃO COM TOKEN DE 6 DÍGITOS ============
+        'genero',              // ✅ NOVO
+        'classe_personagem',   // ✅ NOVO
+        // Recuperação de senha
         'reset_token',
         'reset_token_expires_at',
         'reset_attempts',
         'reset_attempts_reset_at',
+        // Status online
         'is_online',
         'last_seen',
-        'current_room'
+        'current_room',
+        // Campos de moderação
+        'warning_ativo',
+        'warning_motivo',
+        'warning_data',
+        'warning_aplicado_por',
+        'ban_tipo',
+        'ban_motivo',
+        'ban_inicio',
+        'ban_fim',
+        'ban_aplicado_por',
+        'ip_ban_ativo',
+        'ip_ban_fingerprint',
+        'ip_ban_motivo',
+        'ip_ban_data',
+        'ip_ban_aplicado_por',
+        'account_deleted_at',
+        'account_deleted_motivo',
+        'account_deleted_por',
+        'account_hard_delete_at'
     ];
 
     protected $hidden = [
         'senha_hash',
         'remember_token',
-        'reset_token', // ← Importante: nunca expor o token de 6 dígitos
+        'reset_token',
     ];
 
     protected $casts = [
@@ -54,13 +76,43 @@ class Usuario extends Authenticatable
         'data_atualizacao' => 'datetime',
         'data_de_nascimento' => 'date',
         'verificado' => 'boolean',
-        // ============ NOVOS CASTS PARA RECUPERAÇÃO DE SENHA ============
         'reset_token_expires_at' => 'datetime',
         'reset_attempts_reset_at' => 'datetime',
         'reset_attempts' => 'integer',
         'is_online' => 'boolean',
-        'last_seen' => 'datetime'
+        'last_seen' => 'datetime',
+        // Casts para moderação
+        'warning_ativo' => 'boolean',
+        'warning_data' => 'datetime',
+        'ban_inicio' => 'datetime',
+        'ban_fim' => 'datetime',
+        'ip_ban_ativo' => 'boolean',
+        'ip_ban_data' => 'datetime',
+        'account_deleted_at' => 'datetime',
+        'account_hard_delete_at' => 'datetime'
     ];
+
+
+    /**
+     * Retorna o caminho do avatar padrão baseado em gênero e classe
+     */
+    public static function getDefaultAvatar($genero, $classe): string
+    {
+        $generoValido = in_array($genero, ['masculino', 'feminino']) ? $genero : 'masculino';
+        
+        $classesValidas = ['ladino', 'barbaro', 'paladino', 'arqueiro', 'bardo', 'mago'];
+        $classeValida = in_array($classe, $classesValidas) ? $classe : 'ladino';
+        
+        $path = "images/avatars/default/{$generoValido}/{$classeValida}.png";
+        
+        // Verificar se o arquivo existe
+        if (!file_exists(public_path($path))) {
+            Log::warning("Avatar padrão não encontrado: {$path}");
+            return 'images/default-avatar.png'; // Fallback
+        }
+        
+        return $path;
+    }
 
     public function getAuthPassword()
     {
@@ -72,7 +124,10 @@ class Usuario extends Authenticatable
         $this->attributes['senha_hash'] = Hash::make($password);
     }
 
-    // Métodos para status online
+    // ============================================================
+    // MÉTODOS DE STATUS ONLINE
+    // ============================================================
+
     public function setOnline($roomId = null)
     {
         $this->update([
@@ -96,50 +151,80 @@ class Usuario extends Authenticatable
         return $this->current_room == $roomId && $this->is_online;
     }
 
-    // Scope para usuários online
     public function scopeOnline($query)
     {
         return $query->where('is_online', true);
     }
 
-    // Scope para usuários online em uma sala específica
     public function scopeOnlineInRoom($query, $roomId)
     {
         return $query->where('is_online', true)
             ->where('current_room', $roomId);
     }
 
-    // ============ MÉTODOS DE AVATAR (MANTIDOS DO SEU ORIGINAL) ============
+    // ============================================================
+    // MÉTODOS DE AVATAR
+    // ============================================================
 
     /**
-     * MÉTODO CORRIGIDO - Método para obter URL completa do avatar
-     */
-    public function getAvatarUrlAttribute($value)
-    {
-        Log::info('Verificando avatar_url', ['value' => $value, 'user_id' => $this->id]);
+ * ✅ CORRIGIDO: Retorna avatar personalizado OU padrão baseado em gênero/classe
+ */
+public function getAvatarUrlAttribute($value)
+{
+    Log::info('🔍 Verificando avatar_url', [
+        'value' => $value,
+        'user_id' => $this->id,
+        'genero' => $this->genero,
+        'classe' => $this->classe_personagem
+    ]);
 
-        if ($value) {
+    // Se tem avatar personalizado
+    if ($value) {
+        // Se for um avatar padrão (path começa com 'avatars/default/')
+        if (str_starts_with($value, 'avatars/default/')) {
             $fullPath = storage_path('app/public/' . $value);
-            Log::info('Caminho completo do avatar', ['path' => $fullPath, 'exists' => file_exists($fullPath)]);
-
+            
             if (file_exists($fullPath)) {
                 $url = asset('storage/' . $value);
-                Log::info('URL do avatar gerada', ['url' => $url]);
+                Log::info('✅ Avatar padrão encontrado no storage', ['url' => $url]);
                 return $url;
-            } else {
-                Log::warning('Arquivo de avatar não encontrado', ['path' => $fullPath]);
             }
         }
+        // Se for um avatar customizado (upload do usuário)
+        else {
+            $fullPath = storage_path('app/public/' . $value);
+            
+            if (file_exists($fullPath)) {
+                $url = asset('storage/' . $value);
+                Log::info('✅ Avatar customizado encontrado', ['url' => $url]);
+                return $url;
+            } else {
+                Log::warning('⚠️ Avatar customizado não encontrado', ['path' => $fullPath]);
+            }
+        }
+    }
 
-        // Avatar padrão caso não tenha foto
-        $defaultUrl = asset('images/default-avatar.png');
-        Log::info('Usando avatar padrão', ['url' => $defaultUrl]);
+    // 🆕 USAR AVATAR PADRÃO BASEADO EM GÊNERO E CLASSE
+    if ($this->genero && $this->classe_personagem) {
+        $defaultPath = self::getDefaultAvatar($this->genero, $this->classe_personagem);
+        $defaultUrl = asset($defaultPath);
+        
+        Log::info('🎭 Usando avatar padrão baseado em gênero/classe', [
+            'genero' => $this->genero,
+            'classe' => $this->classe_personagem,
+            'path' => $defaultPath,
+            'url' => $defaultUrl
+        ]);
+        
         return $defaultUrl;
     }
 
-    /**
-     * MÉTODO CORRIGIDO - Método para deletar avatar antigo
-     */
+    // Fallback final (caso não tenha gênero/classe)
+    $fallbackUrl = asset('images/default-avatar.png');
+    Log::warning('⚠️ Usando fallback geral', ['url' => $fallbackUrl]);
+    return $fallbackUrl;
+}
+
     public function deleteOldAvatar()
     {
         $originalAvatarUrl = $this->getOriginal('avatar_url');
@@ -163,11 +248,10 @@ class Usuario extends Authenticatable
         return false;
     }
 
-    // ============ NOVOS MÉTODOS PARA RECUPERAÇÃO DE SENHA COM TOKEN DE 6 DÍGITOS ============
+    // ============================================================
+    // MÉTODOS DE RECUPERAÇÃO DE SENHA COM TOKEN DE 6 DÍGITOS
+    // ============================================================
 
-    /**
-     * Gerar token de 6 dígitos numéricos único
-     */
     public function generateResetToken(): string
     {
         do {
@@ -188,18 +272,15 @@ class Usuario extends Authenticatable
         return $token;
     }
 
-    /**
-     * Definir token de recuperação
-     */
     public function setResetToken(): string
     {
         $token = $this->generateResetToken();
 
         $this->update([
             'reset_token' => $token,
-            'reset_token_expires_at' => Carbon::now()->addMinutes(15), // 15 minutos de validade
-            'reset_attempts' => 0, // Resetar contador de tentativas
-            'reset_attempts_reset_at' => Carbon::now()->addHour(), // Reset contador após 1 hora
+            'reset_token_expires_at' => Carbon::now()->addMinutes(15),
+            'reset_attempts' => 0,
+            'reset_attempts_reset_at' => Carbon::now()->addHour(),
         ]);
 
         Log::info('Token de reset definido', [
@@ -211,9 +292,6 @@ class Usuario extends Authenticatable
         return $token;
     }
 
-    /**
-     * Verificar se token é válido
-     */
     public function isValidResetToken(string $token): bool
     {
         $isValid = $this->reset_token === $token
@@ -231,12 +309,8 @@ class Usuario extends Authenticatable
         return $isValid;
     }
 
-    /**
-     * Verificar se pode tentar reset (máximo 5 tentativas por hora)
-     */
     public function canAttemptReset(): bool
     {
-        // Se já passou 1 hora, resetar contador
         if ($this->reset_attempts_reset_at && $this->reset_attempts_reset_at->isPast()) {
             $this->update([
                 'reset_attempts' => 0,
@@ -259,14 +333,10 @@ class Usuario extends Authenticatable
         return $canAttempt;
     }
 
-    /**
-     * Incrementar tentativas de reset
-     */
     public function incrementResetAttempts(): void
     {
         $this->increment('reset_attempts');
 
-        // Definir tempo de reset se não existe
         if (!$this->reset_attempts_reset_at) {
             $this->update(['reset_attempts_reset_at' => Carbon::now()->addHour()]);
         }
@@ -278,9 +348,6 @@ class Usuario extends Authenticatable
         ]);
     }
 
-    /**
-     * Limpar dados de reset após sucesso
-     */
     public function clearResetData(): void
     {
         $this->update([
@@ -293,9 +360,6 @@ class Usuario extends Authenticatable
         Log::info('Dados de reset limpos', ['user_id' => $this->id]);
     }
 
-    /**
-     * Verificar se email tem bloqueio temporário
-     */
     public static function isEmailBlocked(string $email): bool
     {
         $user = self::where('email', $email)->first();
@@ -312,9 +376,6 @@ class Usuario extends Authenticatable
         return $isBlocked;
     }
 
-    /**
-     * Obter tempo restante do bloqueio
-     */
     public function getBlockTimeRemaining(): ?int
     {
         if (!$this->reset_attempts_reset_at) return null;
@@ -329,70 +390,141 @@ class Usuario extends Authenticatable
         return $minutesRemaining;
     }
 
-    // ============ MÉTODO PARA COMPATIBILIDADE COM LARAVEL AUTH ============
+    // ============================================================
+    // MÉTODOS DE VERIFICAÇÃO DE PERMISSÕES (MODERAÇÃO)
+    // ============================================================
 
     /**
-     * Get the name that can be displayed to represent the user.
+     * Verificar se usuário é staff (moderador ou admin)
      */
-    public function getNameAttribute()
+    public function isStaff()
     {
-        return $this->nickname ?: $this->username;
+        return in_array($this->nivel_usuario, ['moderador', 'admin']);
     }
 
-
-      // ============================================================
-    // RELATIONSHIPS - COMUNIDADE
-    // ============================================================
-    
     /**
-     * Posts do usuário
+     * Verificar se é moderador
      */
-    public function posts() {
+    public function isModerador()
+    {
+        return $this->nivel_usuario === 'moderador';
+    }
+
+    /**
+     * Verificar se é admin
+     */
+    public function isAdmin()
+    {
+        return $this->nivel_usuario === 'admin';
+    }
+
+    /**
+     * Verificar se pode moderar tickets
+     */
+    public function podeModerar()
+    {
+        return $this->isStaff();
+    }
+
+    // ============================================================
+    // RELACIONAMENTOS - MODERAÇÃO
+    // ============================================================
+
+    /**
+     * 🆕 Relacionamento com device fingerprints
+     */
+    public function deviceFingerprints()
+    {
+        return $this->hasMany(DeviceFingerprint::class, 'usuario_id');
+    }
+
+    /**
+     * 🆕 Moderador que aplicou warning
+     */
+    public function warningAplicadoPor()
+    {
+        return $this->belongsTo(Usuario::class, 'warning_aplicado_por');
+    }
+
+    /**
+     * 🆕 Moderador que aplicou ban
+     */
+    public function banAplicadoPor()
+    {
+        return $this->belongsTo(Usuario::class, 'ban_aplicado_por');
+    }
+
+    /**
+     * 🆕 Admin que aplicou IP ban
+     */
+    public function ipBanAplicadoPor()
+    {
+        return $this->belongsTo(Usuario::class, 'ip_ban_aplicado_por');
+    }
+
+    /**
+     * 🆕 Moderador que deletou a conta
+     */
+    public function accountDeletedPor()
+    {
+        return $this->belongsTo(Usuario::class, 'account_deleted_por');
+    }
+
+    /**
+     * 🆕 Warnings aplicados por este usuário (se for staff)
+     */
+    public function warningsAplicados()
+    {
+        return $this->hasMany(Usuario::class, 'warning_aplicado_por');
+    }
+
+    /**
+     * 🆕 Bans aplicados por este usuário (se for staff)
+     */
+    public function bansAplicados()
+    {
+        return $this->hasMany(Usuario::class, 'ban_aplicado_por');
+    }
+
+    // ============================================================
+    // RELACIONAMENTOS - COMUNIDADE
+    // ============================================================
+
+    public function posts()
+    {
         return $this->hasMany(Post::class, 'usuario_id', 'id');
     }
-    
-    /**
-     * Posts salvos pelo usuário
-     */
-    public function saved_posts() {
+
+    public function saved_posts()
+    {
         return $this->hasMany(SavedPost::class, 'usuario_id', 'id')
             ->with('post');
     }
-    
-    /**
-     * Curtidas feitas pelo usuário
-     */
-    public function curtidas() {
+
+    public function curtidas()
+    {
         return $this->hasMany(Like::class, 'usuario_id', 'id');
     }
-    
-    /**
-     * Comentários do usuário
-     */
-    public function comentarios() {
+
+    public function comentarios()
+    {
         return $this->hasMany(Comment::class, 'usuario_id', 'id');
     }
-    
-    /**
-     * Usuários que seguem este usuário
-     */
-    public function seguidores() {
+
+    public function seguidores()
+    {
         return $this->hasMany(UserFollower::class, 'seguido_id', 'id')
             ->with('seguidor');
     }
-    
-    /**
-     * Usuários que este usuário segue
-     */
-    public function seguindo() {
+
+    public function seguindo()
+    {
         return $this->hasMany(UserFollower::class, 'seguidor_id', 'id')
             ->with('seguido');
     }
-    
-    /**
-     * Relação many-to-many com posts salvos (alternativa)
-     */
-    public function posts_salvos() {
+
+    public function posts_salvos()
+    {
         return $this->belongsToMany(
             Post::class,
             'saved_posts',
@@ -400,11 +532,9 @@ class Usuario extends Authenticatable
             'post_id'
         )->withTimestamps();
     }
-    
-    /**
-     * Relação many-to-many de seguidores
-     */
-    public function followers() {
+
+    public function followers()
+    {
         return $this->belongsToMany(
             Usuario::class,
             'user_followers',
@@ -415,11 +545,9 @@ class Usuario extends Authenticatable
         )->as('follower')
          ->withTimestamps();
     }
-    
-    /**
-     * Relação many-to-many de seguindo
-     */
-    public function following() {
+
+    public function following()
+    {
         return $this->belongsToMany(
             Usuario::class,
             'user_followers',
@@ -431,4 +559,47 @@ class Usuario extends Authenticatable
          ->withTimestamps();
     }
 
+    // ============================================================
+    // RELACIONAMENTOS - SUPORTE
+    // ============================================================
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'usuario_id');
+    }
+
+    public function ticketsAtribuidos()
+    {
+        return $this->hasMany(Ticket::class, 'atribuido_a');
+    }
+
+    public function denunciasRecebidas()
+    {
+        return $this->hasMany(Ticket::class, 'usuario_denunciado_id')
+            ->where('categoria', 'denuncia');
+    }
+
+    public function notificacoesTickets()
+    {
+        return $this->hasMany(TicketNotificacao::class, 'usuario_id');
+    }
+
+    public function notificacoesTicketsNaoLidas()
+    {
+        return $this->notificacoesTickets()->where('lida', false);
+    }
+
+    public function getTotalNotificacoesNaoLidas()
+    {
+        return $this->notificacoesTicketsNaoLidas()->count();
+    }
+
+    // ============================================================
+    // ATRIBUTOS COMPUTADOS
+    // ============================================================
+
+    public function getNameAttribute()
+    {
+        return $this->nickname ?: $this->username;
+    }
 }

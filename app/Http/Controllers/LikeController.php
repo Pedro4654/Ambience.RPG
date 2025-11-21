@@ -13,6 +13,7 @@ use App\Models\Like;
 use App\Models\Comment;
 use App\Models\SavedPost;
 use App\Models\PostFile;
+use App\Models\Notificacao; // ✅ NOVO
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -26,6 +27,9 @@ class LikeController extends Controller {
 
     // ==================== ADICIONAR CURTIDA ====================
 
+     /**
+     * Adicionar curtida ✅ ATUALIZADO COM NOTIFICAÇÃO
+     */
     public function store(Request $request) {
         $validated = $request->validate([
             'post_id' => 'required|exists:posts,id'
@@ -49,6 +53,20 @@ class LikeController extends Controller {
             'usuario_id' => Auth::id(),
             'post_id' => $post->id
         ]);
+
+        // ✅ CRIAR NOTIFICAÇÃO
+        try {
+            Notificacao::notificarCurtida(Auth::id(), $post->id, $post->usuario_id);
+            Log::info('Notificação de curtida criada', [
+                'usuario_id' => Auth::id(),
+                'post_id' => $post->id,
+                'autor_id' => $post->usuario_id
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Erro ao criar notificação de curtida', [
+                'error' => $e->getMessage()
+            ]);
+        }
 
         return response()->json([
             'success' => true,

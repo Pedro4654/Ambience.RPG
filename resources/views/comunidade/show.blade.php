@@ -1,6 +1,3 @@
-<!-- VIEW 3: show.blade.php -->
-<!-- resources/views/comunidade/show.blade.php -->
-
 @extends('layout.app')
 
 @section('content')
@@ -88,17 +85,14 @@
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
         <div class="grid grid-cols-4 gap-4 text-center">
             <div>
-               
                 <p class="text-gray-600 text-sm">Curtidas: </p>
-                 <p class="text-2xl font-bold text-red-500">{{ $post->curtidas()->count() }}</p>
+                <p class="text-2xl font-bold text-red-500">{{ $post->curtidas()->count() }}</p>
             </div>
             <div>
-                
                 <p class="text-gray-600 text-sm">Comentários: </p>
                 <p class="text-2xl font-bold text-blue-500">{{ $post->comentarios()->count() }}</p>
             </div>
             <div>
-                
                 <p class="text-gray-600 text-sm">Salvos: </p>
                 <p class="text-2xl font-bold text-green-500">{{ $post->salvos()->count() }}</p>
             </div>
@@ -140,7 +134,7 @@
                         @csrf
                         <input type="hidden" name="post_id" value="{{ $post->id }}">
                         <button type="submit" class="w-full py-3 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 font-bold transition-colors">
-                            ☐ Salvar
+                            ☆ Salvar
                         </button>
                     </form>
                 @endif
@@ -164,8 +158,8 @@
         <h2 class="text-xl font-bold text-gray-800 mb-6">💬 Comentários</h2>
 
         @if(Auth::check())
-            <!-- Formulário de Comentário -->
-            <form action="{{ route('comunidade.comentar') }}" method="POST" class="mb-6 pb-6 border-b">
+            <!-- Formulário de Comentário COM MODERAÇÃO -->
+            <form action="{{ route('comunidade.comentar') }}" method="POST" class="mb-6 pb-6 border-b" id="form-comentario">
                 @csrf
                 <input type="hidden" name="post_id" value="{{ $post->id }}">
 
@@ -173,13 +167,16 @@
                     <img src="{{ Auth::user()->avatar_url ?? asset('images/default-avatar.png') }}" alt="Seu avatar" class="w-10 h-10 rounded-full object-cover">
                     <div class="flex-1">
                         <textarea 
+                            id="comentario-conteudo"
                             name="conteudo" 
                             maxlength="1000"
                             placeholder="Deixe um comentário..."
                             rows="3"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         ></textarea>
-                        <button type="submit" class="mt-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+                        <small id="comentario-conteudo-warning" style="display:none;color:#e0556b;font-size:0.9rem;margin-top:8px;">⚠️ Conteúdo inapropriado detectado</small>
+                        
+                        <button type="submit" id="comentar-btn" class="mt-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
                             Comentar
                         </button>
                     </div>
@@ -199,4 +196,63 @@
         @endif
     </div>
 </div>
+
+<!-- SCRIPTS DE MODERAÇÃO -->
+<script src="{{ asset('js/moderation.js') }}" defer></script>
+
+<script>
+window.addEventListener('DOMContentLoaded', async () => {
+    // Inicializar moderação
+    const state = await window.Moderation.init({
+        csrfToken: '{{ csrf_token() }}',
+        endpoint: '/moderate',
+        debounceMs: 120,
+    });
+
+    console.log('[Comment Moderation] Sistema inicializado:', state);
+
+    // Função para aplicar warnings
+    function applyWarning(elSelector, res) {
+        const el = document.querySelector(elSelector);
+        const warn = document.querySelector(elSelector + '-warning');
+        if (!el) return;
+        
+        if (res && res.inappropriate) {
+            el.classList.add('border-red-500', 'bg-red-50');
+            if (warn) warn.style.display = 'block';
+        } else {
+            el.classList.remove('border-red-500', 'bg-red-50');
+            if (warn) warn.style.display = 'none';
+        }
+    }
+
+    // Monitorar campo de comentário
+    window.Moderation.attachInput('#comentario-conteudo', 'comentario', {
+        onLocal: (res) => {
+            console.log('[Comentário] Moderação local:', res);
+            applyWarning('#comentario-conteudo', res);
+        },
+        onServer: (srv) => {
+            console.log('[Comentário] Moderação server:', srv);
+            if (srv && srv.data && srv.data.inappropriate) {
+                applyWarning('#comentario-conteudo', { inappropriate: true });
+            }
+        }
+    });
+
+    // Validação no submit do comentário
+    const formComentario = document.getElementById('form-comentario');
+    if (formComentario) {
+        formComentario.addEventListener('submit', function(e) {
+            const comentarioInapropriado = document.querySelector('#comentario-conteudo.border-red-500');
+            
+            if (comentarioInapropriado) {
+                e.preventDefault();
+                alert('⚠️ Comentário contém conteúdo impróprio. Corrija antes de enviar.');
+                return false;
+            }
+        });
+    }
+});
+</script>
 @endsection

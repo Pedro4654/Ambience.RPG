@@ -37,7 +37,11 @@ class Sala extends Model
         'profile_photo_color',    
         // campos do banner
         'banner_url',
-        'banner_color'
+        'banner_color',
+        // NOVOS CAMPOS
+    'motivo_desativacao',
+    'desativada_por',
+    'data_desativacao'
     ];
 
     /**
@@ -46,7 +50,8 @@ class Sala extends Model
     protected $casts = [
         'data_criacao' => 'datetime',
         'ativa' => 'boolean',
-        'max_participantes' => 'integer'
+        'max_participantes' => 'integer',
+        'data_desativacao' => 'datetime' // NOVO
     ];
 
     /**
@@ -74,6 +79,14 @@ class Sala extends Model
         return $this->hasMany(ParticipanteSala::class, 'sala_id')
             ->where('ativo', true);
     }
+
+    /**
+ * Relacionamento: Sala foi desativada por um staff
+ */
+public function desativadaPor(): BelongsTo
+{
+    return $this->belongsTo(Usuario::class, 'desativada_por');
+}
 
     /**
      * Relacionamento: Sala tem muitos participantes (incluindo inativos)
