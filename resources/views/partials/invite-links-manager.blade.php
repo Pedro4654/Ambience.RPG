@@ -1,27 +1,28 @@
-{{-- Salvar em: resources/views/partials/invite-links-manager.blade.php --}}
+{{-- resources/views/partials/invite-links-manager.blade.php --}}
 
 <!-- Modal de Gerenciamento de Links de Convite -->
-<div class="modal fade" id="inviteLinksModal" tabindex="-1" aria-labelledby="inviteLinksModalLabel" aria-hidden="true">
+<div class="modal fade" id="inviteLinksModal" tabindex="-1" aria-labelledby="inviteLinksModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="inviteLinksModalLabel">
-                    <i class="fas fa-link me-2"></i>Gerenciar Links de Convite
+        <div class="modal-content" style="background: linear-gradient(145deg, rgba(31, 42, 51, 0.98), rgba(20, 28, 35, 0.95)); border: 1px solid var(--border-subtle); border-radius: 20px;">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-subtle);">
+                <h5 class="modal-title" id="inviteLinksModalLabel" style="color: #fff; font-weight: 700;">
+                    <i class="fa-solid fa-link me-2"></i> Gerenciar Links de Convite
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar" style="filter: invert(1);"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                 <!-- Formulário para criar novo link -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <i class="fas fa-plus-circle me-2"></i>Criar Novo Link
-                    </div>
+                <div class="card mb-4" style="background: rgba(17, 24, 39, 0.6); border: 1px solid rgba(55, 65, 81, 0.5); border-radius: 16px;">
                     <div class="card-body">
+                        <h6 class="mb-3" style="color: var(--accent); font-weight: 600;">
+                            <i class="fa-solid fa-plus-circle me-2"></i> Criar Novo Link
+                        </h6>
                         <form id="createInviteLinkForm">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="form-label">Validade</label>
-                                    <select class="form-select" name="validade" required>
+                                    <label class="form-label" style="color: var(--text-secondary); font-weight: 600;">Validade</label>
+                                    <select class="form-select" name="validade" required
+                                            style="background: rgba(17, 24, 39, 0.8); border: 2px solid rgba(55, 65, 81, 0.8); border-radius: 12px; color: #f9fafb; padding: 0.875rem 1rem;">
                                         <option value="1h">1 hora</option>
                                         <option value="1d" selected>1 dia</option>
                                         <option value="1w">1 semana</option>
@@ -30,8 +31,9 @@
                                     </select>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Máximo de Usos</label>
-                                    <select class="form-select" name="max_usos">
+                                    <label class="form-label" style="color: var(--text-secondary); font-weight: 600;">Máximo de Usos</label>
+                                    <select class="form-select" name="max_usos"
+                                            style="background: rgba(17, 24, 39, 0.8); border: 2px solid rgba(55, 65, 81, 0.8); border-radius: 12px; color: #f9fafb; padding: 0.875rem 1rem;">
                                         <option value="">Ilimitado</option>
                                         <option value="1">1 uso</option>
                                         <option value="5">5 usos</option>
@@ -42,26 +44,25 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="mt-3">
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="fas fa-magic me-2"></i>Gerar Link de Convite
-                                </button>
-                            </div>
+                            <button type="submit" class="btn-action btn-primary mt-3 w-100">
+                                <i class="fa-solid fa-wand-magic-sparkles me-2"></i> Gerar Link de Convite
+                            </button>
                         </form>
-
                         <div id="createLinkAlert" class="alert d-none mt-3" role="alert"></div>
                     </div>
                 </div>
 
                 <!-- Lista de links ativos -->
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <i class="fas fa-list me-2"></i>Links Ativos
-                        <button type="button" class="btn btn-sm btn-outline-secondary float-end" onclick="window.loadInviteLinks()">
-                            <i class="fas fa-sync-alt"></i> Atualizar
-                        </button>
-                    </div>
+                <div class="card" style="background: rgba(17, 24, 39, 0.6); border: 1px solid rgba(55, 65, 81, 0.5); border-radius: 16px;">
                     <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0" style="color: var(--accent); font-weight: 600;">
+                                <i class="fa-solid fa-list me-2"></i> Links Ativos
+                            </h6>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.loadInviteLinks()" style="border-color: rgba(55, 65, 81, 0.8);">
+                                <i class="fa-solid fa-sync-alt"></i> Atualizar
+                            </button>
+                        </div>
                         <div id="inviteLinksContainer">
                             <div class="text-center text-muted py-3">
                                 <div class="spinner-border spinner-border-sm me-2" role="status">
@@ -73,8 +74,8 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            <div class="modal-footer" style="border-top: 1px solid var(--border-subtle);">
+                <button type="button" class="btn-action btn-secondary" data-bs-dismiss="modal">Fechar</button>
             </div>
         </div>
     </div>
@@ -82,102 +83,226 @@
 
 <style>
     .invite-link-item {
-        border: 1px solid #e0e0e0;
-        border-radius: 10px;
-        padding: 16px;
-        margin-bottom: 12px;
-        transition: all 0.2s;
-        background: white;
+        background: rgba(31, 41, 55, 0.4);
+        border: 1px solid rgba(55, 65, 81, 0.5);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        transition: all 0.3s ease;
     }
 
+    /* Garantir que backdrop seja removido corretamente */
+.modal-backdrop.fade {
+    transition: opacity 0.15s linear;
+}
+
+.modal-backdrop.show {
+    opacity: 0.5;
+}
+
+/* Prevenir múltiplos backdrops */
+body > .modal-backdrop:not(:last-of-type) {
+    display: none !important;
+}
+
     .invite-link-item:hover {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        background: rgba(31, 41, 55, 0.6);
+        border-color: rgba(34, 197, 94, 0.3);
+        transform: translateX(4px);
     }
 
     .invite-link-url {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-        padding: 10px 12px;
         font-family: 'Courier New', monospace;
-        font-size: 0.9rem;
-        color: #495057;
+        background: rgba(17, 24, 39, 0.8);
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        color: var(--accent);
+        font-size: 0.85rem;
+        border: 1px solid rgba(34, 197, 94, 0.2);
         word-break: break-all;
-        margin-bottom: 10px;
+        margin-bottom: 0.75rem;
     }
 
     .invite-link-info {
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
         font-size: 0.85rem;
-        color: #6c757d;
-        margin-bottom: 10px;
+        color: var(--text-secondary);
     }
 
     .invite-link-info-item {
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 0.5rem;
     }
 
     .invite-link-actions {
         display: flex;
-        gap: 8px;
-    }
-
-    .btn-copy-link {
-        flex: 1;
-    }
-
-    .btn-revoke-link {
-        flex: 0 0 auto;
+        gap: 0.5rem;
     }
 
     .no-links-message {
         text-align: center;
         padding: 40px 20px;
-        color: #6c757d;
+        color: var(--text-muted);
     }
 
     .no-links-message i {
         font-size: 3rem;
         margin-bottom: 16px;
-        color: #dee2e6;
+        opacity: 0.3;
+    }
+
+    .btn-copy-link, .btn-revoke-link {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+
+    .btn-copy-link {
+        background: rgba(34, 197, 94, 0.1);
+        color: var(--accent);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        flex: 1;
+    }
+
+    .btn-copy-link:hover {
+        background: rgba(34, 197, 94, 0.2);
+    }
+
+    .btn-revoke-link {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-revoke-link:hover {
+        background: rgba(239, 68, 68, 0.2);
     }
 </style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('[Invite Links] 🚀 Inicializando sistema...');
+        
         const modal = document.getElementById('inviteLinksModal');
         const createForm = document.getElementById('createInviteLinkForm');
         const createAlert = document.getElementById('createLinkAlert');
         const linksContainer = document.getElementById('inviteLinksContainer');
         const salaId = "{{ $sala->id }}";
 
-        console.log('[Invite Links] Inicializando com sala ID:', salaId);
+        if (!modal || !createForm || !linksContainer) {
+            console.error('[Invite Links] ❌ Elementos não encontrados!');
+            return;
+        }
+
+        console.log('[Invite Links] ✅ Elementos encontrados, sala ID:', salaId);
 
         function getCsrf() {
-            return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            return meta ? meta.getAttribute('content') : '';
         }
 
         function showAlert(element, type, message) {
+            if (!element) return;
             element.className = `alert alert-${type}`;
             element.textContent = message;
             element.classList.remove('d-none');
             setTimeout(() => element.classList.add('d-none'), 5000);
         }
 
-        // Carregar links quando o modal abre
+        function cleanupModal() {
+            console.log('[Invite Links] 🧹 Limpando modal...');
+            
+            // Remover todos os backdrops
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => {
+                console.log('[Invite Links] 🗑️ Removendo backdrop');
+                backdrop.remove();
+            });
+            
+            // Limpar classes e estilos do body
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            
+            // Garantir que o modal está escondido
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+            modal.removeAttribute('aria-modal');
+            
+            console.log('[Invite Links] ✅ Modal limpo');
+        }
+
+        // ========== EVENT LISTENERS DO MODAL ==========
+        
+        // Quando o modal é aberto
         modal.addEventListener('show.bs.modal', function() {
-            console.log('[Invite Links] Modal aberto, carregando links...');
+            console.log('[Invite Links] 📂 Modal abrindo...');
+        });
+
+        modal.addEventListener('shown.bs.modal', function() {
+            console.log('[Invite Links] ✅ Modal aberto, carregando links...');
             window.loadInviteLinks();
         });
 
-        // Criar novo link
+        // Quando o modal está sendo fechado
+        modal.addEventListener('hide.bs.modal', function() {
+            console.log('[Invite Links] 🚪 Modal sendo fechado...');
+        });
+
+        // Depois que o modal foi completamente fechado
+        modal.addEventListener('hidden.bs.modal', function() {
+            console.log('[Invite Links] 🔒 Modal fechado completamente');
+            setTimeout(cleanupModal, 50);
+        });
+
+        // Listeners nos botões de fechar
+        const closeButtons = modal.querySelectorAll('[data-bs-dismiss="modal"], .btn-close');
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                console.log('[Invite Links] 🔘 Botão fechar clicado');
+                e.preventDefault();
+                
+                const modalInstance = bootstrap.Modal.getInstance(modal);
+                if (modalInstance) {
+                    modalInstance.hide();
+                } else {
+                    cleanupModal();
+                }
+            });
+        });
+
+        // Click fora do modal
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                console.log('[Invite Links] 🔘 Click fora do modal');
+                const modalInstance = bootstrap.Modal.getInstance(modal);
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+            }
+        });
+
+        // ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.classList.contains('show')) {
+                console.log('[Invite Links] ⌨️ ESC pressionado');
+                const modalInstance = bootstrap.Modal.getInstance(modal);
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+            }
+        });
+
+        // ========== CRIAR NOVO LINK ==========
         createForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            console.log('[Invite Links] Criando novo link...');
+            console.log('[Invite Links] 📝 Criando novo link...');
 
             const formData = new FormData(createForm);
             const data = {
@@ -185,7 +310,7 @@
                 max_usos: formData.get('max_usos') ? parseInt(formData.get('max_usos')) : null
             };
 
-            console.log('[Invite Links] Dados do link:', data);
+            console.log('[Invite Links] 📤 Enviando dados:', data);
 
             try {
                 const response = await fetch(`/salas/${salaId}/links-convite`, {
@@ -198,39 +323,40 @@
                     body: JSON.stringify(data)
                 });
 
+                console.log('[Invite Links] 📥 Status da resposta:', response.status);
+
                 const result = await response.json();
-                console.log('[Invite Links] Resposta da criação:', result);
+                console.log('[Invite Links] 📦 Resultado:', result);
 
                 if (result.success) {
-                    showAlert(createAlert, 'success', result.message);
+                    showAlert(createAlert, 'success', result.message || 'Link criado com sucesso!');
                     createForm.reset();
-                    // RECARREGAR LINKS IMEDIATAMENTE
                     await window.loadInviteLinks();
                 } else {
-                    showAlert(createAlert, 'danger', result.message);
+                    showAlert(createAlert, 'danger', result.message || 'Erro ao criar link');
                 }
             } catch (error) {
-                console.error('[Invite Links] Erro ao criar:', error);
-                showAlert(createAlert, 'danger', 'Erro ao criar link de convite.');
+                console.error('[Invite Links] ❌ Erro ao criar:', error);
+                showAlert(createAlert, 'danger', 'Erro ao criar link de convite: ' + error.message);
             }
         });
 
-        // Carregar lista de links
+        // ========== CARREGAR LISTA DE LINKS ==========
         window.loadInviteLinks = async function() {
-            console.log('[Invite Links] Carregando links da sala:', salaId);
+            console.log('[Invite Links] 🔄 Carregando links...');
 
             linksContainer.innerHTML = `
-            <div class="text-center text-muted py-3">
-                <div class="spinner-border spinner-border-sm me-2" role="status">
-                    <span class="visually-hidden">Carregando...</span>
+                <div class="text-center text-muted py-3">
+                    <div class="spinner-border spinner-border-sm me-2" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    Carregando links...
                 </div>
-                Carregando links...
-            </div>
-        `;
+            `;
 
             try {
                 const url = `/salas/${salaId}/links-convite`;
-                console.log('[Invite Links] Fazendo requisição para:', url);
+                console.log('[Invite Links] 🌐 URL:', url);
 
                 const response = await fetch(url, {
                     method: 'GET',
@@ -240,250 +366,186 @@
                     }
                 });
 
-                console.log('[Invite Links] Status da resposta:', response.status);
+                console.log('[Invite Links] 📊 Status:', response.status);
 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    console.error('[Invite Links] Erro HTTP:', response.status, errorText);
-                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                    console.error('[Invite Links] ❌ Erro HTTP:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText.substring(0, 100)}`);
                 }
 
                 const result = await response.json();
-                console.log('[Invite Links] Dados recebidos:', result);
+                console.log('[Invite Links] 📦 Dados recebidos:', result);
 
                 if (result.success) {
                     if (result.links && result.links.length > 0) {
-                        console.log('[Invite Links] Total de links:', result.links.length);
+                        console.log('[Invite Links] ✅ Total de links:', result.links.length);
                         renderLinks(result.links);
                     } else {
-                        console.log('[Invite Links] Nenhum link encontrado');
+                        console.log('[Invite Links] ℹ️ Nenhum link encontrado');
                         renderNoLinks();
                     }
                 } else {
-                    console.error('[Invite Links] Resposta de erro:', result.message);
+                    console.error('[Invite Links] ❌ Resposta de erro:', result.message);
                     renderError(result.message || 'Erro ao carregar links.');
                 }
             } catch (error) {
-                console.error('[Invite Links] Erro ao carregar:', error);
+                console.error('[Invite Links] ❌ Erro ao carregar:', error);
                 renderError('Erro ao carregar links: ' + error.message);
             }
         };
 
-        // Renderizar lista de links
+        // ========== RENDERIZAR LISTA DE LINKS ==========
         function renderLinks(links) {
-            console.log('[Invite Links] Renderizando', links.length, 'links');
+            console.log('[Invite Links] 🎨 Renderizando', links.length, 'links');
 
             linksContainer.innerHTML = links.map(link => `
-            <div class="invite-link-item" data-link-id="${link.id}">
-                <div class="invite-link-url" id="link-${link.id}">
-                    ${link.url}
-                </div>
-                
-                <div class="invite-link-info">
-                    <div class="invite-link-info-item">
-                        <i class="fas fa-user"></i>
-                        <span>Criado por: <strong>${link.criador}</strong></span>
+                <div class="invite-link-item" data-link-id="${link.id}">
+                    <div class="invite-link-url" id="link-${link.id}">
+                        ${link.url}
                     </div>
-                    <div class="invite-link-info-item">
-                        <i class="fas fa-clock"></i>
-                        <span>${link.validade}</span>
+                    
+                    <div class="invite-link-info">
+                        <div class="invite-link-info-item">
+                            <i class="fa-solid fa-user"></i>
+                            <span>Criado por: <strong>${link.criador}</strong></span>
+                        </div>
+                        <div class="invite-link-info-item">
+                            <i class="fa-solid fa-clock"></i>
+                            <span>${link.validade}</span>
+                        </div>
+                        <div class="invite-link-info-item">
+                            <i class="fa-solid fa-chart-bar"></i>
+                            <span>${link.usos_atual}${link.max_usos ? ' / ' + link.max_usos : ''} usos</span>
+                        </div>
+                        ${!link.esta_valido ? 
+                            '<span class="badge bg-danger">Inválido</span>' : 
+                            '<span class="badge bg-success">Ativo</span>'
+                        }
                     </div>
-                    <div class="invite-link-info-item">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>
-                            ${link.usos_atual}${link.max_usos ? ' / ' + link.max_usos : ''} usos
-                        </span>
-                    </div>
-                    ${!link.esta_valido ? '<span class="badge bg-danger">Inválido</span>' : '<span class="badge bg-success">Ativo</span>'}
-                </div>
 
-                <div class="invite-link-actions">
-                    <button type="button" class="btn btn-sm btn-outline-primary btn-copy-link" onclick="window.copyLink('link-${link.id}')">
-                        <i class="fas fa-copy me-1"></i>Copiar Link
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-danger btn-revoke-link" onclick="window.revokeLink(${link.id})">
-                        <i class="fas fa-trash me-1"></i>Revogar
-                    </button>
+                    <div class="invite-link-actions">
+                        <button type="button" class="btn-copy-link" onclick="window.copyLink('link-${link.id}')">
+                            <i class="fa-solid fa-copy me-1"></i>Copiar Link
+                        </button>
+                        <button type="button" class="btn-revoke-link" onclick="window.revokeLink(${link.id})">
+                            <i class="fa-solid fa-trash me-1"></i>Revogar
+                        </button>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `).join('');
         }
 
-        // Renderizar mensagem quando não há links
+        // ========== RENDERIZAR SEM LINKS ==========
         function renderNoLinks() {
-            console.log('[Invite Links] Mostrando mensagem de "sem links"');
+            console.log('[Invite Links] 📭 Mostrando "sem links"');
             linksContainer.innerHTML = `
-            <div class="no-links-message">
-                <i class="fas fa-link-slash"></i>
-                <p class="mb-0">Nenhum link de convite ativo no momento.</p>
-                <small class="text-muted">Crie um novo link usando o formulário acima.</small>
-            </div>
-        `;
+                <div class="no-links-message">
+                    <i class="fa-solid fa-link-slash"></i>
+                    <p class="mb-1">Nenhum link de convite ativo no momento.</p>
+                    <small class="text-muted">Crie um novo link usando o formulário acima.</small>
+                </div>
+            `;
         }
 
-        // Renderizar mensagem de erro
+        // ========== RENDERIZAR ERRO ==========
         function renderError(message) {
-            console.log('[Invite Links] Mostrando erro:', message);
+            console.log('[Invite Links] ⚠️ Mostrando erro:', message);
             linksContainer.innerHTML = `
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                ${message}
-            </div>
-        `;
+                <div class="alert alert-danger">
+                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                    ${message}
+                </div>
+            `;
         }
 
-        // Copiar link - MÉTODO DEFINITIVO QUE FUNCIONA EM HTTP
+        // ========== COPIAR LINK ==========
         window.copyLink = async function(elementId) {
-    const element = document.getElementById(elementId);
-    if (!element) {
-        console.error('[Invite Links] Elemento não encontrado:', elementId);
-        alert('Erro: elemento não encontrado');
-        return;
-    }
-
-    const text = (element.innerText || element.textContent || '').trim();
-    console.log('[Invite Links] Copiando texto:', text);
-
-    const linkItem = element.closest('.invite-link-item');
-    const btn = linkItem ? linkItem.querySelector('.btn-copy-link') : null;
-
-    function showSuccess() {
-        if (!btn) return;
-        const original = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-check me-1"></i>Copiado!';
-        btn.classList.remove('btn-outline-primary');
-        btn.classList.add('btn-success');
-        btn.disabled = true;
-        setTimeout(() => {
-            btn.innerHTML = original;
-            btn.classList.remove('btn-success');
-            btn.classList.add('btn-outline-primary');
-            btn.disabled = false;
-        }, 2000);
-    }
-    function showError() {
-        if (!btn) return;
-        const original = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-times me-1"></i>Erro';
-        btn.classList.remove('btn-outline-primary');
-        btn.classList.add('btn-danger');
-        setTimeout(() => {
-            btn.innerHTML = original;
-            btn.classList.remove('btn-danger');
-            btn.classList.add('btn-outline-primary');
-        }, 2000);
-    }
-
-    // 1) Tenta Clipboard API (HTTPS / localhost)
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        try {
-            await navigator.clipboard.writeText(text);
-            console.log('[Invite Links] ✅ Copiado com Clipboard API!');
-            showSuccess();
-            return;
-        } catch (err) {
-            console.warn('[Invite Links] Clipboard API falhou:', err);
-            // continua para fallback
-        }
-    }
-
-    // 2) Fallback que funciona mesmo com focus trap do modal: anexar dentro do modal ou do próprio item
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.setAttribute('readonly', '');
-    // colocar fora da visualização, MAS dentro do modal/linkItem para respeitar focus trap
-    textarea.style.position = 'absolute';
-    textarea.style.left = '-9999px';
-    textarea.style.top = '0';
-    textarea.style.width = '1px';
-    textarea.style.height = '1px';
-    textarea.style.opacity = '0'; // invisível
-    textarea.setAttribute('aria-hidden', 'true');
-
-    // container preferencial: o próprio invite-link-item (fica dentro do modal)
-    const container = linkItem || document.getElementById('inviteLinksModal') || document.body;
-    container.appendChild(textarea);
-
-    // garantir foco/seleção
-    textarea.focus();
-    textarea.select();
-    textarea.setSelectionRange(0, textarea.value.length);
-
-    let success = false;
-    try {
-        success = document.execCommand('copy');
-        console.log('[Invite Links] execCommand result:', success);
-    } catch (err) {
-        console.error('[Invite Links] Erro no execCommand:', err);
-        success = false;
-    } finally {
-        // remover rapidamente
-        setTimeout(() => {
-            try { container.removeChild(textarea); } catch (e) {}
-        }, 50);
-    }
-
-    if (success) {
-        console.log('[Invite Links] ✅ Copiado com fallback execCommand!');
-        showSuccess();
-    } else {
-        console.error('[Invite Links] ❌ Falha ao copiar com fallback.');
-        showError();
-        // fallback final: prompt para o usuário copiar manualmente
-        setTimeout(() => prompt('Copie manualmente (Ctrl+C):', text), 100);
-    }
-};
-
-        // Função de fallback SIMPLIFICADA e FUNCIONAL
-        function fallbackCopy(text) {
-            let success = false;
-
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-
-            // Estilo mínimo, visível mas praticamente invisível ao usuário
-            textarea.style.position = 'fixed';
-            textarea.style.top = '0';
-            textarea.style.left = '0';
-            textarea.style.width = '1px';
-            textarea.style.height = '1px';
-            textarea.style.padding = '0';
-            textarea.style.border = 'none';
-            textarea.style.outline = 'none';
-            textarea.style.boxShadow = 'none';
-            textarea.style.background = 'transparent';
-            textarea.setAttribute('aria-hidden', 'true');
-
-            document.body.appendChild(textarea);
-
-            try {
-                // assegurar foco e seleção antes de copiar
-                textarea.focus();
-                textarea.select();
-                textarea.setSelectionRange(0, textarea.value.length);
-
-                success = document.execCommand('copy');
-                console.log('[Invite Links] execCommand result:', success);
-
-                if (!success) {
-                    console.error('[Invite Links] ❌ execCommand retornou false');
-                } else {
-                    console.log('[Invite Links] ✅ Copiado com execCommand!');
-                }
-            } catch (err) {
-                console.error('[Invite Links] ❌ Erro no execCommand:', err);
-                success = false;
-            } finally {
-                // remover do DOM independente do resultado
-                document.body.removeChild(textarea);
+            const element = document.getElementById(elementId);
+            if (!element) {
+                console.error('[Invite Links] ❌ Elemento não encontrado:', elementId);
+                alert('Erro: elemento não encontrado');
+                return;
             }
 
-            return success;
-        }
+            const text = (element.innerText || element.textContent || '').trim();
+            console.log('[Invite Links] 📋 Copiando:', text);
 
-        // Revogar link
+            const linkItem = element.closest('.invite-link-item');
+            const btn = linkItem ? linkItem.querySelector('.btn-copy-link') : null;
+
+            function showSuccess() {
+                if (!btn) return;
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check me-1"></i>Copiado!';
+                btn.style.background = 'rgba(34, 197, 94, 0.3)';
+                btn.disabled = true;
+                setTimeout(() => {
+                    btn.innerHTML = original;
+                    btn.style.background = '';
+                    btn.disabled = false;
+                }, 2000);
+            }
+
+            function showError() {
+                if (!btn) return;
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-times me-1"></i>Erro';
+                btn.style.background = 'rgba(239, 68, 68, 0.3)';
+                setTimeout(() => {
+                    btn.innerHTML = original;
+                    btn.style.background = '';
+                }, 2000);
+            }
+
+            // Tentar Clipboard API primeiro
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    console.log('[Invite Links] ✅ Copiado com Clipboard API');
+                    showSuccess();
+                    return;
+                } catch (err) {
+                    console.warn('[Invite Links] ⚠️ Clipboard API falhou:', err);
+                }
+            }
+
+            // Fallback com textarea
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            textarea.style.top = '0';
+
+            const container = linkItem || document.body;
+            container.appendChild(textarea);
+
+            textarea.focus();
+            textarea.select();
+
+            let success = false;
+            try {
+                success = document.execCommand('copy');
+                console.log('[Invite Links] execCommand result:', success);
+            } catch (err) {
+                console.error('[Invite Links] ❌ Erro no execCommand:', err);
+            } finally {
+                container.removeChild(textarea);
+            }
+
+            if (success) {
+                console.log('[Invite Links] ✅ Copiado com fallback');
+                showSuccess();
+            } else {
+                console.error('[Invite Links] ❌ Falha ao copiar');
+                showError();
+                prompt('Copie manualmente (Ctrl+C):', text);
+            }
+        };
+
+        // ========== REVOGAR LINK ==========
         window.revokeLink = async function(linkId) {
-            console.log('[Invite Links] Revogando link:', linkId);
+            console.log('[Invite Links] 🗑️ Revogando link:', linkId);
 
             if (!confirm('Tem certeza que deseja revogar este link? Esta ação não pode ser desfeita.')) {
                 return;
@@ -499,17 +561,20 @@
                 });
 
                 const result = await response.json();
-                console.log('[Invite Links] Resposta da revogação:', result);
+                console.log('[Invite Links] 📥 Resposta da revogação:', result);
 
                 if (result.success) {
+                    console.log('[Invite Links] ✅ Link revogado');
                     await window.loadInviteLinks();
                 } else {
                     alert(result.message || 'Erro ao revogar link.');
                 }
             } catch (error) {
-                console.error('[Invite Links] Erro ao revogar:', error);
-                alert('Erro ao revogar link.');
+                console.error('[Invite Links] ❌ Erro ao revogar:', error);
+                alert('Erro ao revogar link: ' + error.message);
             }
         };
+
+        console.log('[Invite Links] ✅ Sistema inicializado com sucesso!');
     });
 </script>
