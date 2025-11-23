@@ -241,7 +241,9 @@ class SuporteController extends Controller
             'respostas.usuario',
             'respostas.anexos',
             'anexos.usuario',
-            'historico.usuario'
+            'historico.usuario',
+            'mensagensAnexadas.mensagem.usuario',
+        'mensagensAnexadas.mensagem.anexos'
         ])->findOrFail($id);
 
         // Verificar permissão

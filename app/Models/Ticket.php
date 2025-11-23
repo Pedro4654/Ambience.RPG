@@ -325,6 +325,14 @@ class Ticket extends Model
     }
 
     /**
+ * Mensagens de chat anexadas à denúncia
+ */
+public function mensagensAnexadas()
+{
+    return $this->hasMany(DenunciaMensagemAnexada::class, 'ticket_id');
+}
+
+    /**
      * Incrementar visualizações
      */
     public function incrementarVisualizacoes()

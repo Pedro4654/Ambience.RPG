@@ -232,7 +232,7 @@ class SalaController extends Controller
         $request->validate([
             'nome' => 'required|string|max:100|min:3',
             'descricao' => 'nullable|string|max:1000',
-            'tipo' => 'required|in:publica,privada,apenas_convite',
+            'tipo' => 'required|in:publica,privada',
             'max_participantes' => 'integer|min:2|max:100',
             'ativa' => 'boolean'
         ]);
@@ -419,7 +419,7 @@ public function staffToggleStatus(Request $request, $id)
         $request->validate([
             'nome' => 'required|string|max:100|min:3',
             'descricao' => 'nullable|string|max:1000',
-            'tipo' => 'required|in:publica,privada,apenas_convite',
+            'tipo' => 'required|in:publica,privada',
             'senha' => 'nullable|string|min:4|max:50',
             'max_participantes' => 'integer|min:2|max:100',
             'imagem_url' => 'nullable|url|max:255'
@@ -428,7 +428,7 @@ public function staffToggleStatus(Request $request, $id)
             'nome.min' => 'O nome deve ter pelo menos 3 caracteres',
             'nome.max' => 'O nome pode ter no máximo 100 caracteres',
             'tipo.required' => 'O tipo da sala é obrigatório',
-            'tipo.in' => 'Tipo inválido. Use: publica, privada ou apenas_convite',
+            'tipo.in' => 'Tipo inválido. Use: publica ou privada',
             'senha.min' => 'A senha deve ter pelo menos 4 caracteres',
             'max_participantes.min' => 'Mínimo de 2 participantes',
             'max_participantes.max' => 'Máximo de 100 participantes'
@@ -584,13 +584,6 @@ public function staffToggleStatus(Request $request, $id)
                     'pode_moderar_chat' => false,
                     'pode_convidar_usuarios' => false
                 ]);
-            }
-
-            if ($sala->tipo === 'apenas_convite') {
-                ConviteSala::where('sala_id', $salaId)
-                    ->where('destinatario_id', $userId)
-                    ->where('status', 'pendente')
-                    ->update(['status' => 'aceito']);
             }
 
             Log::info('Usuário entrou na sala com sucesso', [

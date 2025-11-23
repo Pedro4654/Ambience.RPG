@@ -229,14 +229,6 @@ public function desativadaPor(): BelongsTo
     }
 
     /**
-     * Verificar se é sala apenas por convite
-     */
-    public function apenasConvite(): bool
-    {
-        return $this->tipo === 'apenas_convite';
-    }
-
-    /**
      * Obter permissões de um usuário na sala
      */
     public function getPermissoesUsuario($userId): ?PermissaoSala
@@ -329,7 +321,6 @@ public function desativadaPor(): BelongsTo
         $icones = [
             'publica' => '🌍',
             'privada' => '🔒',
-            'apenas_convite' => '📧'
         ];
 
         return $icones[$this->tipo] ?? '🏠';
@@ -374,8 +365,7 @@ public function desativadaPor(): BelongsTo
             'total_salas' => static::count(),
             'salas_ativas' => static::ativas()->count(),
             'salas_publicas' => static::publicas()->count(),
-            'salas_privadas' => static::where('tipo', 'privada')->count(),
-            'salas_convite' => static::where('tipo', 'apenas_convite')->count()
+            'salas_privadas' => static::where('tipo', 'privada')->count()
         ];
     }
     public function getSessaoAtiva()

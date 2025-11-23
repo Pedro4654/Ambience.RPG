@@ -790,6 +790,179 @@
             border-left: 4px solid #f59e0b;
         }
 
+        /* ========== MENSAGENS DENUNCIADAS ========== */
+.report-messages-section {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-left: 4px solid #3b82f6;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.messages-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1e40af;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+}
+
+.reported-messages-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.reported-message-card {
+    background: white;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 2px solid #e5e7eb;
+}
+
+.reported-message-card.censored {
+    border-color: #fbbf24;
+    background: #fffbeb;
+}
+
+.reported-message-card.deleted {
+    border-color: #ef4444;
+    background: #fef2f2;
+    opacity: 0.7;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.message-author-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #3b82f6;
+}
+
+.message-author-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a202c;
+    display: block;
+}
+
+.message-timestamp {
+    font-size: 12px;
+    color: #6b7280;
+    display: block;
+    margin-top: 2px;
+}
+
+.message-content {
+    margin-bottom: 12px;
+}
+
+.message-text {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #374151;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+.message-text.original {
+    background: #fef3c7;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.message-text.censored {
+    background: #fee2e2;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.message-flags {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 13px;
+}
+
+.flag-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.flag-profanity { background: #fef3c7; color: #92400e; }
+.flag-sexual { background: #fee2e2; color: #991b1b; }
+.flag-porn { background: #fecaca; color: #7f1d1d; }
+.flag-harassment { background: #fed7aa; color: #9a3412; }
+.flag-swear { background: #fef3c7; color: #854d0e; }
+
+.message-attachments {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.message-attachment-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    transition: transform 0.2s;
+}
+
+.message-attachment-image:hover {
+    transform: scale(1.05);
+    border-color: #3b82f6;
+}
+
+.message-attachment-file {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: #f3f4f6;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.message-attachment-file:hover {
+    background: #e5e7eb;
+    color: #1a202c;
+}
+
         .response-header {
             display: flex;
             justify-content: space-between;
@@ -1294,9 +1467,99 @@
             </div>
         </div>
     </div>
+
+    {{-- ✅ SEÇÃO DE MENSAGENS DENUNCIADAS (DENTRO DO MESMO IF) --}}
+    @if($ticket->mensagensAnexadas->unique('mensagem_id')->count() > 0)
+        <div class="report-messages-section">
+            <h4 class="messages-title">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20" style="vertical-align: middle; margin-right: 8px;">
+                    <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"/>
+                    <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"/>
+                </svg>
+💬 Mensagens Denunciadas ({{ $ticket->mensagensAnexadas->unique('mensagem_id')->count() }})
+            </h4>
+            
+            <div class="reported-messages-container">
+                @foreach($ticket->mensagensAnexadas->unique('mensagem_id') as $anexada)
+                    @php
+                        $mensagem = $anexada->mensagem;
+                    @endphp
+                    
+                    <div class="reported-message-card {{ $mensagem->censurada ? 'censored' : '' }} {{ $mensagem->deletada ? 'deleted' : '' }}">
+                        {{-- Header da mensagem --}}
+                        <div class="message-header">
+    <div class="message-author-info">
+        @if($mensagem->usuario->avatar_url)
+            <img src="{{ str_starts_with($mensagem->usuario->avatar_url, 'http') ? $mensagem->usuario->avatar_url : Storage::url($mensagem->usuario->avatar_url) }}" alt="{{ $mensagem->usuario->username }}" class="message-avatar" onerror="this.src='{{ asset('images/default-avatar.png') }}'">
+        @else
+            <img src="{{ asset('images/default-avatar.png') }}" alt="{{ $mensagem->usuario->username }}" class="message-avatar">
+        @endif
+        <div>
+            <span class="message-author-name">{{ $mensagem->usuario->username }}</span>
+            <span class="message-timestamp">{{ $mensagem->created_at->timezone('America/Sao_Paulo')->format('d/m/Y H:i') }}</span>
+        </div>
+    </div>
+                            
+                            @if($mensagem->deletada)
+                                <span class="badge" style="background: #fee2e2; color: #991b1b;">Deletada</span>
+                            @elseif($mensagem->censurada)
+                                <span class="badge" style="background: #fef3c7; color: #92400e;">Censurada</span>
+                            @endif
+                        </div>
+                        
+                        {{-- Conteúdo da mensagem --}}
+                        <div class="message-content">
+    @if($mensagem->deletada)
+        <em style="color: #991b1b;">[Mensagem deletada]</em>
+    @else
+        @if($mensagem->censurada && auth()->user()->isStaff())
+            <div class="message-text original"><strong>Original:</strong> {{ $mensagem->mensagem_original }}</div>
+            <div class="message-text censored"><strong>Censurada:</strong> {{ $mensagem->mensagem }}</div>
+        @else
+            <div class="message-text">{{ $mensagem->mensagem_original ?? $mensagem->mensagem }}</div>
+        @endif
+                                
+                                {{-- Flags detectadas --}}
+                                @if($mensagem->censurada && !empty($mensagem->flags_detectadas))
+                                    <div class="message-flags">
+                                        <strong>Flags:</strong>
+                                        @foreach($mensagem->flags_detectadas as $flag)
+                                            <span class="flag-badge flag-{{ $flag }}">{{ $flag }}</span>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            @endif
+                        </div>
+                        
+                        {{-- Anexos da mensagem --}}
+                        @if($mensagem->anexos->count() > 0)
+                            <div class="message-attachments">
+                                @foreach($mensagem->anexos as $anexo)
+                                    @if($anexo->ehImagem())
+                                        <img src="{{ $anexo->getUrl() }}" 
+                                             alt="{{ $anexo->nome_original }}"
+                                             class="message-attachment-image"
+                                             onclick="openImageModal('{{ $anexo->getUrl() }}', '{{ addslashes($anexo->nome_original) }}', '{{ $anexo->getTamanhoFormatado() }}')"
+                                             style="cursor: pointer;">
+                                    @else
+                                        <a href="{{ route('suporte.anexos.download', $anexo->id) }}" 
+                                           class="message-attachment-file"
+                                           download>
+                                            📎 {{ $anexo->nome_original }}
+                                        </a>
+                                    @endif
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
 @endif
 
-                    <div class="description">{{ $ticket->descricao }}</div>
+{{-- ✅ DESCRIÇÃO (FORA DO BLOCO DE DENÚNCIA) --}}
+<div class="description">{{ $ticket->descricao }}</div>
 
                     @if($ticket->anexos->where('resposta_id', null)->count() > 0)
                         <div class="attachments-section">

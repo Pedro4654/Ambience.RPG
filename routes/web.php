@@ -31,6 +31,39 @@ Route::get('/', function () {
 Route::get('/ban-ip', [App\Http\Controllers\ModeracaoUsuarioController::class, 'mostrarIpBan'])
     ->name('public.ip_ban'); // rota pública para mostrar IP ban para visitantes/guests
 
+// Rotas de Chat (dentro do grupo middleware 'auth')
+Route::middleware(['auth'])->prefix('salas/{id}/chat')->name('chat.')->group(function () {
+    
+    // Listar mensagens
+    Route::get('/mensagens', [App\Http\Controllers\ChatController::class, 'listarMensagens'])
+        ->name('mensagens');
+    
+    // Enviar mensagem
+    Route::post('/enviar', [App\Http\Controllers\ChatController::class, 'enviarMensagem'])
+        ->name('enviar');
+    
+});
+
+// Rotas de ações em mensagens individuais
+Route::middleware(['auth'])->prefix('chat')->name('chat.')->group(function () {
+    
+
+    // ✅ NOVA ROTA: Editar mensagem
+    Route::put('/mensagens/{id}/editar', [App\Http\Controllers\ChatController::class, 'editarMensagem'])
+        ->name('mensagens.editar');
+        
+    // Deletar mensagem
+    Route::delete('/mensagens/{id}', [App\Http\Controllers\ChatController::class, 'deletarMensagem'])
+        ->name('mensagens.deletar');
+    
+    // Ver conteúdo censurado
+    Route::post('/mensagens/{id}/ver-censurado', [App\Http\Controllers\ChatController::class, 'verConteudoCensurado'])
+        ->name('mensagens.ver-censurado');
+    
+    // Denunciar usuário
+    Route::post('/denunciar-usuario', [App\Http\Controllers\ChatController::class, 'denunciarUsuario'])
+        ->name('denunciar-usuario');
+});
 
     // ==================== ROTAS DE NOTIFICAÇÕES ====================
 Route::middleware(['auth'])->prefix('api/notificacoes')->name('api.notificacoes.')->group(function () {
@@ -467,9 +500,14 @@ Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->g
         ->name('salas.banner.upload')
         ->where('id', '[0-9]+');
 
-    Route::post('/salas/{id}/banner/color', [App\Http\Controllers\SalaController::class, 'setBannerColor'])
-        ->name('salas.banner.color')
-        ->where('id', '[0-9]+');
+    // ADICIONAR novas rotas
+Route::post('/salas/{id}/banner/gradient', [SalaController::class, 'setBannerGradient'])
+    ->middleware('auth')
+    ->name('salas.banner.gradient');
+
+Route::delete('/salas/{id}/banner/gradient', [SalaController::class, 'removeBannerGradient'])
+    ->middleware('auth')
+    ->name('salas.banner.gradient.remove');
 
     Route::delete('/salas/{id}/banner', [App\Http\Controllers\SalaController::class, 'removeBanner'])
         ->name('salas.banner.remove')
