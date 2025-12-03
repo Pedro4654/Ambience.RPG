@@ -41,7 +41,9 @@ Route::middleware(['auth'])->prefix('salas/{id}/chat')->name('chat.')->group(fun
     // Enviar mensagem
     Route::post('/enviar', [App\Http\Controllers\ChatController::class, 'enviarMensagem'])
         ->name('enviar');
-    
+
+        Route::post('/typing', [App\Http\Controllers\ChatController::class, 'notificarDigitando'])
+        ->name('typing');
 });
 
 // Rotas de ações em mensagens individuais
@@ -526,6 +528,30 @@ Route::delete('/salas/{id}/banner/gradient', [SalaController::class, 'removeBann
     Route::delete('/salas/{id}/profile-photo', [App\Http\Controllers\SalaController::class, 'removeProfilePhoto'])
         ->name('salas.profile.remove')
         ->where('id', '[0-9]+');
+
+        /**
+ * Editar sala (apenas criador)
+ * GET /salas/{id}/editar
+ */
+Route::get('/salas/{id}/editar', [SalaController::class, 'edit'])
+    ->name('salas.edit')
+    ->where('id', '[0-9]+');
+
+/**
+ * Atualizar sala (apenas criador)
+ * PUT /salas/{id}/atualizar
+ */
+Route::put('/salas/{id}/atualizar', [SalaController::class, 'update'])
+    ->name('salas.update')
+    ->where('id', '[0-9]+');
+
+/**
+ * Excluir sala (apenas criador)
+ * DELETE /salas/{id}/excluir
+ */
+Route::delete('/salas/{id}/excluir', [SalaController::class, 'destroy'])
+    ->name('salas.destroy')
+    ->where('id', '[0-9]+');
     /**
      * Sair da sala
      * POST /salas/{id}/sair - Remove usuário da sala (exceto criador)
