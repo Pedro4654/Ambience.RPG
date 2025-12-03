@@ -33,6 +33,10 @@ class Usuario extends Authenticatable
         'pontos_reputacao',
         'ranking_posicao',
         'verificado',
+          'discord_url',         // ✅ ADICIONADO
+        'youtube_url',         // ✅ ADICIONADO
+        'twitch_url',          // ✅ ADICIONADO
+        'privacidade_perfil',  // ✅ ADICIONADO
         'genero',              // ✅ NOVO
         'classe_personagem',   // ✅ NOVO
         // Recuperação de senha
