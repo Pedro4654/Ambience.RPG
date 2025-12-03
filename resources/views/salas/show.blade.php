@@ -64,14 +64,15 @@
         }
 
         .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 2rem;
-        }
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    height: 70px;
+}
 
         .loading-screen {
     position: fixed;
@@ -596,6 +597,54 @@
             background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
         }
 
+        /* Inputs com foco */
+#modalEditarSala .form-control:focus,
+#modalEditarSala .form-select:focus {
+    border-color: rgba(34, 197, 94, 0.5);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    outline: none;
+}
+
+/* Botão de salvar hover */
+#btnSalvarEdicao:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.5);
+}
+
+/* Botão de excluir hover */
+#btnMostrarExclusao:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #ef4444;
+    transform: translateY(-2px);
+}
+
+/* Botão de confirmar exclusão quando habilitado */
+#btnConfirmarExclusao:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+/* Ícones nos labels */
+#modalEditarSala label svg {
+    flex-shrink: 0;
+}
+
+/* Select customizado para parecer com input */
+#modalEditarSala .form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2322c55e' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+}
+
+/* Smooth transitions */
+#modalEditarSala input,
+#modalEditarSala textarea,
+#modalEditarSala select,
+#modalEditarSala button {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
         /* ========== PROFILE SECTION ========== */
         .sala-profile-section {
             display: flex;
@@ -692,25 +741,39 @@
         }
 
         .tipo-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem; /* Espaço entre ícone e texto */
+}
 
-        .tipo-publica {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
-            color: var(--accent);
-            border: 1px solid var(--accent);
-        }
+.tipo-badge svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
 
-        .tipo-privada {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1));
-            color: #ef4444;
-            border: 1px solid #ef4444;
-        }
+.tipo-publica {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
+    color: var(--accent);
+    border: 1px solid var(--accent);
+}
+
+.tipo-privada {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1));
+    color: #ef4444;
+    border: 1px solid #ef4444;
+}
 
         /* ========== ACTION BUTTONS ========== */
         .action-buttons {
@@ -849,7 +912,14 @@
             align-items: center;
             gap: 1rem;
             transition: var(--transition);
-        }
+            justify-content: space-between; /* importante para manter o right à direita */
+  gap: 0.9rem;                     /* mantém espaçamento entre colunas */
+}
+
+.participant-left {
+  flex: 0 0 auto;
+}
+  
 
         .participant-card:hover {
             background: rgba(17, 24, 39, 0.8);
@@ -878,24 +948,41 @@
         }
 
         .participant-info {
-            flex: 1;
-        }
+  flex: 1 1 auto;      /* <-- essencial: ocupa espaço e empurra o right para a borda */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;            /* zera margens que poderiam empurrar coisas */
+  padding: 0;
+}
+
+.participant-right {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;   /* alinha status e botões à direita do bloco direito */
+  gap: 8px;
+  min-width: 90px;         /* opcional: evita encolher demais; ajuste se necessário */
+}
 
         .participant-name {
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 0.25rem;
-        }
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  max-width: 100%;
+  white-space: nowrap;      /* evita wrap que poderia criar desalinhamento inesperado */
+  align-self: flex-start;   /* reforça alinhamento à esquerda */
+}
 
         .participant-role {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
+  display: inline-flex;
+  align-items: center;
+  margin: 0;                /* remove margem que desloca pra direita */
+  padding: 0;               /* remove padding extra do container do badge */
+  align-self: flex-start;   /* alinhamento à esquerda */
+}
 
         .role-mestre {
             background: rgba(251, 191, 36, 0.2);
@@ -1121,22 +1208,24 @@
         }
 
         .user-dropdown-details h4 {
-            font-size: 16px;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 4px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 4px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
         .user-dropdown-details p {
-            font-size: 13px;
-            color: var(--text-muted);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+    font-size: 13px;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    margin: 0;
+}
 
         .user-dropdown-menu {
             padding: 8px 0;
@@ -1268,21 +1357,382 @@
             line-height: 1.6;
         }
 
-        .notification-badge {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            width: 18px;
-            height: 18px;
-            background: #ef4444;
-            border-radius: 50%;
-            border: 2px solid var(--bg-dark);
-            font-size: 10px;
-            font-weight: 700;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+.notification-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 18px;
+    height: 18px;
+    background: #ef4444;
+    border-radius: 50%;
+    border: 2px solid var(--bg-dark);
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ========== ESTILOS PARA NOTIFICAÇÕES ========== */
+.notification-list {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 0;
+}
+
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(34, 197, 94, 0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.notification-item:hover {
+    background: rgba(34, 197, 94, 0.05);
+}
+
+.notification-item.nao-lida {
+    background: rgba(34, 197, 94, 0.08);
+}
+
+.notification-item.nao-lida::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--accent);
+}
+
+.notification-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.notification-icon.blue {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.notification-icon.green {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.notification-icon.red {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.notification-icon.yellow {
+    background: rgba(234, 179, 8, 0.1);
+    color: #eab308;
+}
+
+.notification-icon.purple {
+    background: rgba(168, 85, 247, 0.1);
+    color: #a855f7;
+}
+
+.notification-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-message {
+    font-size: 14px;
+    color: #e5e7eb;
+    margin-bottom: 4px;
+    line-height: 1.4;
+}
+
+.notification-time {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.notification-actions {
+    display: flex;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.notification-item:hover .notification-actions {
+    opacity: 1;
+}
+
+/* ========== PLACEHOLDERS DOS INPUTS ========== */
+#modalEditarSala input::placeholder,
+#modalEditarSala textarea::placeholder,
+#modalEditarSala select::placeholder {
+    color: #9ca3af !important;
+    opacity: 1;
+}
+
+#modalEditarSala input::-webkit-input-placeholder,
+#modalEditarSala textarea::-webkit-input-placeholder {
+    color: #9ca3af !important;
+}
+
+#modalEditarSala input::-moz-placeholder,
+#modalEditarSala textarea::-moz-placeholder {
+    color: #9ca3af !important;
+    opacity: 1;
+}
+
+#modalEditarSala input:-ms-input-placeholder,
+#modalEditarSala textarea:-ms-input-placeholder {
+    color: #9ca3af !important;
+}
+
+#btnEditarSala {
+    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+    color: #052e16 !important;
+    border: none !important;
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4) !important;
+}
+
+#btnEditarSala:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.5) !important;
+}
+
+/* ========== ALERTAS CUSTOMIZADOS PARA MODAIS ========== */
+#modalEditarSala .alert-success {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.08));
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-left: 4px solid var(--accent);
+    color: var(--accent);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: slideDown 0.3s ease;
+}
+
+#modalEditarSala .alert-success::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='%2322c55e' stroke-width='2' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+}
+
+#modalEditarSala .alert-danger {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.08));
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-left: 4px solid #ef4444;
+    color: #fca5a5;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: slideDown 0.3s ease;
+}
+
+#modalEditarSala .alert-danger::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='%23ef4444' stroke-width='2' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='15' y1='9' x2='9' y2='15'/%3E%3Cline x1='9' y1='9' x2='15' y2='15'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+}
+
+/* Alertas de exclusão */
+#deleteConfirmSection .alert-success {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.08));
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-left: 4px solid var(--accent);
+    color: var(--accent);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: slideDown 0.3s ease;
+}
+
+#deleteConfirmSection .alert-success::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='%2322c55e' stroke-width='2' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+}
+
+#deleteConfirmSection .alert-danger {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.08));
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-left: 4px solid #ef4444;
+    color: #fca5a5;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: slideDown 0.3s ease;
+}
+
+#deleteConfirmSection .alert-danger::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='%23ef4444' stroke-width='2' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='15' y1='9' x2='9' y2='15'/%3E%3Cline x1='9' y1='9' x2='15' y2='15'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+}
+
+/* Animação suave */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.notification-action-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    color: var(--text-muted);
+}
+
+.notification-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.notification-action-btn.marcar-lida:hover {
+    color: var(--accent);
+}
+
+.notification-action-btn.remover:hover {
+    color: #ef4444;
+}
+
+.notification-action-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(34, 197, 94, 0.3);
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(34, 197, 94, 0.5);
+        }
+
+        /* Scrollbar para modais (mais fina) */
+        .modal-body::-webkit-scrollbar,
+        .rpg-modal-body::-webkit-scrollbar,
+        .permissions-modal .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body::-webkit-scrollbar-track,
+        .rpg-modal-body::-webkit-scrollbar-track,
+        .permissions-modal .modal-body::-webkit-scrollbar-track {
+            background: rgba(17, 24, 39, 0.6);
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb,
+        .rpg-modal-body::-webkit-scrollbar-thumb,
+        .permissions-modal .modal-body::-webkit-scrollbar-thumb {
+            background: rgba(34, 197, 94, 0.3);
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover,
+        .rpg-modal-body::-webkit-scrollbar-thumb:hover,
+        .permissions-modal .modal-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(34, 197, 94, 0.5);
+        }
+
+        /* Scrollbar para listas de notificações (ainda mais fina) */
+        .notification-list::-webkit-scrollbar,
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .notification-list::-webkit-scrollbar-track,
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(17, 24, 39, 0.4);
+            border-radius: 3px;
+        }
+
+        .notification-list::-webkit-scrollbar-thumb,
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(34, 197, 94, 0.3);
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+
+        .notification-list::-webkit-scrollbar-thumb:hover,
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(34, 197, 94, 0.5);
         }
 
         .footer-bottom {
@@ -1295,6 +1745,38 @@
             margin: 0 auto;
             padding: 24px 32px 0;
         }
+
+        .custom-select-wrapper {
+    position: relative;
+}
+
+.custom-select-wrapper select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+}
+
+.custom-select-wrapper select:hover {
+    border-color: rgba(34, 197, 94, 0.5);
+}
+
+.custom-select-wrapper select:focus {
+    border-color: rgba(34, 197, 94, 0.5);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    outline: none;
+}
+
+/* Animação suave do ícone */
+#tipo-icon {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Botão de excluir com texto separado */
+#btnMostrarExclusao span {
+    flex: 1;
+    text-align: center;
+}
 
         /* ========== RESPONSIVE ========== */
         @media (max-width: 1200px) {
@@ -1391,6 +1873,326 @@
             color: var(--text-secondary);
             font-size: 0.875rem;
         }
+
+        .permissions-modal .modal-dialog {
+    max-width: 540px;
+}
+
+.permissions-modal .modal-content {
+    background: linear-gradient(145deg, rgba(31, 42, 51, 0.98), rgba(20, 28, 35, 0.95));
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+.permissions-modal .modal-header {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+    border-bottom: 1px solid rgba(34, 197, 94, 0.2);
+    padding: 1.75rem 2rem;
+}
+
+.permissions-modal .modal-title {
+    color: #fff;
+    font-weight: 800;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.permissions-modal .modal-title svg {
+    width: 28px;
+    height: 28px;
+    stroke: var(--accent);
+}
+
+.permissions-modal .btn-close {
+    filter: invert(1);
+    opacity: 0.8;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.permissions-modal .btn-close:hover {
+    opacity: 1;
+    transform: rotate(90deg);
+}
+
+.permissions-modal .modal-body {
+    padding: 2rem;
+}
+
+.permissions-modal .modal-footer {
+    border-top: 1px solid rgba(34, 197, 94, 0.15);
+    padding: 1.5rem 2rem;
+    background: rgba(17, 24, 39, 0.4);
+}
+
+/* Loading State */
+.permissions-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    gap: 1.5rem;
+}
+
+.permissions-loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(34, 197, 94, 0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.permissions-loading-text {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* Permission Items */
+.permission-toggle-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    background: rgba(17, 24, 39, 0.6);
+    border: 1px solid rgba(55, 65, 81, 0.5);
+    border-radius: 16px;
+    margin-bottom: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.permission-toggle-item:hover {
+    background: rgba(17, 24, 39, 0.8);
+    border-color: rgba(34, 197, 94, 0.3);
+    transform: translateX(4px);
+}
+
+.permission-toggle-item.active {
+    background: rgba(34, 197, 94, 0.08);
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+.permission-toggle-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.permission-toggle-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(55, 65, 81, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.3s;
+}
+
+.permission-toggle-item.active .permission-toggle-icon {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
+}
+
+.permission-toggle-icon svg {
+    width: 22px;
+    height: 22px;
+    stroke: var(--text-muted);
+    transition: all 0.3s;
+}
+
+.permission-toggle-item.active .permission-toggle-icon svg {
+    stroke: var(--accent);
+}
+
+.permission-toggle-content {
+    flex: 1;
+}
+
+.permission-toggle-label {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.permission-toggle-description {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+/* Modern Toggle Switch */
+.toggle-switch {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(55, 65, 81, 0.8);
+    border: 2px solid rgba(55, 65, 81, 0.6);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 2px;
+    background: white;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.3);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(24px);
+}
+
+.toggle-slider:hover {
+    border-color: rgba(34, 197, 94, 0.5);
+}
+
+/* Alert Messages */
+.permissions-modal .alert {
+    border-radius: 12px;
+    border: none;
+    padding: 1rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: 1.5rem;
+    animation: slideDown 0.3s ease;
+}
+
+.permissions-modal .alert-success {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--accent);
+    border-left: 4px solid var(--accent);
+}
+
+.permissions-modal .alert-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border-left: 4px solid #ef4444;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* User Info Header */
+.permissions-user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: rgba(17, 24, 39, 0.5);
+    border: 1px solid rgba(55, 65, 81, 0.5);
+    border-radius: 14px;
+    margin-bottom: 1.5rem;
+}
+
+.permissions-user-avatar-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 10px !important;
+    display: block !important;
+}
+
+/* Container do avatar */
+.permissions-user-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #064e3b, #052e16);
+    border: 2px solid rgba(34, 197, 94, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent);
+    flex-shrink: 0;
+    overflow: hidden; /* CRÍTICO */
+    position: relative;
+}
+
+.permissions-user-details h6 {
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    margin: 0 0 0.25rem 0;
+}
+
+.permissions-user-details p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .permissions-modal .modal-dialog {
+        margin: 1rem;
+    }
+    
+    .permission-toggle-item {
+        padding: 1rem;
+    }
+    
+    .permission-toggle-icon {
+        width: 38px;
+        height: 38px;
+    }
+    
+    .permission-toggle-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+}
     </style>
 </head>
 <body>
@@ -1499,6 +2301,82 @@
     gap: 2.5rem;
     max-width: 500px;
     padding: 2rem;
+}
+
+/* Ícones inline em badges e labels */
+.tipo-badge svg,
+.participant-role svg {
+    width: 14px;
+    height: 14px;
+    margin-right: 4px;
+    vertical-align: middle;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.06);
+    margin-left: 0 !important;
+  transform: none !important;
+}
+
+.role-badge i {
+    font-size: 0.85rem;
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Mestre (dourado leve, não grita) */
+.role-mestre {
+    background: linear-gradient(90deg, #f7d87c, #eabc4e);
+    color: #2b1e05;
+}
+
+/* Admin (azul elegante) */
+.role-admin {
+    background: linear-gradient(90deg, #79c4ff, #44aaff);
+    color: #062038;
+}
+
+/* Jogador (neutro, discreto) */
+.role-jogador {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-muted);
+}
+
+/* Ícones em títulos de seção */
+.session-info h3 svg {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    vertical-align: middle;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+}
+
+/* Garantir que os ícones não quebrem em mobile */
+@media (max-width: 768px) {
+    .tipo-badge svg,
+    .participant-role svg {
+        width: 12px;
+        height: 12px;
+    }
 }
 
 /* ========== LOGO ANIMADO ========== */
@@ -1881,12 +2759,21 @@
                 </div>
 
                 <span class="tipo-badge {{ $sala->tipo === 'publica' ? 'tipo-publica' : 'tipo-privada' }}">
-                    @if($sala->tipo === 'publica')
-                        🌐 Pública
-                    @else
-                        🔒 Privada
-                    @endif
-                </span>
+    @if($sala->tipo === 'publica')
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        Pública
+    @else
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        Privada
+    @endif
+</span>
 
                 <div class="sala-meta-item">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1916,6 +2803,16 @@
                 </svg>
                 Voltar
             </a>
+
+            @if((int)auth()->id() === (int)$sala->criador_id)
+        <button type="button" class="btn-action btn-secondary" id="btnEditarSala" data-sala-id="{{ $sala->id }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            Editar Sala
+        </button>
+    @endif
 
             @if((int)auth()->id() === (int)$sala->criador_id || ($minhas_permissoes && $minhas_permissoes->pode_convidar_usuarios))
     <button type="button" 
@@ -1956,21 +2853,38 @@
         <div class="session-alert fade-in">
             <div class="session-alert-content">
                 <div class="session-info">
-                    <h3>🎮 Sessão em Andamento</h3>
+                    <h3>
+    <svg style="width:20px;height:20px;margin-right:8px;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="7" width="20" height="15" rx="2" ry="2"/>
+        <polyline points="17 2 12 7 7 2"/>
+    </svg>
+    Sessão em Andamento
+</h3>
                     <p>{{ $sessao_ativa->nome_sessao }}</p>
                     <p style="font-size: 0.75rem; color: var(--text-muted);">Status: {{ ucfirst($sessao_ativa->status) }}</p>
                 </div>
                 <div>
                     @if($participa_na_sessao)
                         <a href="{{ route('sessoes.show', ['id' => $sessao_ativa->id]) }}" class="btn-action btn-primary">
-                            🎲 Ir para Sessão
-                        </a>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="1" y="3" width="15" height="13"/>
+        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+        <circle cx="5.5" cy="18.5" r="2.5"/>
+        <circle cx="18.5" cy="18.5" r="2.5"/>
+    </svg>
+    Ir para Sessão
+</a>
                     @else
                         <form action="{{ route('sessoes.entrar', ['id' => $sessao_ativa->id]) }}" method="POST" style="display: inline;">
                             @csrf
                             <button type="submit" class="btn-action btn-primary">
-                                🚪 Entrar na Sessão
-                            </button>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+        <polyline points="10 17 15 12 10 7"/>
+        <line x1="15" y1="12" x2="3" y2="12"/>
+    </svg>
+    Entrar na Sessão
+</button>
                         </form>
                     @endif
                 </div>
@@ -1978,15 +2892,15 @@
         </div>
     @else
         @if($minhas_permissoes && $minhas_permissoes->pode_iniciar_sessao)
-            <div style="text-align: right; margin-bottom: 2rem;">
-                <button id="btnIniciarSessao" class="btn-action btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="5 3 19 12 5 21 5 3"/>
-                    </svg>
-                    Iniciar Sessão
-                </button>
-            </div>
-        @endif
+    <div style="text-align: right; margin-bottom: 2rem; margin-top: 1.5rem;">
+        <button id="btnIniciarSessao" class="btn-action btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            Iniciar Sessão
+        </button>
+    </div>
+@endif
     @endif
 
     <!-- Grid Principal -->
@@ -2006,17 +2920,6 @@
                         </svg>
                         Participantes Ativos
                     </h2>
-                    @if($minhas_permissoes && $minhas_permissoes->pode_convidar_usuarios)
-                        <button class="btn-action btn-primary" data-bs-toggle="modal" data-bs-target="#modalConvite" style="padding: 0.625rem 1rem; font-size: 0.875rem;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                <circle cx="8.5" cy="7" r="4"/>
-                                <line x1="20" y1="8" x2="20" y2="14"/>
-                                <line x1="23" y1="11" x2="17" y2="11"/>
-                            </svg>
-                            Convidar
-                        </button>
-                    @endif
                 </div>
 
                 <div class="participants-grid">
@@ -2028,15 +2931,15 @@
                         @endphp
 
                         <div class="participant-card" id="user-{{ $uid }}">
-                            <div>
-                                @if(!empty($participante->usuario->avatar))
-                                    <img src="{{ $participante->usuario->avatar }}" alt="Avatar" class="participant-avatar">
-                                @else
-                                    <div class="participant-avatar-fallback">
-                                        {{ strtoupper(substr($participante->usuario->username, 0, 1)) }}
-                                    </div>
-                                @endif
-                            </div>
+            <div class="participant-left">
+                @if(!empty($participante->usuario->avatar_url))
+                    <img src="{{ $participante->usuario->avatar_url }}" alt="{{ $participante->usuario->username }}" class="participant-avatar">
+                @else
+                    <div class="participant-avatar-fallback">
+                        {{ strtoupper(substr($participante->usuario->username, 0, 1)) }}
+                    </div>
+                @endif
+            </div>
 
                             <div class="participant-info">
                                 <div class="participant-name">
@@ -2045,15 +2948,24 @@
                                         <span style="color: var(--accent); font-size: 0.75rem; margin-left: 0.5rem;">• Criador</span>
                                     @endif
                                 </div>
-                                <span class="participant-role role-{{ $papel }}">
-                                    @if($papel === 'mestre')
-                                        🎩 Mestre
-                                    @elseif($papel === 'admin_sala')
-                                        🛡️ Admin
-                                    @else
-                                        ⚔️ Jogador
-                                    @endif
-                                </span>
+                                <div class="participant-role">
+    @if($papel === 'mestre')
+        <span class="role-badge role-mestre">
+            <i class="fa-solid fa-crown"></i>
+            Mestre
+        </span>
+    @elseif($papel === 'admin_sala')
+        <span class="role-badge role-admin">
+            <i class="fa-solid fa-user-shield"></i>
+            Admin
+        </span>
+    @else
+        <span class="role-badge role-jogador">
+            <i class="fa-solid fa-user"></i>
+            Jogador
+        </span>
+    @endif
+</div>
                             </div>
 
                             <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;">
@@ -2194,6 +3106,213 @@
 
 <!-- ========== MODALS ========== -->
 
+
+{{-- ========== MODAL: EDITAR SALA (VERSÃO MELHORADA) ========== --}}
+<div class="modal fade" id="modalEditarSala" tabindex="-1" aria-labelledby="modalEditarSalaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="background: linear-gradient(145deg, rgba(31, 42, 51, 0.98), rgba(20, 28, 35, 0.95)); border: 1px solid var(--border-subtle); border-radius: 20px;">
+            
+            {{-- HEADER --}}
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-subtle); padding: 1.75rem 2rem;">
+                <h5 class="modal-title" id="modalEditarSalaLabel" style="color: #fff; font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Configurações da Sala
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar" style="filter: invert(1);"></button>
+            </div>
+            
+            {{-- BODY --}}
+            <div class="modal-body" style="padding: 2rem;">
+                
+                {{-- FORMULÁRIO DE EDIÇÃO --}}
+                <form id="formEditarSala">
+                    <input type="hidden" id="edit_sala_id">
+                    
+                    {{-- Nome da Sala --}}
+                    <div class="mb-4">
+                        <label class="form-label" style="color: var(--text-secondary); font-weight: 600; font-size: 0.95rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                <path d="M2 17l10 5 10-5"/>
+                                <path d="M2 12l10 5 10-5"/>
+                            </svg>
+                            Nome da Sala *
+                        </label>
+                        <input type="text" id="edit_nome" class="form-control" placeholder="Ex: Mesa de D&D" required
+                               style="background: rgba(17, 24, 39, 0.8); border: 2px solid rgba(55, 65, 81, 0.8); border-radius: 12px; color: #f9fafb; padding: 0.875rem 1rem; font-size: 0.95rem; transition: all 0.3s;">
+                    </div>
+                    
+                    {{-- Descrição --}}
+                    <div class="mb-4">
+                        <label class="form-label" style="color: var(--text-secondary); font-weight: 600; font-size: 0.95rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                <polyline points="10 9 9 9 8 9"/>
+                            </svg>
+                            Descrição
+                        </label>
+                        <textarea id="edit_descricao" class="form-control" rows="3" placeholder="Descreva sua sala..."
+                                  style="background: rgba(17, 24, 39, 0.8); border: 2px solid rgba(55, 65, 81, 0.8); border-radius: 12px; color: #f9fafb; padding: 0.875rem 1rem; font-size: 0.95rem; resize: vertical; transition: all 0.3s;"></textarea>
+                    </div>
+                    
+                    {{-- Grid: Tipo e Max Participantes --}}
+                    <div class="row g-3 mb-4">
+                        {{-- Tipo de Sala --}}
+                        <div class="col-md-6">
+    <label class="form-label" style="color: var(--text-secondary); font-weight: 600; font-size: 0.95rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        Tipo de Sala *
+    </label>
+    <div class="custom-select-wrapper" style="position: relative;">
+        <select id="edit_tipo" class="form-select" required
+                style="background: rgba(17, 24, 39, 0.8); border: 2px solid rgba(55, 65, 81, 0.8); border-radius: 12px; color: #f9fafb; padding: 0.875rem 1rem 0.875rem 2.75rem; font-size: 0.95rem; transition: all 0.3s; appearance: none;">
+            <option value="publica">Pública (qualquer um pode entrar)</option>
+            <option value="privada">Privada (requer senha)</option>
+        </select>
+        
+        <!-- Ícone dinâmico baseado na seleção -->
+        <svg id="tipo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+             style="position: absolute; left: 0.875rem; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; pointer-events: none; color: var(--accent);">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        
+        <!-- Seta dropdown customizada -->
+        <svg viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="2"
+             style="position: absolute; right: 0.875rem; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; pointer-events: none;">
+            <path d="M2 5l6 6 6-6"/>
+        </svg>
+    </div>
+</div>
+                        
+                        {{-- Máximo de Participantes --}}
+                        <div class="col-md-6">
+                            <label class="form-label" style="color: var(--text-secondary); font-weight: 600; font-size: 0.95rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                                Máximo de Participantes *
+                            </label>
+                            <input type="number" id="edit_max_participantes" class="form-control" min="2" max="100" required
+                                   style="background: rgba(17, 24, 39, 0.8); border: 2px solid rgba(55, 65, 81, 0.8); border-radius: 12px; color: #f9fafb; padding: 0.875rem 1rem; font-size: 0.95rem; transition: all 0.3s;">
+                        </div>
+                    </div>
+                    
+                    {{-- Senha (condicional) --}}
+                    <div class="mb-4" id="edit_senha_container" style="display: none;">
+                        <label class="form-label" style="color: var(--text-secondary); font-weight: 600; font-size: 0.95rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                                <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                            </svg>
+                            Nova Senha (deixe vazio para manter a atual)
+                        </label>
+                        <input type="password" id="edit_senha" class="form-control" placeholder="Mínimo 4 caracteres"
+                               style="background: rgba(17, 24, 39, 0.8); border: 2px solid rgba(55, 65, 81, 0.8); border-radius: 12px; color: #f9fafb; padding: 0.875rem 1rem; font-size: 0.95rem; transition: all 0.3s;">
+                    </div>
+                    
+                    {{-- Alert de feedback --}}
+                    <div id="edit_alert" class="alert d-none" role="alert" style="border-radius: 12px; padding: 1rem 1.25rem; font-size: 0.95rem;"></div>
+                </form>
+                
+                {{-- DIVISÓRIA --}}
+                <hr style="border-color: rgba(239, 68, 68, 0.2); margin: 2.5rem 0;">
+                
+                {{-- SEÇÃO DE EXCLUSÃO (ZONA DE PERIGO) --}}
+                <div id="deleteZone" style="padding: 1.75rem; background: rgba(239, 68, 68, 0.05); border: 2px solid rgba(239, 68, 68, 0.2); border-radius: 16px;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="width: 24px; height: 24px; flex-shrink: 0;">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                            <line x1="12" y1="9" x2="12" y2="13"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                        <h6 style="color: #ef4444; font-weight: 700; margin: 0; font-size: 1.1rem;">
+                            Zona de Perigo
+                        </h6>
+                    </div>
+                    
+                    <p style="color: #fca5a5; font-size: 0.9rem; margin-bottom: 1.25rem; line-height: 1.6;">
+                        Excluir esta sala é uma ação permanente e irreversível. Todos os dados serão perdidos, incluindo mensagens, histórico de sessões, permissões e arquivos.
+                    </p>
+                    
+                    {{-- Botão para expandir exclusão --}}
+                    <button type="button" id="btnMostrarExclusao" class="btn-action" 
+        style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); width: 100%; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.75rem; font-weight: 600; font-size: 0.95rem; transition: all 0.3s;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; flex-shrink: 0;">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        <line x1="10" y1="11" x2="10" y2="17"/>
+        <line x1="14" y1="11" x2="14" y2="17"/>
+    </svg>
+    <span>Excluir Esta Sala Permanentemente</span>
+</button>
+                    
+                    {{-- Formulário de confirmação (oculto inicialmente) --}}
+                    <div id="deleteConfirmSection" style="display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(239, 68, 68, 0.2);">
+                        <p style="color: #fca5a5; font-size: 0.9rem; margin-bottom: 1rem; font-weight: 600;">
+                            Para confirmar a exclusão, digite exatamente o nome da sala abaixo:
+                        </p>
+                        
+                        <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
+                            <code style="color: var(--accent); font-size: 0.95rem; font-weight: 700;">{{ $sala->nome }}</code>
+                        </div>
+                        
+                        <input type="text" id="delete_confirm_nome" class="form-control mb-3" 
+                               placeholder="Digite o nome da sala aqui"
+                               style="background: rgba(17, 24, 39, 0.8); border: 2px solid rgba(239, 68, 68, 0.3); border-radius: 12px; color: #f9fafb; padding: 0.875rem 1rem; font-size: 0.95rem;">
+                        
+                        <div style="display: flex; gap: 1rem;">
+                            <button type="button" id="btnCancelarExclusao" class="btn-action btn-secondary" style="flex: 1; padding: 0.875rem 1.5rem;">
+                                Cancelar
+                            </button>
+                            <button type="button" id="btnConfirmarExclusao" class="btn-action" disabled
+                                    style="flex: 1; padding: 0.875rem 1.5rem; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                                Confirmar Exclusão
+                            </button>
+                        </div>
+                        
+                        <div id="delete_alert" class="alert d-none mt-3" role="alert" style="border-radius: 12px; padding: 1rem 1.25rem; font-size: 0.95rem;"></div>
+                    </div>
+                </div>
+                
+            </div>
+            
+            {{-- FOOTER --}}
+            <div class="modal-footer" style="border-top: 1px solid var(--border-subtle); padding: 1.5rem 2rem;">
+                <button type="button" class="btn-action btn-secondary" data-bs-dismiss="modal" style="padding: 0.875rem 1.5rem;">
+                    Fechar
+                </button>
+                <button type="submit" form="formEditarSala" class="btn-action" id="btnSalvarEdicao"
+                        style="background: linear-gradient(135deg, #22c55e, #16a34a); color: #052e16; border: none; padding: 0.875rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4); font-weight: 700;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/>
+                        <polyline points="7 3 7 8 15 8"/>
+                    </svg>
+                    Salvar Alterações
+                </button>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
 <!-- Modal: Convidar Usuário -->
 <div class="modal fade" id="modalConvite" tabindex="-1" aria-labelledby="modalConviteLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -2247,43 +3366,158 @@
 </div>
 
 <!-- Modal: Gerenciar Permissões -->
-<div class="modal fade" id="managePermissionsModal" tabindex="-1" aria-labelledby="managePermissionsModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content" style="background: linear-gradient(145deg, rgba(31, 42, 51, 0.98), rgba(20, 28, 35, 0.95)); border: 1px solid var(--border-subtle); border-radius: 20px;">
+<div class="modal fade permissions-modal" id="managePermissionsModal" tabindex="-1" aria-labelledby="managePermissionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
             <form id="managePermissionsForm">
-                <div class="modal-header" style="border-bottom: 1px solid var(--border-subtle);">
-                    <h5 class="modal-title" id="managePermissionsModalLabel" style="color: #fff; font-weight: 700;">Gerenciar Permissões</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar" style="filter: invert(1);"></button>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="managePermissionsModalLabel">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        Gerenciar Permissões
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
+                
                 <div class="modal-body">
                     <input type="hidden" id="mp_user_id" value="">
-                    <div class="mb-2">
-                        <div class="form-check" style="margin-bottom: 0.75rem;">
-                            <input class="form-check-input" type="checkbox" id="mp_pode_criar_conteudo">
-                            <label class="form-check-label" for="mp_pode_criar_conteudo" style="color: var(--text-secondary);">Criar Conteúdo</label>
-                        </div>
-                        <div class="form-check" style="margin-bottom: 0.75rem;">
-                            <input class="form-check-input" type="checkbox" id="mp_pode_editar_grid">
-                            <label class="form-check-label" for="mp_pode_editar_grid" style="color: var(--text-secondary);">Editar Grid</label>
-                        </div>
-                        <div class="form-check" style="margin-bottom: 0.75rem;">
-                            <input class="form-check-input" type="checkbox" id="mp_pode_iniciar_sessao">
-                            <label class="form-check-label" for="mp_pode_iniciar_sessao" style="color: var(--text-secondary);">Iniciar Sessão</label>
-                        </div>
-                        <div class="form-check" style="margin-bottom: 0.75rem;">
-                            <input class="form-check-input" type="checkbox" id="mp_pode_moderar_chat">
-                            <label class="form-check-label" for="mp_pode_moderar_chat" style="color: var(--text-secondary);">Moderar Chat</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="mp_pode_convidar_usuarios">
-                            <label class="form-check-label" for="mp_pode_convidar_usuarios" style="color: var(--text-secondary);">Convidar Usuários</label>
+                    
+                    <!-- Loading State -->
+                    <div class="permissions-loading" id="mp_loading">
+                        <div class="permissions-loading-spinner"></div>
+                        <span class="permissions-loading-text">Carregando permissões...</span>
+                    </div>
+                    
+                    <!-- User Info (Hidden inicialmente) -->
+                    <div class="permissions-user-info d-none" id="mp_user_info">
+                        <div class="permissions-user-avatar" id="mp_user_avatar">U</div>
+                        <div class="permissions-user-details">
+                            <h6 id="mp_username">Usuário</h6>
+                            <p id="mp_user_role">Carregando...</p>
                         </div>
                     </div>
+                    
+                    <!-- Permissions List (Hidden inicialmente) -->
+                    <div class="d-none" id="mp_permissions_list">
+                        <!-- Criar Conteúdo -->
+                        <div class="permission-toggle-item" data-permission="criar_conteudo">
+                            <div class="permission-toggle-info">
+                                <div class="permission-toggle-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 5v14m7-7H5"/>
+                                    </svg>
+                                </div>
+                                <div class="permission-toggle-content">
+                                    <label class="permission-toggle-label" for="mp_pode_criar_conteudo">Criar Conteúdo</label>
+                                    <span class="permission-toggle-description">Permite criar fichas, NPCs e itens</span>
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="mp_pode_criar_conteudo">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <!-- Editar Grid -->
+                        <div class="permission-toggle-item" data-permission="editar_grid">
+                            <div class="permission-toggle-info">
+                                <div class="permission-toggle-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                </div>
+                                <div class="permission-toggle-content">
+                                    <label class="permission-toggle-label" for="mp_pode_editar_grid">Editar Grid</label>
+                                    <span class="permission-toggle-description">Permite modificar o mapa e cenários</span>
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="mp_pode_editar_grid">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <!-- Iniciar Sessão -->
+                        <div class="permission-toggle-item" data-permission="iniciar_sessao">
+                            <div class="permission-toggle-info">
+                                <div class="permission-toggle-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="5 3 19 12 5 21 5 3"/>
+                                    </svg>
+                                </div>
+                                <div class="permission-toggle-content">
+                                    <label class="permission-toggle-label" for="mp_pode_iniciar_sessao">Iniciar Sessão</label>
+                                    <span class="permission-toggle-description">Permite criar e começar novas sessões</span>
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="mp_pode_iniciar_sessao">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <!-- Moderar Chat -->
+                        <div class="permission-toggle-item" data-permission="moderar_chat">
+                            <div class="permission-toggle-info">
+                                <div class="permission-toggle-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                    </svg>
+                                </div>
+                                <div class="permission-toggle-content">
+                                    <label class="permission-toggle-label" for="mp_pode_moderar_chat">Moderar Chat</label>
+                                    <span class="permission-toggle-description">Permite deletar mensagens e silenciar usuários</span>
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="mp_pode_moderar_chat">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <!-- Convidar Usuários -->
+                        <div class="permission-toggle-item" data-permission="convidar_usuarios">
+                            <div class="permission-toggle-info">
+                                <div class="permission-toggle-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="8.5" cy="7" r="4"/>
+                                        <line x1="20" y1="8" x2="20" y2="14"/>
+                                        <line x1="23" y1="11" x2="17" y2="11"/>
+                                    </svg>
+                                </div>
+                                <div class="permission-toggle-content">
+                                    <label class="permission-toggle-label" for="mp_pode_convidar_usuarios">Convidar Usuários</label>
+                                    <span class="permission-toggle-description">Permite gerar links e convidar novos membros</span>
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="mp_pode_convidar_usuarios">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
                     <div id="mp_alert" class="d-none alert" role="alert"></div>
                 </div>
-                <div class="modal-footer" style="border-top: 1px solid var(--border-subtle);">
-                    <button type="button" class="btn-action btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                    <button type="submit" class="btn-action btn-primary" id="mp_save_btn">Salvar</button>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn-action btn-secondary" data-bs-dismiss="modal">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-action btn-primary" id="mp_save_btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        Salvar Permissões
+                    </button>
                 </div>
             </form>
         </div>
@@ -2434,7 +3668,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<!-- Script: Gerenciar Permissões -->
+<!-- Script: Gerenciar Permissões (Atualizado) -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const modalEl = document.getElementById('managePermissionsModal');
@@ -2442,6 +3676,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const mpUserId = document.getElementById('mp_user_id');
     const mpSaveBtn = document.getElementById('mp_save_btn');
     const mpAlert = document.getElementById('mp_alert');
+    const mpLoading = document.getElementById('mp_loading');
+    const mpUserInfo = document.getElementById('mp_user_info');
+    const mpPermissionsList = document.getElementById('mp_permissions_list');
+    const mpUsername = document.getElementById('mp_username');
+    const mpUserRole = document.getElementById('mp_user_role');
+    const mpUserAvatar = document.getElementById('mp_user_avatar');
 
     const fields = {
         pode_criar_conteudo: document.getElementById('mp_pode_criar_conteudo'),
@@ -2458,12 +3698,48 @@ document.addEventListener('DOMContentLoaded', function () {
     function getShowUrl(salaId, userId) {
         return `/salas/${salaId}/participantes/${userId}/permissoes`;
     }
+    
     function getUpdateUrl(salaId, userId) {
         return `/salas/${salaId}/participantes/${userId}/permissoes`;
     }
 
     const SALA_ID = "{{ $sala->id }}";
 
+    // Atualizar classes ativas nos items
+    function updateActiveStates() {
+        document.querySelectorAll('.permission-toggle-item').forEach(item => {
+            const permission = item.dataset.permission;
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            
+            if (checkbox && checkbox.checked) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+    }
+
+    // Event listeners para os toggles
+    Object.values(fields).forEach(field => {
+        if (field) {
+            field.addEventListener('change', updateActiveStates);
+        }
+    });
+
+    // Clicar no item inteiro para alternar
+    document.querySelectorAll('.permission-toggle-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            if (e.target.tagName !== 'INPUT' && !e.target.closest('.toggle-switch')) {
+                const checkbox = this.querySelector('input[type="checkbox"]');
+                if (checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    updateActiveStates();
+                }
+            }
+        });
+    });
+
+    // Abrir modal
     document.body.addEventListener('click', function (e) {
         const el = e.target.closest('.manage-permissions-btn');
         if (!el) return;
@@ -2473,11 +3749,23 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!userId) return;
 
         mpUserId.value = userId;
+        
+        // Resetar estado do modal
         mpAlert.classList.add('d-none');
         mpAlert.innerText = '';
-
+        mpLoading.classList.remove('d-none');
+        mpUserInfo.classList.add('d-none');
+        mpPermissionsList.classList.add('d-none');
+        
+        // Limpar campos
         Object.values(fields).forEach(f => { if (f) f.checked = false; });
+        updateActiveStates();
 
+        // 🎯 ABRIR MODAL IMEDIATAMENTE
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+
+        // 📡 Carregar dados em paralelo
         const url = getShowUrl(SALA_ID, userId);
         fetch(url, {
             method: 'GET',
@@ -2497,34 +3785,105 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(data => {
             const permissoes = (data && data.permissoes) ? data.permissoes : (data || {});
+            const participante = data.participante || {};
+            const usuario = participante.usuario || {};
 
-            Object.values(fields).forEach(f => { if (f) f.checked = false; });
+            // Preencher dados do usuário
+            if (usuario.username) {
+    mpUsername.textContent = usuario.username;
+    
+    // 🔍 Debug - ver o que está vindo
+    console.log('🖼️ Avatar Debug:', {
+        username: usuario.username,
+        avatar_url: usuario.avatar_url,
+        avatar_exists: !!usuario.avatar_url,
+        avatar_length: usuario.avatar_url ? usuario.avatar_url.length : 0
+    });
+    
+    // 🖼️ Avatar - Versão DEFINITIVA
+    mpUserAvatar.innerHTML = ''; // Limpar TUDO
+    
+    if (usuario.avatar_url) {
+        // Criar e configurar imagem
+        const avatarImg = document.createElement('img');
+        avatarImg.src = usuario.avatar_url;
+        avatarImg.alt = usuario.username;
+        avatarImg.className = 'permissions-user-avatar-img';
+        
+        // Fallback se falhar
+        avatarImg.onerror = function() {
+            console.warn('⚠️ Falha ao carregar avatar, usando fallback');
+            mpUserAvatar.innerHTML = '';
+            mpUserAvatar.textContent = usuario.username.charAt(0).toUpperCase();
+            mpUserAvatar.style.fontSize = '1.25rem';
+            mpUserAvatar.style.fontWeight = '700';
+            mpUserAvatar.style.color = 'var(--accent)';
+        };
+        
+        // Quando carregar com sucesso
+        avatarImg.onload = function() {
+            console.log('✅ Avatar carregado com sucesso!');
+        };
+        
+        mpUserAvatar.appendChild(avatarImg);
+        
+        // Resetar estilos de texto
+        mpUserAvatar.style.fontSize = '';
+        mpUserAvatar.style.fontWeight = '';
+        mpUserAvatar.style.color = '';
+        
+    } else {
+        // Sem avatar - mostrar inicial
+        console.log('ℹ️ Sem avatar, mostrando inicial');
+        mpUserAvatar.textContent = usuario.username.charAt(0).toUpperCase();
+        mpUserAvatar.style.fontSize = '1.25rem';
+        mpUserAvatar.style.fontWeight = '700';
+        mpUserAvatar.style.color = 'var(--accent)';
+    }
+}
 
+            // Papel do usuário
+            const papelMap = {
+                'mestre': '👑 Mestre',
+                'admin_sala': '🛡️ Admin',
+                'jogador': '👤 Jogador'
+            };
+            mpUserRole.textContent = papelMap[participante.papel] || 'Jogador';
+
+            // Preencher permissões
             fields.pode_criar_conteudo.checked = !!permissoes.pode_criar_conteudo;
             fields.pode_editar_grid.checked = !!permissoes.pode_editar_grid;
             fields.pode_iniciar_sessao.checked = !!permissoes.pode_iniciar_sessao;
             fields.pode_moderar_chat.checked = !!permissoes.pode_moderar_chat;
             fields.pode_convidar_usuarios.checked = !!permissoes.pode_convidar_usuarios;
 
-            if (data.participante && data.participante.usuario && data.participante.usuario.username) {
-                const label = document.getElementById('managePermissionsModalLabel');
-                label.innerText = `Gerenciar Permissões — ${data.participante.usuario.username}`;
-            }
+            updateActiveStates();
 
-            const modal = new bootstrap.Modal(modalEl);
-            modal.show();
+            // Ocultar loading e mostrar conteúdo
+            mpLoading.classList.add('d-none');
+            mpUserInfo.classList.remove('d-none');
+            mpPermissionsList.classList.remove('d-none');
         })
         .catch(err => {
+            mpLoading.classList.add('d-none');
             mpAlert.className = 'alert alert-danger';
             mpAlert.innerText = err.message || 'Erro ao buscar permissões.';
             mpAlert.classList.remove('d-none');
         });
     });
 
+    // Salvar permissões
     mpForm.addEventListener('submit', function (e) {
         e.preventDefault();
+        
+        const originalBtnText = mpSaveBtn.innerHTML;
         mpSaveBtn.disabled = true;
-        mpSaveBtn.innerText = 'Salvando...';
+        mpSaveBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;animation:spin 0.6s linear infinite;">
+                <circle cx="12" cy="12" r="10"/>
+            </svg>
+            Salvando...
+        `;
 
         const userId = mpUserId.value;
         const payload = {
@@ -2548,8 +3907,6 @@ document.addEventListener('DOMContentLoaded', function () {
             body: JSON.stringify(payload)
         })
         .then(async res => {
-            mpSaveBtn.disabled = false;
-            mpSaveBtn.innerText = 'Salvar';
             if (!res.ok) {
                 const json = await res.json().catch(() => ({}));
                 throw json;
@@ -2558,19 +3915,40 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(json => {
             mpAlert.className = 'alert alert-success';
-            mpAlert.innerText = json.message || 'Permissões atualizadas com sucesso.';
+            mpAlert.innerText = json.message || 'Permissões atualizadas com sucesso! ✨';
             mpAlert.classList.remove('d-none');
+
+            mpSaveBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                Salvo!
+            `;
 
             setTimeout(() => {
                 const modal = bootstrap.Modal.getInstance(modalEl);
                 if (modal) modal.hide();
-            }, 800);
+                
+                mpSaveBtn.disabled = false;
+                mpSaveBtn.innerHTML = originalBtnText;
+            }, 1200);
         })
         .catch(err => {
             mpAlert.className = 'alert alert-danger';
             mpAlert.innerText = err.message || 'Erro ao salvar permissões.';
             mpAlert.classList.remove('d-none');
+            
+            mpSaveBtn.disabled = false;
+            mpSaveBtn.innerHTML = originalBtnText;
         });
+    });
+
+    // Resetar ao fechar
+    modalEl.addEventListener('hidden.bs.modal', function () {
+        mpAlert.classList.add('d-none');
+        mpLoading.classList.remove('d-none');
+        mpUserInfo.classList.add('d-none');
+        mpPermissionsList.classList.add('d-none');
     });
 });
 </script>
@@ -2698,6 +4076,7 @@ document.addEventListener('DOMContentLoaded', () => {
 @include('partials.banner-editor')
 @include('partials.profile-photo-editor')
 @include('partials.invite-links-manager')
+@include('partials.chat-denuncia-modal')
 
 <script>
 // ========== SISTEMA DE CORREÇÃO E DEBUG DE MODAIS ==========
@@ -2882,40 +4261,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (e) => {
         if(e.key === 'Escape' && userDropdown.classList.contains('active')) {
             userDropdown.classList.remove('active');
-        }
-    });
-})();
-
-// ========== NOTIFICAÇÕES ==========
-(function(){
-    const notificationBtn = document.getElementById('notificationBtn');
-    const notificationModal = document.getElementById('notificationModal');
-    const closeNotificationModal = document.getElementById('closeNotificationModal');
-
-    if(!notificationBtn || !notificationModal) return;
-
-    notificationBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        notificationModal.classList.toggle('active');
-        const userDropdown = document.getElementById('userDropdown');
-        if(userDropdown) userDropdown.classList.remove('active');
-    });
-
-    if(closeNotificationModal) {
-        closeNotificationModal.addEventListener('click', () => {
-            notificationModal.classList.remove('active');
-        });
-    }
-
-    document.addEventListener('click', (e) => {
-        if(!notificationModal.contains(e.target) && !notificationBtn.contains(e.target)) {
-            notificationModal.classList.remove('active');
-        }
-    });
-
-    document.addEventListener('keydown', (e) => {
-        if(e.key === 'Escape' && notificationModal.classList.contains('active')) {
-            notificationModal.classList.remove('active');
         }
     });
 })();
@@ -3655,6 +5000,803 @@ console.log('💡 Use window.debugCSS() para ver todas as variáveis');
     console.log('✅ Sistema de loading inicializado');
     console.log(`⏱️ Tempo mínimo: ${config.minLoadingTime}ms`);
 })();
+</script>
+
+<script>
+(function(){
+  const notificationBtn = document.getElementById('notificationBtn');
+  const notificationModal = document.getElementById('notificationModal');
+  const closeNotificationModal = document.getElementById('closeNotificationModal');
+  const notificationBadge = document.querySelector('.notification-badge');
+
+  if(!notificationBtn || !notificationModal) return;
+
+  let notificacoes = [];
+  let offset = 0;
+  const limit = 10;
+
+  // Carregar notificações
+  async function carregarNotificacoes(append = false) {
+    try {
+      const response = await fetch(`/api/notificacoes?limit=${limit}&offset=${offset}`);
+      const data = await response.json();
+
+      if (data.success) {
+        if (append) {
+          notificacoes = [...notificacoes, ...data.notificacoes];
+        } else {
+          notificacoes = data.notificacoes;
+        }
+
+        renderizarNotificacoes();
+        atualizarBadge(data.total_nao_lidas);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar notificações:', error);
+    }
+  }
+
+  // Renderizar notificações no DOM
+  function renderizarNotificacoes() {
+    const container = document.querySelector('.notification-list');
+    if (!container) {
+      // Criar container se não existir
+      const emptyDiv = notificationModal.querySelector('.notification-empty');
+      if (emptyDiv) {
+        emptyDiv.remove();
+      }
+
+      const list = document.createElement('div');
+      list.className = 'notification-list';
+      notificationModal.appendChild(list);
+      renderizarNotificacoes();
+      return;
+    }
+
+    if (notificacoes.length === 0) {
+      container.innerHTML = `
+        <div class="notification-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <p>Você não tem notificações no momento.<br>Quando algo acontecer, você verá aqui!</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = notificacoes.map(notif => `
+      <div class="notification-item ${notif.lida ? 'lida' : 'nao-lida'}" data-id="${notif.id}">
+        <div class="notification-icon ${notif.cor}">
+          ${getIconSvg(notif.icone)}
+        </div>
+        <div class="notification-content">
+          <p class="notification-message">${notif.mensagem}</p>
+          <span class="notification-time">${notif.tempo}</span>
+        </div>
+        <div class="notification-actions">
+          ${!notif.lida ? `
+            <button class="notification-action-btn marcar-lida" data-id="${notif.id}" title="Marcar como lida">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </button>
+          ` : ''}
+          <button class="notification-action-btn remover" data-id="${notif.id}" title="Remover">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    // Adicionar event listeners
+    adicionarEventListeners();
+  }
+
+  // Atualizar badge de contador
+  function atualizarBadge(count) {
+    if (count > 0) {
+      if (!notificationBadge) {
+        const badge = document.createElement('span');
+        badge.className = 'notification-badge';
+        badge.textContent = count > 99 ? '99+' : count;
+        notificationBtn.appendChild(badge);
+      } else {
+        notificationBadge.textContent = count > 99 ? '99+' : count;
+      }
+    } else {
+      if (notificationBadge) {
+        notificationBadge.remove();
+      }
+    }
+  }
+
+  // Marcar notificação como lida
+  async function marcarComoLida(id) {
+    try {
+      const response = await fetch(`/api/notificacoes/${id}/marcar-lida`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Atualizar notificação localmente
+        const notif = notificacoes.find(n => n.id === id);
+        if (notif) {
+          notif.lida = true;
+        }
+        renderizarNotificacoes();
+        atualizarBadge(data.total_nao_lidas);
+      }
+    } catch (error) {
+      console.error('Erro ao marcar como lida:', error);
+    }
+  }
+
+  // Remover notificação
+  async function removerNotificacao(id) {
+    try {
+      const response = await fetch(`/api/notificacoes/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Remover notificação localmente
+        notificacoes = notificacoes.filter(n => n.id !== id);
+        renderizarNotificacoes();
+        atualizarBadge(data.total_nao_lidas);
+      }
+    } catch (error) {
+      console.error('Erro ao remover notificação:', error);
+    }
+  }
+
+  // Adicionar event listeners
+  function adicionarEventListeners() {
+    // Marcar como lida
+    document.querySelectorAll('.marcar-lida').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = parseInt(btn.dataset.id);
+        marcarComoLida(id);
+      });
+    });
+
+    // Remover
+    document.querySelectorAll('.remover').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = parseInt(btn.dataset.id);
+        removerNotificacao(id);
+      });
+    });
+
+    // Clicar na notificação (ir para o link)
+    document.querySelectorAll('.notification-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const notif = notificacoes.find(n => n.id === parseInt(item.dataset.id));
+        if (notif && notif.link) {
+          if (!notif.lida) {
+            marcarComoLida(notif.id);
+          }
+          window.location.href = notif.link;
+        }
+      });
+    });
+  }
+
+  // Obter ícone SVG
+  function getIconSvg(icone) {
+    const icones = {
+      'UserPlus': '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>',
+      'Heart': '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
+      'MessageCircle': '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+      'AtSign': '<circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/>',
+      'Mail': '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>',
+      'Bell': '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>'
+    };
+
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icones[icone] || icones['Bell']}</svg>`;
+  }
+
+  // Abrir/fechar modal
+  notificationBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    notificationModal.classList.toggle('active');
+    const userDropdown = document.getElementById('userDropdown');
+    if(userDropdown) userDropdown.classList.remove('active');
+
+    if (notificationModal.classList.contains('active')) {
+      carregarNotificacoes();
+    }
+  });
+
+  if(closeNotificationModal) {
+    closeNotificationModal.addEventListener('click', () => {
+      notificationModal.classList.remove('active');
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if(!notificationModal.contains(e.target) && e.target !== notificationBtn) {
+      notificationModal.classList.remove('active');
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && notificationModal.classList.contains('active')) {
+      notificationModal.classList.remove('active');
+    }
+  });
+
+  // Polling para verificar novas notificações a cada 30 segundos
+  setInterval(async () => {
+    try {
+      const response = await fetch('/api/notificacoes/count');
+      const data = await response.json();
+      
+      if (data.success) {
+        atualizarBadge(data.count);
+      }
+    } catch (error) {
+      console.error('Erro ao verificar notificações:', error);
+    }
+  }, 30000);
+
+  // Carregar contador inicial
+  (async () => {
+    try {
+      const response = await fetch('/api/notificacoes/count');
+      const data = await response.json();
+      
+      if (data.success) {
+        atualizarBadge(data.count);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar contador inicial:', error);
+    }
+  })();
+})();
+</script>
+
+<script>
+// ========================================
+// 🎨 CORREÇÃO FORÇADA DE CORES - ESTADOS VAZIOS
+// ========================================
+(function() {
+    console.log('🎨 [Color Fix] Iniciando correção de estados vazios...');
+    
+    // Função para aplicar cores forçadas
+    function forceEmptyStateColors() {
+        let fixedCount = 0;
+        
+        // ✅ 1. CHAT - "Nenhuma mensagem ainda"
+        const chatEmpty = document.querySelector('#chatMessages .text-center.text-muted');
+        if (chatEmpty) {
+            // Container
+            chatEmpty.style.color = '#9ca3af';
+            chatEmpty.style.setProperty('color', '#9ca3af', 'important');
+            
+            // Ícone
+            const icon = chatEmpty.querySelector('i');
+            if (icon) {
+                icon.style.color = '#6b7280';
+                icon.style.setProperty('color', '#6b7280', 'important');
+            }
+            
+            // Texto
+            const p = chatEmpty.querySelector('p');
+            if (p) {
+                p.style.color = '#9ca3af';
+                p.style.setProperty('color', '#9ca3af', 'important');
+            }
+            
+            fixedCount++;
+            console.log('✅ Chat empty state corrigido');
+        }
+        
+        // ✅ 2. MODAL DE DENÚNCIA - "Nenhuma mensagem selecionada"
+        const reportEmpty = document.querySelector('.ambience-empty-state-small');
+        if (reportEmpty) {
+            // Container
+            reportEmpty.style.color = '#9ca3af';
+            reportEmpty.style.setProperty('color', '#9ca3af', 'important');
+            
+            // SVG
+            const svg = reportEmpty.querySelector('svg');
+            if (svg) {
+                svg.style.stroke = '#6b7280';
+                svg.style.setProperty('stroke', '#6b7280', 'important');
+                svg.style.opacity = '0.7';
+            }
+            
+            // Texto
+            const p = reportEmpty.querySelector('p');
+            if (p) {
+                p.style.color = '#9ca3af';
+                p.style.setProperty('color', '#9ca3af', 'important');
+                p.style.fontWeight = '500';
+            }
+            
+            fixedCount++;
+            console.log('✅ Report modal empty state corrigido');
+        }
+        
+        // ✅ 3. NOTIFICAÇÕES - "Você não tem notificações"
+        const notifEmpty = document.querySelector('.notification-empty');
+        if (notifEmpty) {
+            notifEmpty.style.color = '#9ca3af';
+            notifEmpty.style.setProperty('color', '#9ca3af', 'important');
+            
+            const svg = notifEmpty.querySelector('svg');
+            if (svg) {
+                svg.style.stroke = '#6b7280';
+                svg.style.setProperty('stroke', '#6b7280', 'important');
+            }
+            
+            const p = notifEmpty.querySelector('p');
+            if (p) {
+                p.style.color = '#9ca3af';
+                p.style.setProperty('color', '#9ca3af', 'important');
+            }
+            
+            fixedCount++;
+            console.log('✅ Notification empty state corrigido');
+        }
+        
+        // ✅ 4. QUALQUER OUTRO .text-muted QUE SEJA FILHO DE CONTAINERS DE MENSAGENS
+        document.querySelectorAll('.text-muted').forEach(el => {
+            // Verificar se está em contexto de empty state
+            const isInChat = el.closest('#chatMessages');
+            const isInModal = el.closest('.modal-body');
+            const isInCard = el.closest('.card-modern');
+            
+            if (isInChat || isInModal || isInCard) {
+                el.style.color = '#9ca3af';
+                el.style.setProperty('color', '#9ca3af', 'important');
+            }
+        });
+        
+        console.log(`📊 Total de elementos corrigidos: ${fixedCount}`);
+        
+        if (fixedCount === 0) {
+            console.log('ℹ️ Nenhum elemento de empty state encontrado no momento');
+        } else {
+            console.log('✅ Todas as correções aplicadas com sucesso!');
+        }
+    }
+    
+    // ✅ Aplicar correções imediatamente
+    forceEmptyStateColors();
+    
+    // ✅ Aplicar novamente após 100ms (garantir que DOM está completo)
+    setTimeout(forceEmptyStateColors, 100);
+    
+    // ✅ Aplicar novamente após 500ms (para elementos carregados dinamicamente)
+    setTimeout(forceEmptyStateColors, 500);
+    
+    // ✅ Observar mudanças no DOM para corrigir elementos dinâmicos
+    const observer = new MutationObserver((mutations) => {
+        let needsFix = false;
+        
+        mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+                if (node.nodeType === 1) { // Element node
+                    // Verificar se é um empty state ou contém um
+                    if (
+                        node.classList?.contains('text-muted') ||
+                        node.classList?.contains('ambience-empty-state-small') ||
+                        node.classList?.contains('notification-empty') ||
+                        node.querySelector?.('.text-muted') ||
+                        node.querySelector?.('.ambience-empty-state-small') ||
+                        node.querySelector?.('.notification-empty')
+                    ) {
+                        needsFix = true;
+                    }
+                }
+            });
+        });
+        
+        if (needsFix) {
+            console.log('🔄 Elemento dinâmico detectado, reaplicando correções...');
+            forceEmptyStateColors();
+        }
+    });
+    
+    // Observar mudanças no body
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+    
+    // ✅ Expor função global para correção manual
+    window.fixEmptyStateColors = forceEmptyStateColors;
+    
+    console.log('💡 Use window.fixEmptyStateColors() para reaplicar correções manualmente');
+    console.log('✅ Sistema de correção de cores ativado');
+})();
+</script>
+
+<script>
+// ========================================
+// 🎨 SISTEMA COMPLETO DE EDIÇÃO E EXCLUSÃO DE SALA
+// ========================================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎨 Iniciando sistema de gerenciamento de sala...');
+    
+    const btnEditarSala = document.getElementById('btnEditarSala');
+    const modalEditarSala = document.getElementById('modalEditarSala');
+    const formEditarSala = document.getElementById('formEditarSala');
+    const tipoSelect = document.getElementById('edit_tipo');
+    const senhaContainer = document.getElementById('edit_senha_container');
+    
+    // Elementos de exclusão
+    const btnMostrarExclusao = document.getElementById('btnMostrarExclusao');
+    const deleteConfirmSection = document.getElementById('deleteConfirmSection');
+    const deleteConfirmNome = document.getElementById('delete_confirm_nome');
+    const btnCancelarExclusao = document.getElementById('btnCancelarExclusao');
+    const btnConfirmarExclusao = document.getElementById('btnConfirmarExclusao');
+    
+    const nomeSalaOriginal = "{{ $sala->nome }}";
+    
+    // ========================================
+    // 📝 ABERTURA DO MODAL E CARREGAMENTO
+    // ========================================
+    if (btnEditarSala) {
+        btnEditarSala.addEventListener('click', async function() {
+            const salaId = this.dataset.salaId;
+            
+            console.log('📝 Abrindo modal de edição para sala:', salaId);
+            
+            // Resetar estado do modal
+            resetModal();
+            
+            // Abrir modal imediatamente
+            const modal = new bootstrap.Modal(modalEditarSala);
+            modal.show();
+            
+            // Carregar dados
+            try {
+                const response = await fetch(`/salas/${salaId}/editar`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': getCsrfToken()
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Preencher formulário
+                    document.getElementById('edit_sala_id').value = data.sala.id;
+                    document.getElementById('edit_nome').value = data.sala.nome;
+                    document.getElementById('edit_descricao').value = data.sala.descricao || '';
+                    document.getElementById('edit_tipo').value = data.sala.tipo;
+                    document.getElementById('edit_max_participantes').value = data.sala.max_participantes;
+                    
+                    // Mostrar/ocultar campo de senha
+                    if (data.sala.tipo === 'privada') {
+                        senhaContainer.style.display = 'block';
+                    } else {
+                        senhaContainer.style.display = 'none';
+                    }
+                    
+                    console.log('✅ Dados carregados com sucesso');
+                } else {
+                    throw new Error(data.message || 'Erro ao carregar dados');
+                }
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                showEditAlert('danger', error.message || 'Erro ao carregar dados da sala');
+            }
+        });
+    }
+    
+    // ========================================
+    // 🔄 ALTERNAR CAMPO DE SENHA
+    // ========================================
+    if (tipoSelect) {
+        tipoSelect.addEventListener('change', function() {
+            if (this.value === 'privada') {
+                senhaContainer.style.display = 'block';
+            } else {
+                senhaContainer.style.display = 'none';
+                document.getElementById('edit_senha').value = '';
+            }
+        });
+    }
+    
+    // ========================================
+    // 💾 SALVAR EDIÇÕES
+    // ========================================
+    if (formEditarSala) {
+        formEditarSala.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const salaId = document.getElementById('edit_sala_id').value;
+            const btnSalvar = document.getElementById('btnSalvarEdicao');
+            const originalText = btnSalvar.innerHTML;
+            
+            // Desabilitar botão
+            btnSalvar.disabled = true;
+            btnSalvar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Salvando...';
+            
+            // Coletar dados
+            const formData = {
+                nome: document.getElementById('edit_nome').value,
+                descricao: document.getElementById('edit_descricao').value,
+                tipo: document.getElementById('edit_tipo').value,
+                max_participantes: parseInt(document.getElementById('edit_max_participantes').value),
+                senha: document.getElementById('edit_senha').value
+            };
+            
+            try {
+                const response = await fetch(`/salas/${salaId}/atualizar`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': getCsrfToken()
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showEditAlert('success', data.message);
+                    
+                    btnSalvar.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        Salvo!
+                    `;
+                    
+                    // Aguardar 1.5s e recarregar página
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    throw new Error(data.message || 'Erro ao salvar');
+                }
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                showEditAlert('danger', error.message || 'Erro ao salvar alterações');
+                
+                // Reabilitar botão
+                btnSalvar.disabled = false;
+                btnSalvar.innerHTML = originalText;
+            }
+        });
+    }
+    
+    // ========================================
+    // 🗑️ SISTEMA DE EXCLUSÃO SEGURA
+    // ========================================
+    
+    // Mostrar seção de confirmação
+    if (btnMostrarExclusao) {
+        btnMostrarExclusao.addEventListener('click', function() {
+            deleteConfirmSection.style.display = 'block';
+            btnMostrarExclusao.style.display = 'none';
+            deleteConfirmNome.focus();
+        });
+    }
+    
+    // Cancelar exclusão
+    if (btnCancelarExclusao) {
+        btnCancelarExclusao.addEventListener('click', function() {
+            deleteConfirmSection.style.display = 'none';
+            btnMostrarExclusao.style.display = 'block';
+            deleteConfirmNome.value = '';
+            btnConfirmarExclusao.disabled = true;
+            hideDeleteAlert();
+        });
+    }
+    
+    // Validar nome digitado
+    if (deleteConfirmNome) {
+        deleteConfirmNome.addEventListener('input', function() {
+            const nomeDigitado = this.value.trim();
+            const nomeCorreto = nomeSalaOriginal.trim();
+            
+            if (nomeDigitado === nomeCorreto) {
+                btnConfirmarExclusao.disabled = false;
+                btnConfirmarExclusao.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                btnConfirmarExclusao.style.color = '#fff';
+                btnConfirmarExclusao.style.borderColor = '#ef4444';
+            } else {
+                btnConfirmarExclusao.disabled = true;
+                btnConfirmarExclusao.style.background = 'rgba(239, 68, 68, 0.2)';
+                btnConfirmarExclusao.style.color = '#ef4444';
+                btnConfirmarExclusao.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+            }
+        });
+    }
+    
+    // Confirmar exclusão
+    if (btnConfirmarExclusao) {
+        btnConfirmarExclusao.addEventListener('click', async function() {
+            const salaId = document.getElementById('edit_sala_id').value;
+            const originalText = this.innerHTML;
+            
+            // Desabilitar botão
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Excluindo...';
+            
+            try {
+                const response = await fetch(`/salas/${salaId}/excluir`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': getCsrfToken()
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showDeleteAlert('success', data.message);
+                    
+                    this.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        Excluído!
+                    `;
+                    
+                    // Aguardar 1.5s e redirecionar
+                    setTimeout(() => {
+                        window.location.href = data.redirect_to || '/salas';
+                    }, 1500);
+                } else {
+                    throw new Error(data.message || 'Erro ao excluir');
+                }
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                showDeleteAlert('danger', error.message || 'Erro ao excluir sala');
+                
+                // Reabilitar botão
+                this.disabled = false;
+                this.innerHTML = originalText;
+            }
+        });
+    }
+    
+    // ========================================
+    // 🛠️ FUNÇÕES AUXILIARES
+    // ========================================
+    
+    function getCsrfToken() {
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.getAttribute('content') : '';
+    }
+    
+    function resetModal() {
+        // Resetar formulário
+        if (formEditarSala) formEditarSala.reset();
+        
+        // Ocultar alertas
+        hideEditAlert();
+        hideDeleteAlert();
+        
+        // Ocultar seção de exclusão
+        if (deleteConfirmSection) deleteConfirmSection.style.display = 'none';
+        if (btnMostrarExclusao) btnMostrarExclusao.style.display = 'block';
+        
+        // Resetar campo de confirmação
+        if (deleteConfirmNome) deleteConfirmNome.value = '';
+        if (btnConfirmarExclusao) btnConfirmarExclusao.disabled = true;
+    }
+    
+    function showEditAlert(type, message) {
+        const alert = document.getElementById('edit_alert');
+        if (!alert) return;
+        
+        alert.className = `alert alert-${type}`;
+        alert.textContent = message;
+        alert.classList.remove('d-none');
+        
+        if (type === 'success') {
+            setTimeout(() => {
+                alert.classList.add('d-none');
+            }, 3000);
+        }
+    }
+    
+    function hideEditAlert() {
+        const alert = document.getElementById('edit_alert');
+        if (alert) alert.classList.add('d-none');
+    }
+    
+    function showDeleteAlert(type, message) {
+        const alert = document.getElementById('delete_alert');
+        if (!alert) return;
+        
+        alert.className = `alert alert-${type}`;
+        alert.textContent = message;
+        alert.classList.remove('d-none');
+        
+        if (type === 'success') {
+            setTimeout(() => {
+                alert.classList.add('d-none');
+            }, 3000);
+        }
+    }
+    
+    function hideDeleteAlert() {
+        const alert = document.getElementById('delete_alert');
+        if (alert) alert.classList.add('d-none');
+    }
+    
+    // Resetar modal ao fechar
+    if (modalEditarSala) {
+        modalEditarSala.addEventListener('hidden.bs.modal', resetModal);
+    }
+    
+    console.log('✅ Sistema de gerenciamento de sala inicializado');
+});
+</script>
+
+<script>
+// ========================================
+// 🎨 ALTERNAR ÍCONE DO SELECT TIPO SALA
+// ========================================
+document.addEventListener('DOMContentLoaded', function() {
+    const tipoSelect = document.getElementById('edit_tipo');
+    const tipoIcon = document.getElementById('tipo-icon');
+    
+    if (!tipoSelect || !tipoIcon) return;
+    
+    // Ícones SVG
+    const icons = {
+        publica: `
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        `,
+        privada: `
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        `
+    };
+    
+    // Função para atualizar ícone
+    function updateIcon() {
+        const value = tipoSelect.value;
+        tipoIcon.innerHTML = icons[value] || icons.publica;
+        
+        // Mudar cor do ícone
+        if (value === 'publica') {
+            tipoIcon.style.color = '#22c55e';
+        } else {
+            tipoIcon.style.color = '#22c55e';
+        }
+    }
+    
+    // Atualizar ao carregar
+    updateIcon();
+    
+    // Atualizar ao mudar
+    tipoSelect.addEventListener('change', updateIcon);
+});
 </script>
 </body>
 </html>

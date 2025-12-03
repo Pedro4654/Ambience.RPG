@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use App\Models\PermissaoSala;
 
 class ChatController extends Controller
 {
@@ -114,7 +115,8 @@ class ChatController extends Controller
             $validated = $request->validate([
                 'mensagem' => 'required|string|max:2000',
                 'flags' => 'nullable|array',
-                'anexos.*' => 'nullable|image|max:10240'
+                'anexos' => 'nullable|array',
+                'anexos.*' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:10240'
             ]);
 
             DB::beginTransaction();
@@ -256,154 +258,269 @@ try {
     }
 
     /**
+ * Notificar que usuário está digitando
+ * POST /salas/{id}/chat/typing
+ */
+public function notificarDigitando(Request $request, $salaId)
+{
+    try {
+        $usuario = Auth::user();
+        $sala = Sala::findOrFail($salaId);
+
+        if (!$sala->temParticipante($usuario->id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Você não tem acesso a este chat.'
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'is_typing' => 'required|boolean'
+        ]);
+
+        // Broadcast do evento
+        broadcast(new \App\Events\UsuarioDigitando(
+            $usuario->id,
+            $usuario->username,
+            $salaId,
+            $validated['is_typing']
+        ))->toOthers();
+
+        return response()->json([
+            'success' => true
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Erro ao notificar digitação', [
+            'error' => $e->getMessage(),
+            'sala_id' => $salaId
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro ao notificar digitação.'
+        ], 500);
+    }
+}
+
+    /**
      * ✅ NOVO: Editar mensagem
      * PUT /chat/mensagens/{id}/editar
      */
     public function editarMensagem(Request $request, $id)
-    {
-        try {
-            $usuario = Auth::user();
-            $mensagem = MensagemChat::findOrFail($id);
+{
+    try {
+        $usuario = Auth::user();
+        
+        // ✅ CARREGAR MENSAGEM COM RELACIONAMENTOS
+        $mensagem = MensagemChat::with(['sala', 'usuario'])->findOrFail($id);
 
-            // Verificar se é o autor
-            if ($mensagem->usuario_id !== $usuario->id) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Você não tem permissão para editar esta mensagem.'
-                ], 403);
-            }
-
-            // Verificar se mensagem foi deletada
-            if ($mensagem->deletada) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Esta mensagem foi deletada e não pode ser editada.'
-                ], 400);
-            }
-
-            $validated = $request->validate([
-                'mensagem' => 'required|string|max:2000'
-            ]);
-
-            $novaMensagem = $validated['mensagem'];
-
-            // Moderar nova mensagem
-            $moderacao = $this->moderarMensagemBackend($novaMensagem);
-            $flags = $moderacao['flags'] ?? [];
-            $censurada = count($flags) > 0;
-            $mensagemFinal = $censurada ? $moderacao['cleaned'] : $novaMensagem;
-
-            // Atualizar mensagem
-            $mensagem->update([
-                'mensagem' => $mensagemFinal,
-                'mensagem_original' => $censurada ? $novaMensagem : null,
-                'censurada' => $censurada,
-                'flags_detectadas' => $censurada ? $flags : null,
-                'editada' => true
-            ]);
-
-            // ✅ BROADCAST: Mensagem Editada
-            try {
-                Log::info('[Chat] Broadcasting edição de mensagem', [
-                    'mensagem_id' => $mensagem->id,
-                    'sala_id' => $mensagem->sala_id
-                ]);
-
-                broadcast(new \App\Events\MensagemChatEditada(
-                    $mensagem->id,
-                    $mensagem->sala_id,
-                    $mensagemFinal
-                ))->toOthers();
-
-                Log::info('[Chat] ✅ Broadcast de edição enviado');
-            } catch (\Exception $e) {
-                Log::error('[Chat] ❌ Erro ao fazer broadcast de edição', [
-                    'error' => $e->getMessage(),
-                    'mensagem_id' => $mensagem->id
-                ]);
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Mensagem editada com sucesso!',
-                'mensagem' => $mensagemFinal,
-                'editada' => true
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Erro ao editar mensagem', [
-                'error' => $e->getMessage(),
-                'mensagem_id' => $id
-            ]);
-
+        // ✅ VERIFICAR SE MENSAGEM FOI DELETADA PRIMEIRO
+        if ($mensagem->deletada) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao editar mensagem.'
-            ], 500);
+                'message' => 'Esta mensagem foi deletada e não pode ser editada.'
+            ], 400);
         }
+
+        // ✅ VERIFICAR PERMISSÕES
+        $ehAutor = (int)$mensagem->usuario_id === (int)$usuario->id;
+        $ehCriadorSala = (int)$mensagem->sala->criador_id === (int)$usuario->id;
+        
+        // ✅ BUSCAR PERMISSÃO (pode não existir)
+        $permissao = PermissaoSala::where('sala_id', $mensagem->sala_id)
+            ->where('usuario_id', $usuario->id)
+            ->first();
+        
+        $podeModerarChat = $permissao ? (bool)$permissao->pode_moderar_chat : false;
+        
+        // ✅ VERIFICAR SE TEM PERMISSÃO
+        if (!$ehAutor && !$ehCriadorSala && !$podeModerarChat) {
+            Log::warning('[Chat] Tentativa de edição sem permissão', [
+                'mensagem_id' => $id,
+                'usuario_id' => $usuario->id,
+                'eh_autor' => $ehAutor,
+                'eh_criador' => $ehCriadorSala,
+                'pode_moderar' => $podeModerarChat
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Você não tem permissão para editar esta mensagem.'
+            ], 403);
+        }
+
+        // ✅ VALIDAR INPUT
+        $validated = $request->validate([
+            'mensagem' => 'required|string|max:2000'
+        ]);
+
+        $novaMensagem = trim($validated['mensagem']);
+        
+        // ✅ VERIFICAR SE A MENSAGEM É DIFERENTE
+        $mensagemOriginalAtual = $mensagem->mensagem_original ?? $mensagem->mensagem;
+        if ($novaMensagem === $mensagemOriginalAtual) {
+            return response()->json([
+                'success' => false,
+                'message' => 'A mensagem não foi alterada.'
+            ], 400);
+        }
+
+        // ✅ MODERAR NOVA MENSAGEM
+        $moderacao = $this->moderarMensagemBackend($novaMensagem);
+        $flags = $moderacao['flags'] ?? [];
+        $censurada = count($flags) > 0;
+        $mensagemFinal = $censurada ? ($moderacao['cleaned'] ?? $novaMensagem) : $novaMensagem;
+
+        // ✅ ATUALIZAR MENSAGEM
+        $mensagem->update([
+            'mensagem' => $mensagemFinal,
+            'mensagem_original' => $censurada ? $novaMensagem : null,
+            'censurada' => $censurada,
+            'flags_detectadas' => $censurada ? $flags : null,
+            'editada' => true,
+            'editada_em' => now()
+        ]);
+
+        Log::info('[Chat] Mensagem editada com sucesso', [
+            'mensagem_id' => $mensagem->id,
+            'sala_id' => $mensagem->sala_id,
+            'editado_por' => $usuario->id,
+            'eh_moderador' => !$ehAutor,
+            'censurada' => $censurada
+        ]);
+
+        // ✅ BROADCAST (COM TRY-CATCH SEPARADO)
+        try {
+            broadcast(new \App\Events\MensagemChatEditada(
+                $mensagem->id,
+                $mensagem->sala_id,
+                $mensagemFinal
+            ))->toOthers();
+            
+            Log::info('[Chat] ✅ Broadcast de edição enviado');
+        } catch (\Exception $e) {
+            // Não falhar se o broadcast der erro
+            Log::error('[Chat] ⚠️ Erro no broadcast de edição (não crítico)', [
+                'error' => $e->getMessage(),
+                'mensagem_id' => $mensagem->id
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Mensagem editada com sucesso!',
+            'mensagem' => $mensagemFinal,
+            'editada' => true,
+            'censurada' => $censurada
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        Log::warning('[Chat] Erro de validação ao editar mensagem', [
+            'errors' => $e->errors(),
+            'mensagem_id' => $id
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Dados inválidos.',
+            'errors' => $e->errors()
+        ], 422);
+        
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        Log::error('[Chat] Mensagem não encontrada', [
+            'mensagem_id' => $id
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Mensagem não encontrada.'
+        ], 404);
+        
+    } catch (\Exception $e) {
+        Log::error('[Chat] Erro crítico ao editar mensagem', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'mensagem_id' => $id,
+            'user_id' => Auth::id()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro interno ao editar mensagem.'
+        ], 500);
     }
+}
 
     /**
      * Deletar mensagem (apenas autor ou staff)
      * DELETE /chat/mensagens/{id}
      */
     public function deletarMensagem($id)
-    {
-        try {
-            $usuario = Auth::user();
-            $mensagem = MensagemChat::findOrFail($id);
+{
+    try {
+        $usuario = Auth::user();
+        $mensagem = MensagemChat::with('sala')->findOrFail($id);
 
-            $ehAutor = $mensagem->usuario_id === $usuario->id;
-            $ehStaff = $usuario->isStaff();
-
-            if (!$ehAutor && !$ehStaff) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Você não tem permissão para deletar esta mensagem.'
-                ], 403);
-            }
-
-            $mensagem->marcarDeletada($usuario);
-
-            // ✅ BROADCAST: Mensagem Deletada (para TODOS, incluindo quem deletou)
-            try {
-                Log::info('[Chat] Broadcasting deleção de mensagem', [
-                    'mensagem_id' => $mensagem->id,
-                    'sala_id' => $mensagem->sala_id,
-                    'deletado_por' => $usuario->id
-                ]);
-
-                // NÃO usar toOthers() aqui - todos devem receber a deleção
-                broadcast(new \App\Events\MensagemChatDeletada(
-                    $mensagem->id,
-                    $mensagem->sala_id
-                ));
-
-                Log::info('[Chat] ✅ Broadcast de deleção enviado para todos');
-            } catch (\Exception $e) {
-                Log::error('[Chat] ❌ Erro ao fazer broadcast de deleção', [
-                    'error' => $e->getMessage(),
-                    'mensagem_id' => $mensagem->id
-                ]);
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Mensagem deletada!'
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Erro ao deletar mensagem', [
-                'error' => $e->getMessage(),
-                'mensagem_id' => $id
-            ]);
-
+        // ✅ VERIFICAR PERMISSÕES
+        $ehAutor = $mensagem->usuario_id === $usuario->id;
+        $ehCriadorSala = $mensagem->sala->criador_id === $usuario->id;
+        
+        $permissao = PermissaoSala::where('sala_id', $mensagem->sala_id)
+            ->where('usuario_id', $usuario->id)
+            ->first();
+        
+        $podeModerarChat = $permissao && $permissao->pode_moderar_chat;
+        
+        // ✅ NOVO: Verificar se é autor OU moderador
+        if (!$ehAutor && !$ehCriadorSala && !$podeModerarChat) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao deletar mensagem.'
-            ], 500);
+                'message' => 'Você não tem permissão para deletar esta mensagem.'
+            ], 403);
         }
+
+        $mensagem->marcarDeletada($usuario);
+
+        // ✅ Broadcast
+        try {
+            Log::info('[Chat] Broadcasting deleção de mensagem', [
+                'mensagem_id' => $mensagem->id,
+                'sala_id' => $mensagem->sala_id,
+                'deletado_por' => $usuario->id,
+                'eh_moderador' => !$ehAutor
+            ]);
+
+            broadcast(new \App\Events\MensagemChatDeletada(
+                $mensagem->id,
+                $mensagem->sala_id
+            ));
+
+            Log::info('[Chat] ✅ Broadcast de deleção enviado para todos');
+        } catch (\Exception $e) {
+            Log::error('[Chat] ❌ Erro ao fazer broadcast de deleção', [
+                'error' => $e->getMessage(),
+                'mensagem_id' => $mensagem->id
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Mensagem deletada!'
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Erro ao deletar mensagem', [
+            'error' => $e->getMessage(),
+            'mensagem_id' => $id
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro ao deletar mensagem.'
+        ], 500);
     }
+}
 
     /**
      * Ver conteúdo censurado (apenas +18)
