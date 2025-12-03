@@ -21,91 +21,93 @@ class CommentController extends Controller {
     
     // ==================== CRIAR COMENTÁRIO (COM MODERAÇÃO) ====================
 
-    public function store(Request $request) {
-        $validated = $request->validate([
-            'post_id' => 'required|exists:posts,id',
-            'conteudo' => 'required|string|max:1000',
-            'parent_id' => 'nullable|exists:comments,id'
-        ]);
+   public function store(Request $request)
+{
+    $validated = $request->validate([
+        'post_id' => 'required|exists:posts,id',
+        'conteudo' => 'required|string|max:1000',
+        'parent_id' => 'nullable|exists:comments,id'
+    ]);
 
-        // ========== MODERAÇÃO DE TEXTO ==========
-        try {
-            $moderacao = $this->moderarTexto($validated['conteudo']);
+    // ========== MODERAÇÃO DE TEXTO ==========
+    try {
+        $moderacao = $this->moderarTexto($validated['conteudo']);
+        
+        if ($moderacao && $moderacao['inappropriate']) {
+            Log::warning('Comentário bloqueado: conteúdo inapropriado', [
+                'usuario_id' => Auth::id(),
+                'post_id' => $validated['post_id'],
+                'conteudo_preview' => substr($validated['conteudo'], 0, 50)
+            ]);
             
-            if ($moderacao && $moderacao['inappropriate']) {
-                Log::warning('Comentário bloqueado: conteúdo inapropriado', [
-                    'usuario_id' => Auth::id(),
-                    'post_id' => $validated['post_id'],
-                    'conteudo_preview' => substr($validated['conteudo'], 0, 50)
-                ]);
-                
-                if ($request->expectsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'O comentário contém conteúdo inapropriado e foi bloqueado.'
-                    ], 422);
-                }
-                
-                return back()->withErrors([
-                    'conteudo' => 'O comentário contém conteúdo inapropriado.'
-                ]);
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'O comentário contém conteúdo inapropriado e foi bloqueado.'
+                ], 422);
             }
             
-        } catch (\Exception $e) {
-            Log::error('Erro na moderação de comentário', [
-                'error' => $e->getMessage(),
-                'usuario_id' => Auth::id()
-            ]);
-            // Continua mesmo se a moderação falhar
-        }
-
-        $comment = Comment::create([
-            'post_id' => $validated['post_id'],
-            'usuario_id' => Auth::id(),
-            'parent_id' => $validated['parent_id'] ?? null,
-            'conteudo' => $validated['conteudo']
-        ]);
-
-        $comment->load('autor');
-
-        $post = Post::find($validated['post_id']);
-
-        // ✅ CRIAR NOTIFICAÇÃO
-        try {
-            Notificacao::notificarComentario(
-                Auth::id(), 
-                $post->id, 
-                $validated['conteudo'],
-                $post->usuario_id
-            );
-            Log::info('Notificação de comentário criada', [
-                'usuario_id' => Auth::id(),
-                'post_id' => $post->id,
-                'autor_id' => $post->usuario_id
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Erro ao criar notificação de comentário', [
-                'error' => $e->getMessage()
+            return back()->withErrors([
+                'conteudo' => 'O comentário contém conteúdo inapropriado.'
             ]);
         }
-
-
-        Log::info('Comentário criado', [
-            'comment_id' => $comment->id,
-            'post_id' => $validated['post_id'],
+        
+    } catch (\Exception $e) {
+        Log::error('Erro na moderação de comentário', [
+            'error' => $e->getMessage(),
             'usuario_id' => Auth::id()
         ]);
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Comentário adicionado!',
-                'comment' => $comment
-            ], 201);
-        }
-
-        return redirect()->back()->with('success', 'Comentário adicionado!');
+        // Continua mesmo se a moderação falhar
     }
+
+    $comment = Comment::create([
+        'post_id' => $validated['post_id'],
+        'usuario_id' => Auth::id(),
+        'parent_id' => $validated['parent_id'] ?? null,
+        'conteudo' => $validated['conteudo']
+    ]);
+
+    $comment->load('autor');
+
+    $post = Post::find($validated['post_id']);
+
+    // ✅ CRIAR NOTIFICAÇÃO
+    try {
+        Notificacao::notificarComentario(
+            Auth::id(), 
+            $post->id, 
+            $validated['conteudo'],
+            $post->usuario_id
+        );
+        Log::info('Notificação de comentário criada', [
+            'usuario_id' => Auth::id(),
+            'post_id' => $post->id,
+            'autor_id' => $post->usuario_id
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Erro ao criar notificação de comentário', [
+            'error' => $e->getMessage()
+        ]);
+    }
+
+    Log::info('Comentário criado', [
+        'comment_id' => $comment->id,
+        'post_id' => $validated['post_id'],
+        'usuario_id' => Auth::id()
+    ]);
+
+    // Verificar se é uma requisição AJAX/JSON
+    if ($request->ajax() || $request->wantsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Comentário adicionado!',
+            'comment' => $comment,
+            'html' => view('comunidade.components.comment-item', compact('comment'))->render()
+        ], 201);
+    }
+
+    return redirect()->back()->with('success', 'Comentário adicionado!');
+}
 
     // ==================== EDITAR COMENTÁRIO (COM MODERAÇÃO) ====================
 
@@ -159,28 +161,39 @@ class CommentController extends Controller {
 
     // ==================== DELETAR COMENTÁRIO ====================
 
-    public function destroy($id) {
-        $comment = Comment::findOrFail($id);
+   public function destroy($id, Request $request)
+{
+    $comment = Comment::findOrFail($id);
 
-        if ($comment->usuario_id !== Auth::id()) {
+    // Verificar permissão: apenas o autor do comentário pode deletar
+    if ($comment->usuario_id !== Auth::id() && !Auth::user()->isStaff()) {
+        if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Não autorizado'
             ], 403);
         }
+        return back()->with('error', 'Não autorizado.');
+    }
 
-        $comment->delete();
+    $comment->delete();
 
-        Log::info('Comentário deletado', [
-            'comment_id' => $id,
-            'usuario_id' => Auth::id()
-        ]);
+    Log::info('Comentário deletado', [
+        'comment_id' => $id,
+        'usuario_id' => Auth::id()
+    ]);
 
+    // Verificar se é uma requisição AJAX/JSON
+    if ($request->ajax() || $request->wantsJson()) {
         return response()->json([
             'success' => true,
             'message' => 'Comentário deletado!'
         ]);
     }
+
+    // Para requisições normais, voltar para a página do post
+    return redirect()->back()->with('success', 'Comentário deletado!');
+}
 
     /**
      * Moderar texto via endpoint /moderate

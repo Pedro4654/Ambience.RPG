@@ -717,12 +717,12 @@ Route::get('/api/salas/desativadas', [SalaController::class, 'getSalasDesativada
 
         // ========== LIKES ==========
         Route::post('/curtir', [LikeController::class, 'store'])->name('curtir');
-        Route::delete('/curtir/{post_id}', [LikeController::class, 'destroy'])->name('descurtir');
+        Route::delete('/descurtir/{post_id}', [LikeController::class, 'destroy'])->name('descurtir');
 
 
         // ========== COMENTÁRIOS ==========
         Route::post('/comentar', [CommentController::class, 'store'])->name('comentar');
-        Route::delete('/comentario/{id}', [CommentController::class, 'destroy'])->name('comentario.destroy');
+         Route::delete('/comentario/{id}', [CommentController::class, 'destroy'])->name('comentario.destroy');
     });
 
     // ==================== PERFIL DE USUÁRIO ====================

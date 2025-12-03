@@ -39,6 +39,10 @@ body {
     font-weight: bold;
     margin-bottom: 1rem;
     color: #f9fafb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .forgot-subtitle {
@@ -134,12 +138,18 @@ body {
     background: rgba(16, 185, 129, 0.1);
     border: 1px solid #10b981;
     color: #10b981;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .alert-error {
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid #ef4444;
     color: #ef4444;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 /* Info box */
@@ -157,10 +167,16 @@ body {
     font-size: 0.875rem;
     color: #d1d5db;
     line-height: 1.6;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
 }
 
 .info-box strong {
     color: #10b981;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 small.error {
@@ -173,26 +189,67 @@ small.error {
 
 <div class="forgot-container">
     <div class="forgot-card">
-        <h1 class="forgot-title">🔒 Esqueci Minha Senha</h1>
+        <h1 class="forgot-title">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            Esqueci Minha Senha
+        </h1>
         <p class="forgot-subtitle">Digite seu email para receber um código de 6 dígitos<br>para recuperar sua senha.</p>
 
         @if(session('success'))
         <div class="alert alert-success">
-            ✓ {{ session('success') }}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            {{ session('success') }}
         </div>
         @endif
 
         @if(session('error'))
         <div class="alert alert-error">
-            ✗ {{ session('error') }}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            {{ session('error') }}
         </div>
         @endif
 
         <div class="info-box">
-            <p><strong>💡 Como funciona:</strong></p>
-            <p>1. Digite seu email cadastrado</p>
-            <p>2. Receba um código de 6 dígitos por email</p>
-            <p>3. Use o código para redefinir sua senha</p>
+            <p><strong>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18h6"></path>
+                    <path d="M10 22h4"></path>
+                    <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path>
+                </svg>
+                Como funciona:
+            </strong></p>
+            <p>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="min-width: 16px;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 8v4"></path>
+                    <path d="M12 16h.01"></path>
+                </svg>
+                1. Digite seu email cadastrado
+            </p>
+            <p>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="min-width: 16px;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 8v4"></path>
+                    <path d="M12 16h.01"></path>
+                </svg>
+                2. Receba um código de 6 dígitos por email
+            </p>
+            <p>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="min-width: 16px;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 8v4"></path>
+                    <path d="M12 16h.01"></path>
+                </svg>
+                3. Use o código para redefinir sua senha
+            </p>
         </div>
 
         <form method="POST" action="{{ route('usuarios.forgot.send') }}">
@@ -224,4 +281,3 @@ small.error {
 </div>
 
 @endsection
-    

@@ -45,6 +45,13 @@ class Post extends Model {
     public function salvos() {
         return $this->hasMany(SavedPost::class, 'post_id', 'id');
     }
+    
+    /**
+     * Relacionamento com Ficha RPG
+     */
+    public function fichaRpg() {
+        return $this->hasOne(FichaRpg::class, 'post_id', 'id');
+    }
 
     // ============================================================
     // HELPER METHODS
@@ -67,6 +74,13 @@ class Post extends Model {
             ->where('usuario_id', $usuario_id)
             ->exists();
     }
+    
+    /**
+     * Verifica se post tem ficha RPG
+     */
+    public function temFichaRpg() {
+        return $this->tipo_conteudo === 'ficha_rpg' && $this->fichaRpg()->exists();
+    }
 
     // ============================================================
     // BOOT - AUTO-SLUG
@@ -78,6 +92,13 @@ class Post extends Model {
         static::creating(function ($post) {
             if (empty($post->slug)) {
                 $post->slug = Str::slug($post->titulo) . '-' . uniqid();
+            }
+        });
+        
+        // Ao deletar post, deletar ficha RPG associada
+        static::deleting(function ($post) {
+            if ($post->fichaRpg) {
+                $post->fichaRpg->delete();
             }
         });
     }
