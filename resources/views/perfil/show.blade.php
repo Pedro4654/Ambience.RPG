@@ -1,571 +1,1228 @@
-        @extends('layout.app')
+@extends('layout.app')
 
-        @section('content')
-        <!-- ESTILO INLINE COMPLETO -->
-        <style>
-        :root {
-        --bg-dark: #0a0f14;
-        --card: #1f2a33;
-        --muted: #8b9ba8;
-        --accent: #22c55e;
-        --accent-light: #16a34a;
-        --accent-dark: #15803d;
-        --hero-green: #052e16;
-        --text-on-primary: #e6eef6;
-        --transition-speed: 600ms;
-        }
-        body {
-        background: var(--bg-dark);
-        color: var(--text-on-primary);
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        }
-        /* NAVBAR ESTILO AMBIENCE */
-        .header-ambience {
-        position: sticky; top: 0; z-index: 100;
-        background: rgba(10, 15, 20, 0.85);
-        backdrop-filter: blur(12px);
-        border-bottom: 1px solid rgba(34,197,94,0.15);
-        transition: all 600ms;
-        }
-        .container-nav { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
-        .nav-ambience { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; height: 70px; }
-        .logo-ambience { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 18px; color: #fff; text-decoration: none; }
-        .logo-img { height: 48px; width: auto; }
-        .nav-links { display: flex; gap: 32px; align-items: center; }
-        .nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-weight: 500; font-size: 15px; transition: color .2s; }
-        .nav-links a:hover { color: var(--accent); }
-        .cta-buttons { display: flex; gap: 14px; align-items: center; }
-        .btn-ambience {
-        padding: 11px 22px; border-radius: 10px; font-weight: 700; font-size: 15px; border: none; cursor: pointer;
-        transition: all .25s; display: inline-flex; align-items: center; gap: 10px;
-        }
-        .btn-ambience.login { background: transparent; border: 1px solid rgba(34,197,94,0.4); color: var(--accent); }
-        .btn-ambience.login:hover { background: rgba(34,197,94,0.1); border-color: var(--accent); }
-        .btn-ambience.primary {
-        background: linear-gradient(to right, var(--accent), var(--accent-light)); color: var(--hero-green); font-weight: 800;
-        box-shadow: 0 4px 14px rgba(34,197,94,0.3);
-        }
-        .btn-ambience.primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34,197,94,0.4); }
-        .user-menu { display: flex; align-items: center; gap: 16px; position: relative; }
-        .notification-btn {
-        position: relative; width: 42px; height: 42px; border-radius: 10px;
-        background: rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.15);
-        display: flex; align-items: center; justify-content: center;
-        cursor: pointer; transition: all .25s;
-        }
-        .notification-btn:hover { background: rgba(34,197,94,0.15); border-color: var(--accent); transform: translateY(-2px); }
-        .notification-btn svg { width: 20px; height: 20px; stroke: var(--accent); fill: none; stroke-width: 2; }
-        .notification-badge {
-        position:absolute; top:-4px; right:-4px; width: 18px; height: 18px; background: #ef4444;
-        border-radius: 50%; border:2px solid var(--bg-dark); font-size:10px; font-weight:700; color:#fff;
-        display:flex; align-items:center; justify-content:center;
-        }
-        .user-avatar-wrapper { position: relative; cursor: pointer; }
-        .user-avatar {
-        width: 42px; height: 42px; border-radius: 10px; object-fit: cover;
-        border:2px solid rgba(34,197,94,0.2);
-        transition: all .25s; background: linear-gradient(135deg, #064e3b, #052e16);
-        }
-        .user-avatar:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(34,197,94,0.3); }
-        .user-avatar-default {
-        width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg, #064e3b, #052e16);
-        border:2px solid rgba(34,197,94,0.2); display: flex; align-items: center; justify-content: center;
-        font-size: 18px; font-weight: 700; color: var(--accent); transition: all .25s;
-        }
-        .user-avatar-default:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(34,197,94,0.3);}
-        .user-dropdown {
-        display: none; position: absolute; right: 0; top: calc(100% + 12px); min-width: 260px;
-        background: var(--card); border: 1px solid rgba(34,197,94,0.2); border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.3); overflow: hidden;
-        }
-        .user-dropdown.show { display: block; }
-        .user-dropdown-header {
-        padding: 20px; border-bottom: 1px solid rgba(34,197,94,0.15);
-        background: linear-gradient(135deg, rgba(34,197,94,0.08), transparent);
-        }
-        .user-dropdown-info { display: flex; align-items: center; gap: 12px; }
-        .user-dropdown-avatar {
-        width: 48px; height: 48px; border-radius: 12px; object-fit: cover;
-        border: 2px solid rgba(34,197,94,0.3);
-        }
-        .user-dropdown-avatar-default {
-        width: 48px; height: 48px; border-radius: 12px;
-        background: linear-gradient(135deg, #064e3b, #052e16);
-        border: 2px solid rgba(34,197,94,0.3);
-        display: flex; align-items: center; justify-content: center;
-        font-size: 20px; font-weight: 700; color: var(--accent);
-        }
-        .user-dropdown-details { flex:1; min-width:0; }
-        .user-dropdown-details h4 { font-size:16px; font-weight:700; color:#fff; margin:0; }
-        .user-dropdown-details p { font-size:13px; color:var(--muted); margin:0; }
-        .user-dropdown-menu { padding: 8px 0; }
-        .user-dropdown-item {
-        display: flex; align-items: center; gap: 12px; padding: 12px 20px;
-        color: #d1d5db; font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none;
-        transition: all .2s; background: transparent; border: none; width: 100%; text-align: left;
-        }
-        .user-dropdown-item:hover { background: rgba(34,197,94,0.08); color: var(--accent); }
-        .user-dropdown-item.logout { color: #ef4444; }
-        .user-dropdown-item.logout:hover { background: rgba(239,68,68,0.1); }
-        .user-dropdown-item svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
-        .divider-dropdown { height: 1px; background: rgba(34,197,94,0.15); margin: 8px 0; }
+@section('title', 'Perfil de ' . $usuario->username . ' - Ambience RPG')
 
-        /* PERFIL */
-        .profile-card {
-        background: var(--card);
-        border-radius: 2rem;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-        padding: 2.5rem 2rem;
-        border: 1px solid rgba(34,197,94,0.1);
-        }
-        .profile-card .avatar {
-        border-radius: 1.25rem;
-        border: 4px solid var(--card);
-        box-shadow: 0 0 0 4px rgba(34,197,94,0.2), 0 8px 24px rgba(0,0,0,0.3);
-        }
-        .social-icons a {
-        display: inline-flex;
-        width: 44px; height: 44px;
-        align-items: center; justify-content: center;
-        border-radius: 50%;
-        font-size: 1.4rem;
-        margin-right: 0.5rem;
-        margin-left: 0.5rem;
-        color: #fff;
-        transition: box-shadow .2s, transform .14s;
-        }
-        .social-icons .discord { background: #5865F2; }
-        .social-icons .youtube { background: #FF0000; }
-        .social-icons .twitch { background: #9147ff; }
-        .social-icons a:hover { box-shadow: 0 0 0 4px rgba(255,255,255,0.2); transform: scale(1.10); }
-        </style>
-        <!-- FONT AWESOME -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+@section('content')
+<style>
+/* ============================================
+   VARIÁVEIS - Cores do Ambience
+   ============================================ */
+:root {
+  --bg-dark: #0a0f14;
+  --bg-secondary: #151b23;
+  --card-bg: rgba(26, 35, 50, 0.85);
+  --card-hover: rgba(31, 42, 61, 0.9);
+  --border-color: rgba(34,197,94,0.2);
+  --accent: #22c55e;
+  --accent-light: #16a34a;
+  --accent-dark: #15803d;
+  --text-primary: #e6eef6;
+  --text-secondary: #8b9ba8;
+  --text-muted: #64748b;
+  --hero-green: #052e16;
+}
 
-        <!-- NAVBAR AMBIENCE - VERSÃO CORRETA -->
-        <header class="header-ambience">
-        <div class="container-nav">
-            <nav class="nav-ambience">
-            {{-- Logo só com ícone --}}
-            <a href="{{ route('home') }}" class="logo-ambience">
-                <img src="{{ asset('images/logo.png') }}" alt="Ambience RPG" class="logo-img">
-            </a>
-            
-            <div class="nav-links">
-                <a href="{{ route('salas.index') }}">Salas</a>
-                <a href="{{ route('comunidade.feed') }}">Comunidade</a>
-                <a href="{{ route('suporte.index') }}">Suporte</a>
+/* ============================================
+   BACKGROUND
+   ============================================ */
+.profile-container {
+  position: relative;
+  min-height: calc(100vh - 140px);
+  padding: 24px 0 48px;
+}
+
+.profile-container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('{{ asset("images/rpg-background.gif") }}') center/cover;
+  filter: blur(4px) brightness(0.5);
+  z-index: -1;
+}
+
+.profile-container::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 15, 20, 0.7);
+  z-index: -1;
+}
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+.profile-content {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================
+   BANNER
+   ============================================ */
+.profile-banner {
+  position: relative;
+  height: 280px;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
+  opacity: 0.9;
+}
+
+.banner-background {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--hero-green), var(--accent-dark), var(--accent));
+  opacity: 0.7;
+}
+
+.banner-content {
+  position: relative;
+  z-index: 2;
+  padding: 32px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  color: var(--text-primary);
+}
+
+.banner-back-btn {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.banner-back-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.banner-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 36px;
+  font-weight: 900;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.banner-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 600px;
+}
+
+/* ============================================
+   GRID PRINCIPAL
+   ============================================ */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 1200px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   CARD DE PERFIL
+   ============================================ */
+.profile-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s;
+}
+
+.profile-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.15);
+}
+
+/* Avatar e Informações Básicas */
+.profile-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+.profile-avatar {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.avatar-image {
+  width: 140px;
+  height: 140px;
+  border-radius: 20px;
+  object-fit: cover;
+  border: 4px solid var(--card-bg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(135deg, #064e3b, #052e16);
+}
+
+.avatar-default {
+  width: 140px;
+  height: 140px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #064e3b, #052e16);
+  border: 4px solid var(--card-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--accent);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.profile-bio {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  max-width: 600px;
+}
+
+/* Redes Sociais */
+.social-links {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.social-link {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: white;
+  text-decoration: none;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.social-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.social-link.discord { background: #5865F2; }
+.social-link.youtube { background: #FF0000; }
+.social-link.twitch { background: #9147ff; }
+
+/* Estatísticas */
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  display: block;
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.stat-link {
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.stat-link:hover .stat-number {
+  color: var(--accent-light);
+}
+
+/* Botões de Ação */
+.profile-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  text-decoration: none;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+  color: #052e16;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.action-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
+}
+
+.action-btn.secondary {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.action-btn.secondary:hover {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: var(--accent);
+}
+
+.action-btn.following {
+  background: rgba(139, 155, 168, 0.2);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.action-btn.following:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+/* ============================================
+   TABS
+   ============================================ */
+.tabs-container {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.tabs-header {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.tab-btn:hover {
+  color: var(--accent);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.tab-content {
+  padding: 24px;
+}
+
+/* ============================================
+   GRID DE POSTS
+   ============================================ */
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.post-card {
+  background: rgba(10, 15, 20, 0.4);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: block;
+}
+
+.post-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.2);
+}
+
+.post-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  background: linear-gradient(135deg, var(--hero-green), var(--accent-dark));
+}
+
+.post-default-image {
+  width: 100%;
+  height: 180px;
+  background: linear-gradient(135deg, var(--hero-green), var(--accent-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.post-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 6px 12px;
+  background: rgba(34, 197, 94, 0.9);
+  color: #052e16;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.post-content {
+  padding: 16px;
+}
+
+.post-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-excerpt {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ============================================
+   ESTADO VAZIO
+   ============================================ */
+.empty-state {
+  text-align: center;
+  padding: 60px 40px;
+  color: var(--text-secondary);
+}
+
+.empty-state-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.empty-state-description {
+  margin-bottom: 24px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ============================================
+   FORMULÁRIO DE EDIÇÃO (SIDEBAR)
+   ============================================ */
+.edit-sidebar {
+  position: sticky;
+  top: 100px;
+}
+
+.edit-form-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.edit-form-header {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.edit-form-header h3 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  color: #052e16;
+  margin-bottom: 4px;
+}
+
+.edit-form-header p {
+  color: rgba(5, 46, 22, 0.8);
+  font-size: 13px;
+}
+
+.edit-form-body {
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(10, 15, 20, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+.form-input.error {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.05);
+}
+
+textarea.form-input {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.error-message {
+  display: none;
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* ============================================
+   PAGINAÇÃO
+   ============================================ */
+.pagination-container {
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+}
+
+/* ============================================
+   SVG ICONS
+   ============================================ */
+.svg-icon {
+  width: 1.2em;
+  height: 1.2em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  overflow: hidden;
+}
+</style>
+
+<div class="profile-container">
+  <div class="profile-content">
+    <!-- Banner -->
+    <div class="profile-banner">
+      <div class="banner-background"></div>
+      <div class="banner-overlay"></div>
+     
+      <div class="banner-content">
+        <h1 class="banner-title">Perfil de {{ $usuario->username }}</h1>
+        <p class="banner-subtitle">Visualize informações, postagens e redes sociais</p>
+      </div>
+    </div>
+
+    <!-- Grid Principal -->
+    <div class="profile-grid">
+      <!-- Coluna Principal -->
+      <div class="main-column">
+        <!-- Card de Perfil -->
+        <div class="profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar">
+              @if($usuario->avatar_url)
+                <img src="{{ $usuario->avatar_url }}" alt="{{ $usuario->username }}" class="avatar-image">
+              @else
+                <div class="avatar-default">{{ strtoupper(substr($usuario->username, 0, 1)) }}</div>
+              @endif
             </div>
             
-            @guest
-                <div class="cta-buttons">
-                <button class="btn-ambience login" onclick="window.location.href='{{ route('usuarios.login') }}'">Entrar</button>
-                <button class="btn-ambience primary" onclick="window.location.href='{{ route('usuarios.create') }}'">Começar Agora</button>
-                </div>
-            @else
-                <div class="user-menu">
-                {{-- Botão de Notificações --}}
-                <button class="notification-btn" id="notificationBtn" aria-label="Notificações">
-                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                    </svg>
-                    @php
-                    $unreadCount = 0;
-                    if(method_exists(auth()->user(), 'unreadNotifications') && auth()->user()->unreadNotifications) {
-                        $unreadCount = auth()->user()->unreadNotifications->count();
-                    }
-                    @endphp
-                    @if($unreadCount > 0)
-                    <span class="notification-badge">{{ $unreadCount }}</span>
-                    @endif
-                </button>
-                
-                {{-- Avatar do Usuário --}}
-                <div class="user-avatar-wrapper" id="userAvatarBtn">
-                    @if(auth()->user()->avatar_url)
-                    <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->username }}" class="user-avatar">
-                    @else
-                    <div class="user-avatar-default">
-                        {{ strtoupper(substr(auth()->user()->username, 0, 1)) }}
-                    </div>
-                    @endif
-                </div>
-                
-                {{-- Dropdown do Usuário --}}
-                <div class="user-dropdown" id="userDropdown">
-                    <div class="user-dropdown-header">
-                    <div class="user-dropdown-info">
-                        @if(auth()->user()->avatar_url)
-                        <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->username }}" class="user-dropdown-avatar">
-                        @else
-                        <div class="user-dropdown-avatar-default">
-                            {{ strtoupper(substr(auth()->user()->username, 0, 1)) }}
-                        </div>
-                        @endif
-                        <div class="user-dropdown-details">
-                        <h4>{{ auth()->user()->username }}</h4>
-                        <p>{{ auth()->user()->email }}</p>
-                        </div>
-                    </div>
-                    </div>
-                    <div class="user-dropdown-menu">
-                    <a href="{{ route('perfil.show', auth()->user()->username) }}" class="user-dropdown-item">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                        Meu Perfil
+            <div class="profile-info">
+              <h1 class="profile-name">{{ $usuario->username }}</h1>
+              
+              <p class="profile-bio">
+                @if($usuario->bio)
+                  {{ $usuario->bio }}
+                @else
+                  <span style="color: var(--text-muted); font-style: italic;">Sem bio ainda...</span>
+                @endif
+              </p>
+
+              <!-- Redes Sociais -->
+              @if($usuario->discord_url || $usuario->youtube_url || $usuario->twitch_url)
+                <div class="social-links">
+                  @if($usuario->discord_url)
+                    <a href="{{ $usuario->discord_url }}" target="_blank" class="social-link discord" title="Discord">
+                      <i class="fa-brands fa-discord"></i>
                     </a>
-                    <div class="divider-dropdown"></div>
-                    <form method="POST" action="{{ route('usuarios.logout') }}" style="margin:0;">
+                  @endif
+                  @if($usuario->youtube_url)
+                    <a href="{{ $usuario->youtube_url }}" target="_blank" class="social-link youtube" title="YouTube">
+                      <i class="fa-brands fa-youtube"></i>
+                    </a>
+                  @endif
+                  @if($usuario->twitch_url)
+                    <a href="{{ $usuario->twitch_url }}" target="_blank" class="social-link twitch" title="Twitch">
+                      <i class="fa-brands fa-twitch"></i>
+                    </a>
+                  @endif
+                </div>
+              @endif
+
+              <!-- Estatísticas -->
+              <div class="profile-stats">
+                <div class="stat-item">
+                  <span class="stat-number">{{ $posts->total() }}</span>
+                  <span class="stat-label">
+                    <svg class="svg-icon" viewBox="0 0 1024 1024">
+                      <path d="M896 192H128c-17.6 0-32 14.4-32 32v576c0 17.6 14.4 32 32 32h768c17.6 0 32-14.4 32-32V224c0-17.6-14.4-32-32-32z m-32 576H160V256h704v512z"/>
+                      <path d="M256 320h512v64H256zM256 448h384v64H256zM256 576h256v64H256z"/>
+                    </svg>
+                    Posts
+                  </span>
+                </div>
+                <a href="{{ route('perfil.seguidores', $usuario->id) }}" class="stat-item stat-link">
+                  <span class="stat-number">{{ $usuario->seguidores()->count() }}</span>
+                  <span class="stat-label">
+                    <svg class="svg-icon" viewBox="0 0 1024 1024">
+                      <path d="M768 576c70.4 0 128-57.6 128-128s-57.6-128-128-128-128 57.6-128 128 57.6 128 128 128z m128 64h-256c-70.4 0-128 57.6-128 128v64h512v-64c0-70.4-57.6-128-128-128zM384 576c70.4 0 128-57.6 128-128s-57.6-128-128-128-128 57.6-128 128 57.6 128 128 128z m128 64H256c-70.4 0-128 57.6-128 128v64h384v-64c0-70.4-57.6-128-128-128z"/>
+                    </svg>
+                    Seguidores
+                  </span>
+                </a>
+                <a href="{{ route('perfil.seguindo', $usuario->id) }}" class="stat-item stat-link">
+                  <span class="stat-number">{{ $usuario->seguindo()->count() }}</span>
+                  <span class="stat-label">
+                    <svg class="svg-icon" viewBox="0 0 1024 1024">
+                      <path d="M896 576c70.4 0 128-57.6 128-128s-57.6-128-128-128-128 57.6-128 128 57.6 128 128 128z m128 64h-256c-70.4 0-128 57.6-128 128v64h512v-64c0-70.4-57.6-128-128-128z"/>
+                    </svg>
+                    Seguindo
+                  </span>
+                </a>
+              </div>
+
+              <!-- Botões de Ação -->
+              <div class="profile-actions">
+                @auth
+                  @if(Auth::id() === $usuario->id)
+                    <a href="{{ route('comunidade.feed') }}" class="action-btn secondary">
+                      <svg class="svg-icon" viewBox="0 0 1024 1024">
+                        <path d="M832 64H192c-70.4 0-128 57.6-128 128v640c0 70.4 57.6 128 128 128h640c70.4 0 128-57.6 128-128V192c0-70.4-57.6-128-128-128z m-64 704H256V256h512v512z"/>
+                        <path d="M320 320h384v64H320zM320 448h256v64H320z"/>
+                      </svg>
+                      Ver Feed
+                    </a>
+                    <a href="{{ route('comunidade.create') }}" class="action-btn primary">
+                      <svg class="svg-icon" viewBox="0 0 1024 1024">
+                        <path d="M832 64H192c-70.4 0-128 57.6-128 128v640c0 70.4 57.6 128 128 128h640c70.4 0 128-57.6 128-128V192c0-70.4-57.6-128-128-128z m-64 704H256V256h512v512z"/>
+                        <path d="M480 320h64v192h192v64H480zM320 480h192V320h-64v192H320z"/>
+                      </svg>
+                      Criar Postagem
+                    </a>
+                  @else
+                    @if($esta_seguindo)
+                      <form action="{{ route('perfil.deixar_de_seguir', $usuario->id) }}" method="POST" style="display: inline;">
                         @csrf
-                        <button type="submit" class="user-dropdown-item logout">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                            <polyline points="16 17 21 12 16 7"/>
-                            <line x1="21" y1="12" x2="9" y2="12"/>
-                        </svg>
-                        Sair
+                        @method('DELETE')
+                        <button type="submit" class="action-btn following" onclick="return confirm('Deixar de seguir {{ $usuario->username }}?')">
+                          <svg class="svg-icon" viewBox="0 0 1024 1024">
+                            <path d="M512 64C264.96 64 64 264.96 64 512s200.96 448 448 448 448-200.96 448-448S759.04 64 512 64z m0 832c-211.2 0-384-172.8-384-384s172.8-384 384-384 384 172.8 384 384-172.8 384-384 384z"/>
+                            <path d="M672 352l-160 160-160-160-64 64 224 224 224-224z"/>
+                          </svg>
+                          Seguindo
                         </button>
-                    </form>
-                    </div>
-                </div>
-                </div>
-            @endguest
-            </nav>
-        </div>
-        </header>
-
-
-
-        <!-- CONTEÚDO DO PERFIL -->
-        <div class="min-h-screen py-12" style="background: var(--bg-dark);">
-            <div class="container mx-auto px-4 max-w-5xl">
-
-                {{-- BANNER --}}
-                <div class="relative h-56 md:h-64 rounded-3xl shadow-2xl overflow-hidden mb-10" style="background: linear-gradient(135deg, var(--hero-green), var(--accent-dark), var(--accent));">
-                    <div class="absolute inset-0 opacity-20">
-                        <div class="absolute top-10 left-10 w-32 h-32 bg-white rounded-full blur-3xl"></div>
-                        <div class="absolute bottom-10 right-10 w-40 h-40 bg-white rounded-full blur-3xl"></div>
-                    </div>
-                    <button onclick="history.back()" class="absolute top-6 left-6 px-4 py-2 bg-white/10 backdrop-blur-md text-white rounded-lg hover:bg-white/20 transition-all font-medium">
-                        ← Voltar
-                    </button>
-                    <div class="absolute bottom-6 left-6 text-white">
-                        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
-                            Perfil de {{ $usuario->username }}
-                        </h1>
-                        <p class="text-sm md:text-base opacity-90 mt-1">
-                            Visualize informações, postagens e redes sociais
-                        </p>
-                    </div>
-                </div>
-
-                {{-- GRID: PERFIL + EDIÇÃO --}}
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-                    <div class="lg:col-span-2">
-                        {{-- CARD PERFIL --}}
-                        <div class="profile-card mb-6">
-                            <div class="flex flex-col md:flex-row gap-8 @auth @if(Auth::id() !== $usuario->id) items-center justify-center text-center @endif @else items-center justify-center text-center @endauth">
-                                <div class="flex flex-col items-center md:items-start">
-                                    <div class="relative group">
-                                        <img 
-                                            src="{{ $usuario->avatar_url ?? asset('images/default-avatar.png') }}" 
-                                            alt="{{ $usuario->username }}"
-                                            class="w-32 h-32 rounded-2xl object-cover ring-4 ring-gray-800 shadow-2xl mb-4 group-hover:scale-105 transition-transform avatar"
-                                        >
-                                        @if(Auth::check() && Auth::id() === $usuario->id)
-                                            <button type="button" class="absolute bottom-3 right-0 w-9 h-9 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-full shadow-lg hover:scale-110 transition-transform text-lg flex items-center justify-center">
-                                                📷
-                                            </button>
-                                        @endif
-                                    </div>
-                                    <h2 class="text-2xl font-bold mb-1" style="color: var(--text-on-primary);">
-                                        {{ $usuario->username }}
-                                    </h2>
-                                </div>
-
-                                <div class="flex-1 flex flex-col gap-4 @auth @if(Auth::id() !== $usuario->id) items-center text-center @endif @endauth">
-                                    @if($usuario->bio)
-                                        <p style="color: var(--muted);">{{ $usuario->bio }}</p>
-                                    @else
-                                        <p style="color: rgba(139,155,168,0.5);" class="italic">Sem bio ainda...</p>
-                                    @endif
-
-                                    {{-- REDES SOCIAIS --}}
-                                    @php
-                                        $hasAnySocial = $usuario->discord_url || $usuario->youtube_url || $usuario->twitch_url;
-                                    @endphp
-                                    @if($hasAnySocial)
-                                        <div class="social-icons flex gap-4 mt-2 @auth @if(Auth::id() !== $usuario->id) justify-center @else justify-start @endif @else justify-center @endauth">
-                                            @if($usuario->discord_url)
-                                                <a href="{{ $usuario->discord_url }}" target="_blank" class="discord" title="Discord">
-                                                    <i class="fa-brands fa-discord"></i>
-                                                </a>
-                                            @endif
-                                            @if($usuario->youtube_url)
-                                                <a href="{{ $usuario->youtube_url }}" target="_blank" class="youtube" title="YouTube">
-                                                    <i class="fa-brands fa-youtube"></i>
-                                                </a>
-                                            @endif
-                                            @if($usuario->twitch_url)
-                                                <a href="{{ $usuario->twitch_url }}" target="_blank" class="twitch" title="Twitch">
-                                                    <i class="fa-brands fa-twitch"></i>
-                                                </a>
-                                            @endif
-                                        </div>
-                                    @endif
-
-                                    {{-- ESTATÍSTICAS --}}
-                                    <div class="grid grid-cols-3 gap-6 p-5 rounded-2xl" style="background: rgba(34,197,94,0.08);">
-                                        <div class="text-center">
-                                            <div class="text-2xl font-extrabold mb-1" style="color: var(--accent);">
-                                                {{ $posts->total() }}
-                                            </div>
-                                            <p class="text-xs font-semibold" style="color: var(--muted);">📝 Posts</p>
-                                        </div>
-                                        <a href="{{ route('perfil.seguidores', $usuario->id) }}" class="text-center hover:scale-105 transition-transform">
-                                            <div class="text-2xl font-extrabold mb-1" style="color: var(--accent-light);">
-                                                {{ $usuario->seguidores()->count() }}
-                                            </div>
-                                            <p class="text-xs font-semibold" style="color: var(--muted);">👥 Seguidores</p>
-                                        </a>
-                                        <a href="{{ route('perfil.seguindo', $usuario->id) }}" class="text-center hover:scale-105 transition-transform">
-                                            <div class="text-2xl font-extrabold mb-1" style="color: var(--accent);">
-                                                {{ $usuario->seguindo()->count() }}
-                                            </div>
-                                            <p class="text-xs font-semibold" style="color: var(--muted);">💫 Seguindo</p>
-                                        </a>
-                                    </div>
-
-                                    {{-- BOTÕES --}}
-                                    <div class="flex flex-wrap gap-3 mt-3 @auth @if(Auth::id() !== $usuario->id) justify-center @endif @else justify-center @endauth">
-                                        @auth
-                                            @if(Auth::id() === $usuario->id)
-                                                <a href="{{ route('comunidade.feed') }}" class="flex-1 min-w-[180px] py-3 rounded-xl font-bold text-center transition-all" style="background: rgba(34,197,94,0.1); color: var(--accent); border: 1px solid rgba(34,197,94,0.3);">
-                                                    📰 Ver Feed
-                                                </a>
-                                            @else
-                                                @if($esta_seguindo)
-                                                    <form action="{{ route('perfil.deixar_de_seguir', $usuario->id) }}" method="POST" class="flex-1 min-w-[180px]">
-                                                        @csrf @method('DELETE')
-                                                        <button type="submit" class="w-full py-3 rounded-xl font-bold transition-all" style="background: rgba(139,155,168,0.2); color: var(--muted);">✓ Seguindo</button>
-                                                    </form>
-                                                @else
-                                                    <form action="{{ route('perfil.seguir', $usuario->id) }}" method="POST" class="flex-1 min-w-[180px]">
-                                                        @csrf
-                                                        <button type="submit" class="w-full py-3 rounded-xl font-bold transition-all" style="background: linear-gradient(to right, var(--accent), var(--accent-light)); color: var(--hero-green); box-shadow: 0 4px 14px rgba(34,197,94,0.3);">+ Seguir</button>
-                                                    </form>
-                                                @endif
-                                                <button class="px-6 py-3 rounded-xl font-bold transition-all" style="background: rgba(34,197,94,0.1); color: var(--accent); border: 1px solid rgba(34,197,94,0.3);">💬 Mensagem</button>
-                                            @endif
-                                        @else
-                                            <a href="{{ route('usuarios.login') }}" class="flex-1 py-3 rounded-xl font-bold text-center transition-all" style="background: linear-gradient(to right, var(--accent), var(--accent-light)); color: var(--hero-green); box-shadow: 0 4px 14px rgba(34,197,94,0.3);">
-                                                🔑 Fazer Login para Seguir
-                                            </a>
-                                        @endauth
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- TABS --}}
-                        <div class="profile-card mb-8">
-                            <div class="flex border-b" style="border-color: rgba(34,197,94,0.15);">
-                                <button onclick="mostrarAba('posts')" id="tab-posts" class="flex-1 py-3 md:py-4 px-4 md:px-6 font-bold transition-all border-b-2" style="color: var(--accent); border-color: var(--accent);">
-                                    📝 Postagens
-                                </button>
-                                @auth
-                                    @if(Auth::id() === $usuario->id)
-                                        <button onclick="mostrarAba('salvos')" id="tab-salvos" class="flex-1 py-3 md:py-4 px-4 md:px-6 font-bold transition-all" style="color: var(--muted);">
-                                            💾 Salvos
-                                        </button>
-                                    @endif
-                                @endauth
-                            </div>
-                        </div>
-
-                        {{-- CONTEÚDO POSTS --}}
-                        <div id="aba-posts">
-                            @if($posts->count() > 0)
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                                    @foreach($posts as $post)
-                                        <a href="{{ route('comunidade.post.show', $post->slug) }}" class="group profile-card hover:shadow-2xl transition-all transform hover:-translate-y-2">
-                                            <div class="relative h-44 md:h-48 overflow-hidden rounded-2xl mb-4" style="background: linear-gradient(135deg, var(--hero-green), var(--accent-dark));">
-                                                @if($post->arquivos->first() && $post->arquivos->first()->tipo === 'imagem')
-                                                    <img src="{{ $post->arquivos->first()->url }}" alt="{{ $post->titulo }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
-                                                @else
-                                                    <div class="w-full h-full flex items-center justify-center text-white text-6xl">📝</div>
-                                                @endif
-                                                <span class="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold" style="background: rgba(34,197,94,0.9); color: var(--hero-green);">
-                                                    {{ ucfirst(str_replace('_', ' ', $post->tipo_conteudo)) }}
-                                                </span>
-                                            </div>
-                                            <h3 class="font-bold text-base md:text-lg mb-2 line-clamp-2 group-hover:text-green-500 transition-colors" style="color: var(--text-on-primary);">
-                                                {{ $post->titulo }}
-                                            </h3>
-                                            <p class="text-sm line-clamp-2 mb-4" style="color: var(--muted);">{{ $post->conteudo }}</p>
-                                            <div class="flex gap-4 text-xs md:text-sm" style="color: var(--muted);">
-                                                <span>❤️ {{ $post->curtidas()->count() }}</span>
-                                                <span>💬 {{ $post->comentarios()->count() }}</span>
-                                            </div>
-                                        </a>
-                                    @endforeach
-                                </div>
-                                <div class="mt-6">{{ $posts->links() }}</div>
-                            @else
-                                <div class="profile-card p-14 text-center">
-                                    <div class="text-7xl mb-4">📝</div>
-                                    <h3 class="text-2xl font-bold mb-2" style="color: var(--text-on-primary);">Nenhuma postagem ainda</h3>
-                                    <p class="mb-6" style="color: var(--muted);">Compartilhe conteúdo com a comunidade</p>
-                                    @auth
-                                        @if(Auth::id() === $usuario->id)
-                                            <a href="{{ route('comunidade.create') }}" class="inline-block px-8 py-4 rounded-xl font-bold transition-all" style="background: linear-gradient(to right, var(--accent), var(--accent-light)); color: var(--hero-green); box-shadow: 0 4px 14px rgba(34,197,94,0.3);">
-                                                ✨ Criar Primeira Postagem
-                                            </a>
-                                        @endif
-                                    @endauth
-                                </div>
-                            @endif
-                        </div>
-
-                        {{-- SALVOS --}}
-                        @auth
-                            @if(Auth::id() === $usuario->id)
-                                <div id="aba-salvos" class="hidden">
-                                    @if($usuario->saved_posts()->count() > 0)
-                                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                                            @foreach($usuario->saved_posts as $saved)
-                                                @php $post = $saved->post; @endphp
-                                                <div class="group profile-card hover:shadow-2xl transition-all transform hover:-translate-y-2">
-                                                    <div class="relative h-44 md:h-48 overflow-hidden rounded-2xl mb-4" style="background: linear-gradient(135deg, var(--hero-green), var(--accent-dark));">
-                                                        @if($post->arquivos->first() && $post->arquivos->first()->tipo === 'imagem')
-                                                            <img src="{{ $post->arquivos->first()->url }}" alt="{{ $post->titulo }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
-                                                        @else
-                                                            <div class="w-full h-full flex items-center justify-center text-white text-6xl">📝</div>
-                                                        @endif
-                                                        <span class="absolute top-3 right-3 px-3 py-1 bg-yellow-400 text-yellow-900 rounded-full text-xs font-bold">💾 Salvo</span>
-                                                    </div>
-                                                    <h3 class="font-bold text-base md:text-lg mb-2 line-clamp-2" style="color: var(--text-on-primary);">{{ $post->titulo }}</h3>
-                                                    <p class="text-sm line-clamp-2 mb-4" style="color: var(--muted);">{{ $post->conteudo }}</p>
-                                                    <div class="flex gap-2">
-                                                        <a href="{{ route('comunidade.post.show', $post->slug) }}" class="flex-1 py-2 rounded-lg text-xs md:text-sm font-bold text-center transition-all" style="background: linear-gradient(to right, var(--accent), var(--accent-light)); color: var(--hero-green);">Ver Post</a>
-                                                        <form action="{{ route('comunidade.desalvar', $post->id) }}" method="POST" class="flex-1">
-                                                            @csrf @method('DELETE')
-                                                            <button type="submit" class="w-full py-2 bg-red-100 text-red-600 text-xs md:text-sm font-bold rounded-lg hover:bg-red-200 transition-all" onclick="return confirm('Remover dos salvos?')">🗑️</button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <div class="profile-card p-14 text-center">
-                                            <div class="text-7xl mb-4">💾</div>
-                                            <h3 class="text-2xl font-bold mb-2" style="color: var(--text-on-primary);">Nenhuma postagem salva</h3>
-                                            <p class="mb-6" style="color: var(--muted);">Salve suas postagens favoritas para acessá-las rapidamente</p>
-                                            <a href="{{ route('comunidade.feed') }}" class="inline-block px-8 py-4 rounded-xl font-bold transition-all" style="background: linear-gradient(to right, var(--accent), var(--accent-light)); color: var(--hero-green); box-shadow: 0 4px 14px rgba(34,197,94,0.3);">
-                                                Explorar Feed →
-                                            </a>
-                                        </div>
-                                    @endif
-                                </div>
-                            @endif
-                        @endauth
-                    </div>
-
-                    {{-- FORMULÁRIO EDIÇÃO --}}
-                    @auth
-                        @if(Auth::id() === $usuario->id)
-                            <div>
-                                <div class="profile-card">
-                                    <div class="px-6 py-5 rounded-t-3xl mb-5" style="background: linear-gradient(to right, var(--accent), var(--accent-light)); margin: -2.5rem -2rem 1.5rem -2rem; padding: 2rem;">
-                                        <h2 class="text-xl font-bold" style="color: var(--hero-green);">✏️ Editar Perfil</h2>
-                                        <p class="text-sm mt-1" style="color: rgba(5,46,22,0.8);">Atualize sua bio e redes sociais</p>
-                                    </div>
-                                    <form action="{{ route('perfil.update') }}" method="POST" class="space-y-5">
-                                        @csrf @method('PUT')
-                                        <div>
-                                            <label class="block text-xs font-bold mb-2" style="color: var(--text-on-primary);">📝 Bio (até 500 caracteres)</label>
-                                            <textarea name="bio" maxlength="500" rows="4" placeholder="Conte um pouco sobre você..." class="w-full px-3 py-2 rounded-xl resize-none text-sm" style="background: rgba(34,197,94,0.05); border: 2px solid rgba(34,197,94,0.2); color: var(--text-on-primary);">{{ old('bio', Auth::user()->bio) }}</textarea>
-                                            @error('bio')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-bold mb-2" style="color: var(--text-on-primary);">
-                                                <span class="inline-flex items-center gap-2"><i class="fa-brands fa-discord" style="color:#5865F2"></i> Discord</span>
-                                            </label>
-                                            <input type="url" name="discord_url" placeholder="https://discord.gg/seu-link" value="{{ old('discord_url', Auth::user()->discord_url) }}" class="w-full px-3 py-2 rounded-xl text-sm" style="background: rgba(34,197,94,0.05); border: 2px solid rgba(34,197,94,0.2); color: var(--text-on-primary);">
-                                            @error('discord_url')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-bold mb-2" style="color: var(--text-on-primary);">
-                                                <span class="inline-flex items-center gap-2"><i class="fa-brands fa-youtube" style="color:#FF0000"></i> YouTube</span>
-                                            </label>
-                                            <input type="url" name="youtube_url" placeholder="https://youtube.com/@seu-canal" value="{{ old('youtube_url', Auth::user()->youtube_url) }}" class="w-full px-3 py-2 rounded-xl text-sm" style="background: rgba(34,197,94,0.05); border: 2px solid rgba(34,197,94,0.2); color: var(--text-on-primary);">
-                                            @error('youtube_url')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-bold mb-2" style="color: var(--text-on-primary);">
-                                                <span class="inline-flex items-center gap-2"><i class="fa-brands fa-twitch" style="color:#9147ff"></i> Twitch</span>
-                                            </label>
-                                            <input type="url" name="twitch_url" placeholder="https://twitch.tv/seu-user" value="{{ old('twitch_url', Auth::user()->twitch_url) }}" class="w-full px-3 py-2 rounded-xl text-sm" style="background: rgba(34,197,94,0.05); border: 2px solid rgba(34,197,94,0.2); color: var(--text-on-primary);">
-                                            @error('twitch_url')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                                        </div>
-                                        <div class="flex flex-col gap-2 pt-3" style="border-top: 1px solid rgba(34,197,94,0.15);">
-                                            <button type="submit" class="w-full py-2.5 rounded-xl font-bold text-sm transition-all" style="background: linear-gradient(to right, var(--accent), var(--accent-light)); color: var(--hero-green); box-shadow: 0 4px 14px rgba(34,197,94,0.3);">
-                                                ✅ Salvar Alterações
-                                            </button>
-                                            <a href="{{ route('perfil.show', Auth::user()->username) }}" class="w-full py-2.5 rounded-xl font-bold text-sm text-center transition-all" style="background: rgba(139,155,168,0.2); color: var(--muted);">
-                                                ❌ Cancelar
-                                            </a>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        @endif
-                    @endauth
-                </div>
+                      </form>
+                    @else
+                      <form action="{{ route('perfil.seguir', $usuario->id) }}" method="POST" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="action-btn primary">
+                          <svg class="svg-icon" viewBox="0 0 1024 1024">
+                            <path d="M832 64H192c-70.4 0-128 57.6-128 128v640c0 70.4 57.6 128 128 128h640c70.4 0 128-57.6 128-128V192c0-70.4-57.6-128-128-128z m-64 704H256V256h512v512z"/>
+                            <path d="M480 320h64v192h192v64H480zM320 480h192V320h-64v192H320z"/>
+                          </svg>
+                          Seguir
+                        </button>
+                      </form>
+                    @endif
+                  
+                  @endif
+                @else
+                  <a href="{{ route('usuarios.login') }}" class="action-btn primary">
+                    <svg class="svg-icon" viewBox="0 0 1024 1024">
+                      <path d="M832 64H192c-70.4 0-128 57.6-128 128v640c0 70.4 57.6 128 128 128h640c70.4 0 128-57.6 128-128V192c0-70.4-57.6-128-128-128z m-64 704H256V256h512v512z"/>
+                      <path d="M416 448l192 128-192 128z"/>
+                    </svg>
+                    Fazer Login para Seguir
+                  </a>
+                @endauth
+              </div>
             </div>
+          </div>
         </div>
 
-        <script>
-        // Dropdown usuário
-        document.addEventListener('DOMContentLoaded', function() {
-        const avatarBtn = document.getElementById('userAvatarBtn');
-        const dropdown = document.getElementById('userDropdown');
-        if(avatarBtn && dropdown) {
-            avatarBtn.addEventListener('click', e => {
-            e.stopPropagation();
-            dropdown.classList.toggle('show');
-            });
-            document.addEventListener('click', function(e) {
-            if(!dropdown.contains(e.target) && e.target !== avatarBtn && !avatarBtn.contains(e.target)) {
-                dropdown.classList.remove('show');
-            }
-            });
+        <!-- Tabs -->
+        <div class="tabs-container">
+          <div class="tabs-header">
+            <button class="tab-btn active" onclick="mostrarAba('posts')" id="tab-posts">
+              <svg class="svg-icon" viewBox="0 0 1024 1024">
+                <path d="M896 192H128c-17.6 0-32 14.4-32 32v576c0 17.6 14.4 32 32 32h768c17.6 0 32-14.4 32-32V224c0-17.6-14.4-32-32-32z m-32 576H160V256h704v512z"/>
+                <path d="M256 320h512v64H256zM256 448h384v64H256zM256 576h256v64H256z"/>
+              </svg>
+              Postagens
+            </button>
+            @auth
+              @if(Auth::id() === $usuario->id)
+                <button class="tab-btn" onclick="mostrarAba('salvos')" id="tab-salvos">
+                  <svg class="svg-icon" viewBox="0 0 1024 1024">
+                    <path d="M832 64H192c-70.4 0-128 57.6-128 128v640c0 70.4 57.6 128 128 128h640c70.4 0 128-57.6 128-128V192c0-70.4-57.6-128-128-128z m-64 704H256V256h512v512z"/>
+                    <path d="M384 448l128 128 224-224 64 64-288 288-192-192z"/>
+                  </svg>
+                  Salvos
+                </button>
+              @endif
+            @endauth
+          </div>
+
+          <!-- Conteúdo da Aba Posts -->
+          <div class="tab-content" id="aba-posts">
+            @if($posts->count() > 0)
+              <div class="posts-grid">
+                @foreach($posts as $post)
+                  <a href="{{ route('comunidade.post.show', $post->slug) }}" class="post-card">
+                    <div class="relative">
+                      @if($post->arquivos->first() && $post->arquivos->first()->tipo === 'imagem')
+                        <img src="{{ $post->arquivos->first()->url }}" alt="{{ $post->titulo }}" class="post-image">
+                      @else
+                        <div class="post-default-image">
+                          <svg class="svg-icon" viewBox="0 0 1024 1024" style="width: 48px; height: 48px; opacity: 0.3;">
+                            <path d="M896 192H128c-17.6 0-32 14.4-32 32v576c0 17.6 14.4 32 32 32h768c17.6 0 32-14.4 32-32V224c0-17.6-14.4-32-32-32z m-32 576H160V256h704v512z"/>
+                            <path d="M256 320h512v64H256zM256 448h384v64H256zM256 576h256v64H256z"/>
+                          </svg>
+                        </div>
+                      @endif
+                      <span class="post-badge">{{ ucfirst(str_replace('_', ' ', $post->tipo_conteudo)) }}</span>
+                    </div>
+                    <div class="post-content">
+                      <h3 class="post-title">{{ $post->titulo }}</h3>
+                      <p class="post-excerpt">{{ Str::limit($post->conteudo, 120) }}</p>
+                      <div class="post-stats">
+                        <span>
+                          <svg class="svg-icon" viewBox="0 0 1024 1024" style="width: 12px; height: 12px;">
+                            <path d="M512 832c-211.2 0-384-172.8-384-384 0-185.6 124.8-345.6 307.2-390.4 17.6-4.8 35.2 6.4 40 24 4.8 17.6-6.4 35.2-24 40-150.4 35.2-259.2 169.6-259.2 326.4 0 176 144 320 320 320s320-144 320-320c0-156.8-108.8-291.2-259.2-326.4-17.6-4.8-28.8-22.4-24-40s22.4-28.8 40-24c182.4 44.8 307.2 204.8 307.2 390.4 0 211.2-172.8 384-384 384z"/>
+                          </svg>
+                          {{ $post->curtidas()->count() }}
+                        </span>
+                        <span>
+                          <svg class="svg-icon" viewBox="0 0 1024 1024" style="width: 12px; height: 12px;">
+                            <path d="M832 64H192c-70.4 0-128 57.6-128 128v384c0 70.4 57.6 128 128 128h128v128l192-128h320c70.4 0 128-57.6 128-128V192c0-70.4-57.6-128-128-128z m-64 512H416l-96 64v-64H256V192h512v384z"/>
+                          </svg>
+                          {{ $post->comentarios()->count() }}
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                @endforeach
+              </div>
+              
+              <!-- Paginação -->
+              @if($posts->hasPages())
+                <div class="pagination-container">
+                  {{ $posts->links() }}
+                </div>
+              @endif
+            @else
+              <div class="empty-state">
+                <div class="empty-state-icon">
+                  <svg class="svg-icon" viewBox="0 0 1024 1024" style="width: 64px; height: 64px;">
+                    <path d="M896 192H128c-17.6 0-32 14.4-32 32v576c0 17.6 14.4 32 32 32h768c17.6 0 32-14.4 32-32V224c0-17.6-14.4-32-32-32z m-32 576H160V256h704v512z"/>
+                    <path d="M256 320h512v64H256zM256 448h384v64H256zM256 576h256v64H256z"/>
+                  </svg>
+                </div>
+                <h3 class="empty-state-title">Nenhuma postagem ainda</h3>
+                <p class="empty-state-description">Compartilhe conteúdo com a comunidade</p>
+                @auth
+                  @if(Auth::id() === $usuario->id)
+                    <a href="{{ route('comunidade.create') }}" class="action-btn primary" style="display: inline-block;">
+                      <svg class="svg-icon" viewBox="0 0 1024 1024">
+                        <path d="M832 64H192c-70.4 0-128 57.6-128 128v640c0 70.4 57.6 128 128 128h640c70.4 0 128-57.6 128-128V192c0-70.4-57.6-128-128-128z m-64 704H256V256h512v512z"/>
+                        <path d="M480 320h64v192h192v64H480zM320 480h192V320h-64v192H320z"/>
+                      </svg>
+                      Criar Primeira Postagem
+                    </a>
+                  @endif
+                @endauth
+              </div>
+            @endif
+          </div>
+
+          <!-- Conteúdo da Aba Salvos -->
+          @auth
+            @if(Auth::id() === $usuario->id)
+              <div class="tab-content" id="aba-salvos" style="display: none;">
+                @if($usuario->saved_posts()->count() > 0)
+                  <div class="posts-grid">
+                    @foreach($usuario->saved_posts as $saved)
+                      @php $post = $saved->post; @endphp
+                      <div class="post-card">
+                        <div class="relative">
+                          @if($post->arquivos->first() && $post->arquivos->first()->tipo === 'imagem')
+                            <img src="{{ $post->arquivos->first()->url }}" alt="{{ $post->titulo }}" class="post-image">
+                          @else
+                            <div class="post-default-image">
+                              <svg class="svg-icon" viewBox="0 0 1024 1024" style="width: 48px; height: 48px; opacity: 0.3;">
+                                <path d="M832 64H192c-70.4 0-128 57.6-128 128v640c0 70.4 57.6 128 128 128h640c70.4 0 128-57.6 128-128V192c0-70.4-57.6-128-128-128z m-64 704H256V256h512v512z"/>
+                                <path d="M384 448l128 128 224-224 64 64-288 288-192-192z"/>
+                              </svg>
+                            </div>
+                          @endif
+                          <span class="post-badge" style="background: #eab308; color: #052e16;">
+                            <svg class="svg-icon" viewBox="0 0 1024 1024" style="width: 11px; height: 11px;">
+                              <path d="M832 64H192c-70.4 0-128 57.6-128 128v640c0 70.4 57.6 128 128 128h640c70.4 0 128-57.6 128-128V192c0-70.4-57.6-128-128-128z m-64 704H256V256h512v512z"/>
+                              <path d="M384 448l128 128 224-224 64 64-288 288-192-192z"/>
+                            </svg>
+                            Salvo
+                          </span>
+                        </div>
+                        <div class="post-content">
+                          <h3 class="post-title">{{ $post->titulo }}</h3>
+                          <p class="post-excerpt">{{ Str::limit($post->conteudo, 120) }}</p>
+                          <div class="post-stats">
+                            <span>
+                              <svg class="svg-icon" viewBox="0 0 1024 1024" style="width: 12px; height: 12px;">
+                                <path d="M512 832c-211.2 0-384-172.8-384-384 0-185.6 124.8-345.6 307.2-390.4 17.6-4.8 35.2 6.4 40 24 4.8 17.6-6.4 35.2-24 40-150.4 35.2-259.2 169.6-259.2 326.4 0 176 144 320 320 320s320-144 320-320c0-156.8-108.8-291.2-259.2-326.4-17.6-4.8-28.8-22.4-24-40s22.4-28.8 40-24c182.4 44.8 307.2 204.8 307.2 390.4 0 211.2-172.8 384-384 384z"/>
+                              </svg>
+                              {{ $post->curtidas()->count() }}
+                            </span>
+                            <span>
+                              <svg class="svg-icon" viewBox="0 0 1024 1024" style="width: 12px; height: 12px;">
+                                <path d="M832 64H192c-70.4 0-128 57.6-128 128v384c0 70.4 57.6 128 128 128h128v128l192-128h320c70.4 0 128-57.6 128-128V192c0-70.4-57.6-128-128-128z m-64 512H416l-96 64v-64H256V192h512v384z"/>
+                              </svg>
+                              {{ $post->comentarios()->count() }}
+                            </span>
+                          </div>
+                          <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <a href="{{ route('comunidade.post.show', $post->slug) }}" class="action-btn secondary" style="flex: 1; padding: 8px; text-align: center;">
+                              Ver Post
+                            </a>
+                            <form action="{{ route('comunidade.desalvar', $post->id) }}" method="POST" style="flex: 1;">
+                              @csrf
+                              @method('DELETE')
+                              <button type="submit" class="action-btn following" style="width: 100%; padding: 8px;" onclick="return confirm('Remover dos salvos?')">
+                                <svg class="svg-icon" viewBox="0 0 1024 1024">
+                                  <path d="M832 64H192c-70.4 0-128 57.6-128 128v640c0 70.4 57.6 128 128 128h640c70.4 0 128-57.6 128-128V192c0-70.4-57.6-128-128-128z m-64 704H256V256h512v512z"/>
+                                  <path d="M320 320h384v384H320z"/>
+                                </svg>
+                              </button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    @endforeach
+                  </div>
+                @else
+                  <div class="empty-state">
+                    <div class="empty-state-icon">
+                      <svg class="svg-icon" viewBox="0 0 1024 1024" style="width: 64px; height: 64px;">
+                        <path d="M832 64H192c-70.4 0-128 57.6-128 128v640c0 70.4 57.6 128 128 128h640c70.4 0 128-57.6 128-128V192c0-70.4-57.6-128-128-128z m-64 704H256V256h512v512z"/>
+                        <path d="M384 448l128 128 224-224 64 64-288 288-192-192z"/>
+                      </svg>
+                    </div>
+                    <h3 class="empty-state-title">Nenhuma postagem salva</h3>
+                    <p class="empty-state-description">Salve suas postagens favoritas para acessá-las rapidamente</p>
+                    <a href="{{ route('comunidade.feed') }}" class="action-btn primary" style="display: inline-block;">
+                      <svg class="svg-icon" viewBox="0 0 1024 1024">
+                        <path d="M832 64H192c-70.4 0-128 57.6-128 128v640c0 70.4 57.6 128 128 128h640c70.4 0 128-57.6 128-128V192c0-70.4-57.6-128-128-128z m-64 704H256V256h512v512z"/>
+                        <path d="M320 320h384v64H320zM320 448h256v64H320z"/>
+                      </svg>
+                      Explorar Feed
+                    </a>
+                  </div>
+                @endif
+              </div>
+            @endif
+          @endauth
+        </div>
+      </div>
+
+      <!-- Sidebar de Edição -->
+      @auth
+        @if(Auth::id() === $usuario->id)
+          <div class="edit-sidebar">
+            <div class="edit-form-card">
+              <div class="edit-form-header">
+                <h3>
+                  <svg class="svg-icon" viewBox="0 0 1024 1024">
+                    <path d="M878.08 688c26.88-46.72 41.92-100.48 41.92-160 0-185.6-150.4-336-336-336s-336 150.4-336 336 150.4 336 336 336c59.52 0 113.28-15.04 160-41.92l158.08 158.08c12.48 12.48 32.64 12.48 45.12 0s12.48-32.64 0-45.12L878.08 688z m-158.08 0c-123.52 0-224-100.48-224-224s100.48-224 224-224 224 100.48 224 224-100.48 224-224 224z"/>
+                    <path d="M224 512c0-17.6 14.4-32 32-32s32 14.4 32 32-14.4 32-32 32-32-14.4-32-32zM416 512c0-17.6 14.4-32 32-32s32 14.4 32 32-14.4 32-32 32-32-14.4-32-32zM608 512c0-17.6 14.4-32 32-32s32 14.4 32 32-14.4 32-32 32-32-14.4-32-32z"/>
+                  </svg>
+                  Editar Perfil
+                </h3>
+                <p>Atualize sua bio e redes sociais</p>
+              </div>
+              
+              <form action="{{ route('perfil.update') }}" method="POST" class="edit-form-body" id="form-editar-perfil">
+                @csrf
+                @method('PUT')
+                
+                <div class="form-group">
+                  <label class="form-label">
+                    <svg class="svg-icon" viewBox="0 0 1024 1024">
+                      <path d="M896 192H128c-17.6 0-32 14.4-32 32v576c0 17.6 14.4 32 32 32h768c17.6 0 32-14.4 32-32V224c0-17.6-14.4-32-32-32z m-32 576H160V256h704v512z"/>
+                      <path d="M256 320h512v64H256zM256 448h384v64H256zM256 576h256v64H256z"/>
+                    </svg>
+                    Bio (até 500 caracteres)
+                  </label>
+                  <textarea name="bio" id="bio" maxlength="500" class="form-input" placeholder="Conte um pouco sobre você...">{{ old('bio', Auth::user()->bio) }}</textarea>
+                  <small id="bio-warning" class="error-message">
+                    <svg class="svg-icon" viewBox="0 0 1024 1024">
+                      <path d="M512 64C264.96 64 64 264.96 64 512s200.96 448 448 448 448-200.96 448-448S759.04 64 512 64z m0 832c-211.2 0-384-172.8-384-384s172.8-384 384-384 384 172.8 384 384-172.8 384-384 384z"/>
+                      <path d="M512 320c-17.6 0-32 14.4-32 32v192c0 17.6 14.4 32 32 32s32-14.4 32-32V352c0-17.6-14.4-32-32-32zM512 576c-17.6 0-32 14.4-32 32s14.4 32 32 32 32-14.4 32-32-14.4-32-32-32z"/>
+                    </svg>
+                    Conteúdo inapropriado detectado
+                  </small>
+                  @error('bio')
+                    <p style="color: #ef4444; font-size: 12px; margin-top: 4px;">{{ $message }}</p>
+                  @enderror
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">
+                    <svg class="svg-icon" viewBox="0 0 1024 1024" style="color:#5865F2">
+                      <path d="M832 64H192c-70.4 0-128 57.6-128 128v640c0 70.4 57.6 128 128 128h640c70.4 0 128-57.6 128-128V192c0-70.4-57.6-128-128-128z m-64 704H256V256h512v512z"/>
+                      <path d="M416 320h192v64H416zM320 448h384v64H320zM416 576h192v64H416z"/>
+                    </svg>
+                    Discord
+                  </label>
+                  <input type="url" name="discord_url" id="discord_url" placeholder="https://discord.gg/seu-link" value="{{ old('discord_url', Auth::user()->discord_url) }}" class="form-input">
+                  <small id="discord-warning" class="error-message">
+                    <svg class="svg-icon" viewBox="0 0 1024 1024">
+                      <path d="M512 64C264.96 64 64 264.96 64 512s200.96 448 448 448 448-200.96 448-448S759.04 64 512 64z m0 832c-211.2 0-384-172.8-384-384s172.8-384 384-384 384 172.8 384 384-172.8 384-384 384z"/>
+                      <path d="M512 320c-17.6 0-32 14.4-32 32v192c0 17.6 14.4 32 32 32s32-14.4 32-32V352c0-17.6-14.4-32-32-32zM512 576c-17.6 0-32 14.4-32 32s14.4 32 32 32 32-14.4 32-32-14.4-32-32-32z"/>
+                    </svg>
+                    Conteúdo inapropriado detectado
+                  </small>
+                  @error('discord_url')
+                    <p style="color: #ef4444; font-size: 12px; margin-top: 4px;">{{ $message }}</p>
+                  @enderror
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">
+                    <svg class="svg-icon" viewBox="0 0 1024 1024" style="color:#FF0000">
+                      <path d="M832 64H192c-70.4 0-128 57.6-128 128v640c0 70.4 57.6 128 128 128h640c70.4 0 128-57.6 128-128V192c0-70.4-57.6-128-128-128z m-64 704H256V256h512v512z"/>
+                      <path d="M416 448l192 128-192 128z"/>
+                    </svg>
+                    YouTube
+                  </label>
+                  <input type="url" name="youtube_url" id="youtube_url" placeholder="https://youtube.com/@seu-canal" value="{{ old('youtube_url', Auth::user()->youtube_url) }}" class="form-input">
+                  <small id="youtube-warning" class="error-message">
+                    <svg class="svg-icon" viewBox="0 0 1024 1024">
+                      <path d="M512 64C264.96 64 64 264.96 64 512s200.96 448 448 448 448-200.96 448-448S759.04 64 512 64z m0 832c-211.2 0-384-172.8-384-384s172.8-384 384-384 384 172.8 384 384-172.8 384-384 384z"/>
+                      <path d="M512 320c-17.6 0-32 14.4-32 32v192c0 17.6 14.4 32 32 32s32-14.4 32-32V352c0-17.6-14.4-32-32-32zM512 576c-17.6 0-32 14.4-32 32s14.4 32 32 32 32-14.4 32-32-14.4-32-32-32z"/>
+                    </svg>
+                    Conteúdo inapropriado detectado
+                  </small>
+                  @error('youtube_url')
+                    <p style="color: #ef4444; font-size: 12px; margin-top: 4px;">{{ $message }}</p>
+                  @enderror
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">
+                    <svg class="svg-icon" viewBox="0 0 1024 1024" style="color:#9147ff">
+                      <path d="M832 64H192c-70.4 0-128 57.6-128 128v640c0 70.4 57.6 128 128 128h640c70.4 0 128-57.6 128-128V192c0-70.4-57.6-128-128-128z m-64 704H256V256h512v512z"/>
+                      <path d="M416 320h192v64H416zM320 448h384v64H320zM416 576h192v64H416z"/>
+                    </svg>
+                    Twitch
+                  </label>
+                  <input type="url" name="twitch_url" id="twitch_url" placeholder="https://twitch.tv/seu-user" value="{{ old('twitch_url', Auth::user()->twitch_url) }}" class="form-input">
+                  <small id="twitch-warning" class="error-message">
+                    <svg class="svg-icon" viewBox="0 0 1024 1024">
+                      <path d="M512 64C264.96 64 64 264.96 64 512s200.96 448 448 448 448-200.96 448-448S759.04 64 512 64z m0 832c-211.2 0-384-172.8-384-384s172.8-384 384-384 384 172.8 384 384-172.8 384-384 384z"/>
+                      <path d="M512 320c-17.6 0-32 14.4-32 32v192c0 17.6 14.4 32 32 32s32-14.4 32-32V352c0-17.6-14.4-32-32-32zM512 576c-17.6 0-32 14.4-32 32s14.4 32 32 32 32-14.4 32-32-14.4-32-32-32z"/>
+                    </svg>
+                    Conteúdo inapropriado detectado
+                  </small>
+                  @error('twitch_url')
+                    <p style="color: #ef4444; font-size: 12px; margin-top: 4px;">{{ $message }}</p>
+                  @enderror
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">
+                    <svg class="svg-icon" viewBox="0 0 1024 1024">
+                      <path d="M832 64H192c-70.4 0-128 57.6-128 128v640c0 70.4 57.6 128 128 128h640c70.4 0 128-57.6 128-128V192c0-70.4-57.6-128-128-128z m-64 704H256V256h512v512z"/>
+                      <path d="M448 320l128 192 128-192h-64v-64h-128v64zM320 576h384v64H320z"/>
+                    </svg>
+                    Website (opcional)
+                  </label>
+                  <input type="url" name="website" id="website" placeholder="https://seu-site.com" value="{{ old('website', Auth::user()->website) }}" class="form-input">
+                  <small id="website-warning" class="error-message">
+                    <svg class="svg-icon" viewBox="0 0 1024 1024">
+                      <path d="M512 64C264.96 64 64 264.96 64 512s200.96 448 448 448 448-200.96 448-448S759.04 64 512 64z m0 832c-211.2 0-384-172.8-384-384s172.8-384 384-384 384 172.8 384 384-172.8 384-384 384z"/>
+                      <path d="M512 320c-17.6 0-32 14.4-32 32v192c0 17.6 14.4 32 32 32s32-14.4 32-32V352c0-17.6-14.4-32-32-32zM512 576c-17.6 0-32 14.4-32 32s14.4 32 32 32 32-14.4 32-32-14.4-32-32-32z"/>
+                    </svg>
+                    Conteúdo inapropriado detectado
+                  </small>
+                  @error('website')
+                    <p style="color: #ef4444; font-size: 12px; margin-top: 4px;">{{ $message }}</p>
+                  @enderror
+                </div>
+                
+                <button type="submit" class="action-btn primary" style="width: 100%; margin-top: 8px;">
+                  <svg class="svg-icon" viewBox="0 0 1024 1024">
+                    <path d="M512 64C264.96 64 64 264.96 64 512s200.96 448 448 448 448-200.96 448-448S759.04 64 512 64z m0 832c-211.2 0-384-172.8-384-384s172.8-384 384-384 384 172.8 384 384-172.8 384-384 384z"/>
+                    <path d="M448 320l128 128 192-192 64 64-256 256-192-192z"/>
+                  </svg>
+                  Salvar Alterações
+                </button>
+              </form>
+            </div>
+          </div>
+        @endif
+      @endauth
+    </div>
+  </div>
+</div>
+
+<script src="{{ asset('js/moderation.js') }}" defer></script>
+
+<script>
+// Sistema de Tabs
+function mostrarAba(aba) {
+  // Esconder todas as abas
+  document.getElementById('aba-posts').style.display = 'none';
+  const abaSalvos = document.getElementById('aba-salvos');
+  if (abaSalvos) abaSalvos.style.display = 'none';
+  
+  // Remover classe active de todas as tabs
+  document.getElementById('tab-posts').classList.remove('active');
+  const tabSalvos = document.getElementById('tab-salvos');
+  if (tabSalvos) tabSalvos.classList.remove('active');
+  
+  // Mostrar aba selecionada
+  if (aba === 'posts') {
+    document.getElementById('aba-posts').style.display = 'block';
+    document.getElementById('tab-posts').classList.add('active');
+  } else if (aba === 'salvos' && abaSalvos) {
+    abaSalvos.style.display = 'block';
+    tabSalvos.classList.add('active');
+  }
+}
+
+// Font Awesome
+if (!document.querySelector('link[href*="font-awesome"]')) {
+  const faLink = document.createElement('link');
+  faLink.rel = 'stylesheet';
+  faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css';
+  document.head.appendChild(faLink);
+}
+
+// MODERAÇÃO DE TEXTO NO FORMULÁRIO DE EDIÇÃO DE PERFIL
+document.addEventListener('DOMContentLoaded', async function() {
+  // Inicializar sistema de moderação
+  const state = await window.Moderation.init({
+    csrfToken: '{{ csrf_token() }}',
+    endpoint: '/moderate',
+    debounceMs: 120,
+  });
+
+  // Função para aplicar warning em qualquer campo
+  function applyWarning(elementId, result) {
+    const el = document.getElementById(elementId);
+    const warn = document.getElementById(elementId + '-warning');
+    
+    if (!el) return;
+    
+    if (result && result.inappropriate) {
+      el.classList.add('error');
+      if (warn) warn.style.display = 'block';
+    } else {
+      el.classList.remove('error');
+      if (warn) warn.style.display = 'none';
+    }
+  }
+
+  // Lista de campos para moderar no formulário de edição de perfil
+  const camposParaModerar = [
+    { id: 'bio', name: 'bio' },
+    { id: 'discord_url', name: 'discord_url' },
+    { id: 'youtube_url', name: 'youtube_url' },
+    { id: 'twitch_url', name: 'twitch_url' },
+    { id: 'website', name: 'website' }
+  ];
+
+  // Aplicar moderação a todos os campos
+  camposParaModerar.forEach(campo => {
+    window.Moderation.attachInput('#' + campo.id, campo.name, {
+      onLocal: (res) => applyWarning(campo.id, res),
+      onServer: (srv) => {
+        if (srv && srv.data && srv.data.inappropriate) {
+          applyWarning(campo.id, { inappropriate: true });
         }
-        });
-        // Tabs
-        function mostrarAba(aba) {
-            document.getElementById('aba-posts').classList.add('hidden');
-            const abaSalvos = document.getElementById('aba-salvos');
-            if (abaSalvos) abaSalvos.classList.add('hidden');
-            document.getElementById('tab-posts').style.borderColor = 'transparent';
-            document.getElementById('tab-posts').style.color = 'var(--muted)';
-            const tabSalvos = document.getElementById('tab-salvos');
-            if (tabSalvos) {
-            tabSalvos.style.borderColor = 'transparent';
-            tabSalvos.style.color = 'var(--muted)';
-            }
-            if (aba === 'posts') {
-                document.getElementById('aba-posts').classList.remove('hidden');
-                document.getElementById('tab-posts').style.borderColor = 'var(--accent)';
-                document.getElementById('tab-posts').style.color = 'var(--accent)';
-            } else if (aba === 'salvos' && abaSalvos) {
-                abaSalvos.classList.remove('hidden');
-                tabSalvos.style.borderColor = 'var(--accent)';
-                tabSalvos.style.color = 'var(--accent)';
-            }
-        }
-        </script>
-        @endsection
+      }
+    });
+  });
+
+  // Validar formulário antes do envio
+  const form = document.getElementById('form-editar-perfil');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      let hasErrors = false;
+      
+      // Verificar todos os campos com classe 'error'
+      const camposComErro = document.querySelectorAll('.form-input.error');
+      
+      if (camposComErro.length > 0) {
+        hasErrors = true;
+        const campos = Array.from(camposComErro).map(campo => {
+          const label = campo.previousElementSibling?.textContent || campo.id;
+          return `• ${label}`;
+        }).join('\n');
+        
+        alert(`⚠️ Conteúdo inapropriado detectado nos seguintes campos:\n\n${campos}\n\nCorrija antes de continuar.`);
+      }
+      
+      // Se houver erros, prevenir envio
+      if (hasErrors) {
+        e.preventDefault();
+        return false;
+      }
+      
+      // Tudo ok, pode enviar
+      return true;
+    });
+  }
+});
+</script>
+@endsection

@@ -7,12 +7,12 @@ use App\Models\Like;
 use App\Models\Comment;
 use App\Models\SavedPost;
 use App\Models\PostFile;
+use App\Models\FichaRpg;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Intervention\Image\Facades\Image;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class PostController extends Controller {
@@ -30,7 +30,8 @@ class PostController extends Controller {
             'autor:id,username,avatar_url',
             'arquivos',
             'curtidas',
-            'comentarios.autor'
+            'comentarios.autor',
+            'fichaRpg'
         ])
         ->orderBy('created_at', 'desc')
         ->paginate($per_page);
@@ -54,7 +55,7 @@ class PostController extends Controller {
         $termo = $request->get('q', '');
         $tipo = $request->get('tipo', null);
         
-        $query = Post::with(['autor', 'arquivos']);
+        $query = Post::with(['autor', 'arquivos', 'fichaRpg']);
         
         if ($termo) {
             $query->where(function($q) use ($termo) {
@@ -63,7 +64,7 @@ class PostController extends Controller {
             });
         }
         
-        if ($tipo && in_array($tipo, ['texto', 'imagem', 'video', 'modelo_3d', 'ficha', 'outros'])) {
+        if ($tipo && in_array($tipo, ['texto', 'imagem', 'video', 'ficha_rpg', 'outros'])) {
             $query->where('tipo_conteudo', $tipo);
         }
         
@@ -93,19 +94,40 @@ class PostController extends Controller {
     }
     
     /**
-     * Criar nova postagem (COM MODERAÇÃO DE TEXTO E IMAGEM)
+     * Criar nova postagem (COM FICHA RPG E MODERAÇÃO)
      */
     public function store(Request $request) {
-        $validated = $request->validate([
+        // ========== VALIDAÇÃO BASE ==========
+        $rules = [
             'titulo' => 'required|string|max:200',
             'conteudo' => 'required|string|max:5000',
-            'tipo_conteudo' => 'required|in:texto,imagem,video,modelo_3d,ficha,outros',
-            'arquivos.*' => 'nullable|file|max:50000'
-        ]);
+            'tipo_conteudo' => 'required|in:texto,imagem,video,ficha_rpg,outros',
+            'arquivos.*' => 'nullable|file|max:50000',
+        ];
+        
+        // ========== VALIDAÇÃO ESPECÍFICA PARA FICHA RPG ==========
+        if ($request->input('tipo_conteudo') === 'ficha_rpg') {
+            $rules = array_merge($rules, [
+                'ficha_nome' => 'required|string|max:100',
+                'ficha_nivel' => 'nullable|integer|min:1|max:100',
+                'ficha_raca' => 'nullable|string|max:50',
+                'ficha_classe' => 'nullable|string|max:50',
+                'ficha_foto' => 'nullable|image|max:5000',
+                'ficha_forca' => 'nullable|integer|min:1|max:20',
+                'ficha_agilidade' => 'nullable|integer|min:1|max:20',
+                'ficha_vigor' => 'nullable|integer|min:1|max:20',
+                'ficha_inteligencia' => 'nullable|integer|min:1|max:20',
+                'ficha_sabedoria' => 'nullable|integer|min:1|max:20',
+                'ficha_carisma' => 'nullable|integer|min:1|max:20',
+                'ficha_habilidades' => 'nullable|string|max:2000',
+                'ficha_historico' => 'nullable|string|max:3000',
+            ]);
+        }
+        
+        $validated = $request->validate($rules);
         
         // ========== MODERAÇÃO DE TEXTO ==========
         try {
-            // Moderar título via endpoint
             $moderacaoTitulo = $this->moderarTexto($validated['titulo']);
             if ($moderacaoTitulo && $moderacaoTitulo['inappropriate']) {
                 Log::warning('Post bloqueado: título inapropriado', [
@@ -126,7 +148,6 @@ class PostController extends Controller {
                 ])->withInput();
             }
             
-            // Moderar conteúdo via endpoint
             $moderacaoConteudo = $this->moderarTexto($validated['conteudo']);
             if ($moderacaoConteudo && $moderacaoConteudo['inappropriate']) {
                 Log::warning('Post bloqueado: conteúdo inapropriado', [
@@ -147,53 +168,78 @@ class PostController extends Controller {
                 ])->withInput();
             }
             
+            // Moderar campos da ficha se for ficha_rpg
+            if ($validated['tipo_conteudo'] === 'ficha_rpg') {
+                if (!empty($validated['ficha_nome'])) {
+                    $moderacaoNome = $this->moderarTexto($validated['ficha_nome']);
+                    if ($moderacaoNome && $moderacaoNome['inappropriate']) {
+                        return back()->withErrors([
+                            'ficha_nome' => 'Nome do personagem contém conteúdo inapropriado.'
+                        ])->withInput();
+                    }
+                }
+                
+                if (!empty($validated['ficha_habilidades'])) {
+                    $moderacaoHab = $this->moderarTexto($validated['ficha_habilidades']);
+                    if ($moderacaoHab && $moderacaoHab['inappropriate']) {
+                        return back()->withErrors([
+                            'ficha_habilidades' => 'Habilidades contêm conteúdo inapropriado.'
+                        ])->withInput();
+                    }
+                }
+                
+                if (!empty($validated['ficha_historico'])) {
+                    $moderacaoHist = $this->moderarTexto($validated['ficha_historico']);
+                    if ($moderacaoHist && $moderacaoHist['inappropriate']) {
+                        return back()->withErrors([
+                            'ficha_historico' => 'Histórico contém conteúdo inapropriado.'
+                        ])->withInput();
+                    }
+                }
+            }
+            
         } catch (\Exception $e) {
             Log::error('Erro na moderação de texto do post', [
                 'error' => $e->getMessage(),
                 'usuario_id' => Auth::id()
             ]);
-            // Continua mesmo se a moderação falhar
         }
         
-        // ========== VALIDAÇÃO BACKEND DE IMAGENS (CAMADA EXTRA) ==========
+        // ========== VALIDAÇÃO DE IMAGENS/VÍDEOS ==========
         if ($request->hasFile('arquivos')) {
             foreach ($request->file('arquivos') as $arquivo) {
-                if (str_starts_with($arquivo->getMimeType(), 'image/')) {
-                    // Backend básico: verificar tamanho e tipo
-                    // A análise NSFW principal já foi feita no frontend
-                    $tamanho = $arquivo->getSize();
-                    if ($tamanho > 50 * 1024 * 1024) { // 50MB
-                        Log::warning('Post bloqueado: arquivo muito grande', [
-                            'usuario_id' => Auth::id(),
-                            'tamanho' => $tamanho,
-                            'nome' => $arquivo->getClientOriginalName()
-                        ]);
-                        
-                        return back()->withErrors([
-                            'arquivos' => 'Arquivo muito grande. Máximo: 50MB'
-                        ])->withInput();
-                    }
+                $tamanho = $arquivo->getSize();
+                if ($tamanho > 50 * 1024 * 1024) {
+                    Log::warning('Post bloqueado: arquivo muito grande', [
+                        'usuario_id' => Auth::id(),
+                        'tamanho' => $tamanho,
+                        'nome' => $arquivo->getClientOriginalName()
+                    ]);
                     
-                    // Validar extensão
-                    $extensao = strtolower($arquivo->getClientOriginalExtension());
-                    $extensoesPermitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                    return back()->withErrors([
+                        'arquivos' => 'Arquivo muito grande. Máximo: 50MB'
+                    ])->withInput();
+                }
+                
+                $extensao = strtolower($arquivo->getClientOriginalExtension());
+                $extensoesPermitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'webm', 'mov'];
+                
+                if (!in_array($extensao, $extensoesPermitidas)) {
+                    Log::warning('Post bloqueado: extensão não permitida', [
+                        'usuario_id' => Auth::id(),
+                        'extensao' => $extensao,
+                        'nome' => $arquivo->getClientOriginalName()
+                    ]);
                     
-                    if (!in_array($extensao, $extensoesPermitidas)) {
-                        Log::warning('Post bloqueado: extensão não permitida', [
-                            'usuario_id' => Auth::id(),
-                            'extensao' => $extensao,
-                            'nome' => $arquivo->getClientOriginalName()
-                        ]);
-                        
-                        return back()->withErrors([
-                            'arquivos' => 'Tipo de arquivo não permitido. Use: JPG, PNG, GIF, WEBP'
-                        ])->withInput();
-                    }
+                    return back()->withErrors([
+                        'arquivos' => 'Tipo de arquivo não permitido.'
+                    ])->withInput();
                 }
             }
         }
         
         try {
+            // ========== CRIAR POST ==========
             $post = Post::create([
                 'usuario_id' => Auth::id(),
                 'titulo' => $validated['titulo'],
@@ -202,21 +248,56 @@ class PostController extends Controller {
                 'slug' => Str::slug($validated['titulo']) . '-' . uniqid()
             ]);
             
-            // Processar arquivos
+            // ========== PROCESSAR FICHA RPG ==========
+            if ($validated['tipo_conteudo'] === 'ficha_rpg') {
+                $fichaData = [
+                    'post_id' => $post->id,
+                    'nome' => $validated['ficha_nome'],
+                    'nivel' => $request->input('ficha_nivel', 1),
+                    'raca' => $request->input('ficha_raca'),
+                    'classe' => $request->input('ficha_classe'),
+                    'forca' => $request->input('ficha_forca', 10),
+                    'agilidade' => $request->input('ficha_agilidade', 10),
+                    'vigor' => $request->input('ficha_vigor', 10),
+                    'inteligencia' => $request->input('ficha_inteligencia', 10),
+                    'sabedoria' => $request->input('ficha_sabedoria', 10),
+                    'carisma' => $request->input('ficha_carisma', 10),
+                    'habilidades' => $request->input('ficha_habilidades'),
+                    'historico' => $request->input('ficha_historico'),
+                ];
+                
+                // Salvar foto da ficha se houver
+                if ($request->hasFile('ficha_foto')) {
+                    $foto = $request->file('ficha_foto');
+                    $nomeArquivo = 'ficha_' . uniqid() . '.' . $foto->getClientOriginalExtension();
+                    $caminhoFoto = $foto->storeAs('fichas', $nomeArquivo, 'public');
+                    $fichaData['foto_url'] = $caminhoFoto;
+                }
+                
+                // Criar registro da ficha
+                FichaRpg::create($fichaData);
+                
+                Log::info('Ficha RPG criada', [
+                    'post_id' => $post->id,
+                    'nome_personagem' => $fichaData['nome']
+                ]);
+            }
+            
+            // ========== PROCESSAR ARQUIVOS NORMAIS (IMAGEM, VÍDEO, OUTROS) ==========
             if ($request->hasFile('arquivos')) {
                 foreach ($request->file('arquivos') as $index => $arquivo) {
                     $this->salvar_arquivo($post, $arquivo, $index);
                 }
             }
             
-            $post->load(['autor', 'arquivos']);
+            $post->load(['autor', 'arquivos', 'fichaRpg']);
             
             Log::info('Postagem criada com sucesso', [
                 'post_id' => $post->id,
                 'usuario_id' => Auth::id(),
                 'titulo' => $post->titulo,
                 'tipo_conteudo' => $post->tipo_conteudo,
-                'arquivos_count' => $post->arquivos->count()
+                'tem_ficha' => $validated['tipo_conteudo'] === 'ficha_rpg'
             ]);
             
             if ($request->expectsJson()) {
@@ -240,11 +321,11 @@ class PostController extends Controller {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Erro ao criar postagem'
+                    'message' => 'Erro ao criar postagem: ' . $e->getMessage()
                 ], 500);
             }
             
-            return back()->withErrors(['error' => 'Erro ao criar postagem'])->withInput();
+            return back()->withErrors(['error' => 'Erro ao criar postagem: ' . $e->getMessage()])->withInput();
         }
     }
     
@@ -258,7 +339,7 @@ class PostController extends Controller {
                 'arquivos',
                 'curtidas',
                 'comentarios.autor',
-                'comentarios.respostas.autor'
+                'fichaRpg'
             ])
             ->firstOrFail();
         
@@ -307,7 +388,7 @@ class PostController extends Controller {
         $validated = $request->validate([
             'titulo' => 'required|string|max:200',
             'conteudo' => 'required|string|max:5000',
-            'tipo_conteudo' => 'required|in:texto,imagem,video,modelo_3d,ficha,outros',
+            'tipo_conteudo' => 'required|in:texto,imagem,video,ficha_rpg,outros',
             'arquivos.*' => 'nullable|file|max:50000'
         ]);
         
@@ -357,22 +438,20 @@ class PostController extends Controller {
         // ========== VALIDAÇÃO DE NOVOS ARQUIVOS ==========
         if ($request->hasFile('arquivos')) {
             foreach ($request->file('arquivos') as $arquivo) {
-                if (str_starts_with($arquivo->getMimeType(), 'image/')) {
-                    $tamanho = $arquivo->getSize();
-                    if ($tamanho > 50 * 1024 * 1024) {
-                        return back()->withErrors([
-                            'arquivos' => 'Arquivo muito grande. Máximo: 50MB'
-                        ])->withInput();
-                    }
-                    
-                    $extensao = strtolower($arquivo->getClientOriginalExtension());
-                    $extensoesPermitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-                    
-                    if (!in_array($extensao, $extensoesPermitidas)) {
-                        return back()->withErrors([
-                            'arquivos' => 'Tipo de arquivo não permitido. Use: JPG, PNG, GIF, WEBP'
-                        ])->withInput();
-                    }
+                $tamanho = $arquivo->getSize();
+                if ($tamanho > 50 * 1024 * 1024) {
+                    return back()->withErrors([
+                        'arquivos' => 'Arquivo muito grande. Máximo: 50MB'
+                    ])->withInput();
+                }
+                
+                $extensao = strtolower($arquivo->getClientOriginalExtension());
+                $extensoesPermitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'webm', 'mov'];
+                
+                if (!in_array($extensao, $extensoesPermitidas)) {
+                    return back()->withErrors([
+                        'arquivos' => 'Tipo de arquivo não permitido.'
+                    ])->withInput();
                 }
             }
         }
@@ -400,7 +479,7 @@ class PostController extends Controller {
             return response()->json([
                 'success' => true,
                 'message' => 'Postagem atualizada!',
-                'post' => $post->load(['autor', 'arquivos'])
+                'post' => $post->load(['autor', 'arquivos', 'fichaRpg'])
             ]);
         }
         
@@ -419,6 +498,14 @@ class PostController extends Controller {
         foreach ($post->arquivos as $arquivo) {
             if (Storage::disk('public')->exists($arquivo->caminho_arquivo)) {
                 Storage::disk('public')->delete($arquivo->caminho_arquivo);
+            }
+        }
+        
+        // Deletar foto da ficha se existir
+        if ($post->fichaRpg && $post->fichaRpg->getOriginal('foto_url')) {
+            $fotoPath = $post->fichaRpg->getOriginal('foto_url');
+            if (Storage::disk('public')->exists($fotoPath)) {
+                Storage::disk('public')->delete($fotoPath);
             }
         }
         
@@ -455,8 +542,6 @@ class PostController extends Controller {
                 $tipo = 'imagem';
             } elseif (str_starts_with($tipo_mime, 'video/')) {
                 $tipo = 'video';
-            } elseif (str_ends_with($nome_original, '.glb') || str_ends_with($nome_original, '.gltf')) {
-                $tipo = 'modelo_3d';
             }
             
             $extensao = $arquivo->getClientOriginalExtension();

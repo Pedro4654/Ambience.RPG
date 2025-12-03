@@ -232,7 +232,7 @@ class SalaController extends Controller
         $request->validate([
             'nome' => 'required|string|max:100|min:3',
             'descricao' => 'nullable|string|max:1000',
-            'tipo' => 'required|in:publica,privada,apenas_convite',
+            'tipo' => 'required|in:publica,privada',
             'max_participantes' => 'integer|min:2|max:100',
             'ativa' => 'boolean'
         ]);
@@ -419,7 +419,7 @@ public function staffToggleStatus(Request $request, $id)
         $request->validate([
             'nome' => 'required|string|max:100|min:3',
             'descricao' => 'nullable|string|max:1000',
-            'tipo' => 'required|in:publica,privada,apenas_convite',
+            'tipo' => 'required|in:publica,privada',
             'senha' => 'nullable|string|min:4|max:50',
             'max_participantes' => 'integer|min:2|max:100',
             'imagem_url' => 'nullable|url|max:255'
@@ -428,7 +428,7 @@ public function staffToggleStatus(Request $request, $id)
             'nome.min' => 'O nome deve ter pelo menos 3 caracteres',
             'nome.max' => 'O nome pode ter no máximo 100 caracteres',
             'tipo.required' => 'O tipo da sala é obrigatório',
-            'tipo.in' => 'Tipo inválido. Use: publica, privada ou apenas_convite',
+            'tipo.in' => 'Tipo inválido. Use: publica ou privada',
             'senha.min' => 'A senha deve ter pelo menos 4 caracteres',
             'max_participantes.min' => 'Mínimo de 2 participantes',
             'max_participantes.max' => 'Máximo de 100 participantes'
@@ -585,13 +585,6 @@ public function staffToggleStatus(Request $request, $id)
                     'pode_moderar_chat' => false,
                     'pode_convidar_usuarios' => false
                 ]);
-            }
-
-            if ($sala->tipo === 'apenas_convite') {
-                ConviteSala::where('sala_id', $salaId)
-                    ->where('destinatario_id', $userId)
-                    ->where('status', 'pendente')
-                    ->update(['status' => 'aceito']);
             }
 
             Log::info('Usuário entrou na sala com sucesso', [
@@ -1032,32 +1025,38 @@ public function staffToggleStatus(Request $request, $id)
                 ];
             }
 
-            $columns = ['id', 'username'];
-            if (Schema::hasColumn('usuarios', 'avatar')) {
-                $columns[] = 'avatar';
-            } elseif (Schema::hasColumn('usuarios', 'avatar_url')) {
-                $columns[] = 'avatar_url as avatar';
-            }
+            $usuario = $participante->usuario()->select([
+    'id', 
+    'username', 
+    'avatar_url',
+    'genero',
+    'classe_personagem'
+])->first();
 
-            $usuario = $participante->usuario()->select($columns)->first();
+if (!$usuario) {
+    $usuario = (object)[
+        'id' => $usuarioId,
+        'username' => 'Usuário Desconhecido',
+        'avatar_url' => null
+    ];
+}
 
-            if (!$usuario) {
-                $usuario = (object)[
-                    'id' => $usuarioId,
-                    'username' => null,
-                    'avatar' => null
-                ];
-            }
+// Garantir que o avatar_url use o accessor do Model
+$avatarUrl = $usuario->avatar_url ?? Usuario::find($usuarioId)?->avatar_url;
 
-            return response()->json([
-                'success' => true,
-                'participante' => [
-                    'usuario' => $usuario,
-                    'papel' => $participante->papel,
-                    'ativo' => (bool) $participante->ativo
-                ],
-                'permissoes' => $permissoes
-            ]);
+return response()->json([
+    'success' => true,
+    'participante' => [
+        'usuario' => [
+            'id' => $usuario->id,
+            'username' => $usuario->username,
+            'avatar_url' => $avatarUrl
+        ],
+        'papel' => $participante->papel,
+        'ativo' => (bool) $participante->ativo
+    ],
+    'permissoes' => $permissoes
+]);
         } catch (\Exception $e) {
             Log::error('Erro ao buscar permissões do participante', [
                 'error' => $e->getMessage(),
@@ -1244,6 +1243,206 @@ public function staffToggleStatus(Request $request, $id)
                 ->with('error', 'Sala não encontrada.');
         }
     }
+
+    /**
+ * Buscar dados da sala para edição (apenas criador)
+ * GET /salas/{id}/editar
+ */
+public function edit($id)
+{
+    try {
+        $userId = Auth::id();
+        $sala = Sala::findOrFail($id);
+
+        // Apenas o criador pode editar
+        if ((int)$sala->criador_id !== (int)$userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Apenas o criador da sala pode editá-la.'
+            ], 403);
+        }
+
+        return response()->json([
+            'success' => true,
+            'sala' => [
+                'id' => $sala->id,
+                'nome' => $sala->nome,
+                'descricao' => $sala->descricao,
+                'tipo' => $sala->tipo,
+                'max_participantes' => $sala->max_participantes
+            ]
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Erro ao buscar dados para edição', [
+            'error' => $e->getMessage(),
+            'sala_id' => $id,
+            'user_id' => Auth::id()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro ao carregar dados da sala.'
+        ], 500);
+    }
+}
+
+/**
+ * Atualizar informações da sala (apenas criador)
+ * PUT /salas/{id}/atualizar
+ */
+public function update(Request $request, $id)
+{
+    try {
+        $userId = Auth::id();
+        $sala = Sala::findOrFail($id);
+
+        // Apenas o criador pode editar
+        if ((int)$sala->criador_id !== (int)$userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Apenas o criador da sala pode editá-la.'
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'nome' => 'required|string|max:100|min:3',
+            'descricao' => 'nullable|string|max:1000',
+            'tipo' => 'required|in:publica,privada',
+            'max_participantes' => 'required|integer|min:2|max:100',
+            'senha' => 'nullable|string|min:4|max:50'
+        ], [
+            'nome.required' => 'O nome da sala é obrigatório',
+            'nome.min' => 'O nome deve ter pelo menos 3 caracteres',
+            'nome.max' => 'O nome pode ter no máximo 100 caracteres',
+            'tipo.required' => 'O tipo da sala é obrigatório',
+            'tipo.in' => 'Tipo inválido. Use: publica ou privada',
+            'max_participantes.required' => 'O número máximo de participantes é obrigatório',
+            'max_participantes.min' => 'Mínimo de 2 participantes',
+            'max_participantes.max' => 'Máximo de 100 participantes',
+            'senha.min' => 'A senha deve ter pelo menos 4 caracteres'
+        ]);
+
+        // Atualizar dados básicos
+        $sala->nome = $validated['nome'];
+        $sala->descricao = $validated['descricao'];
+        $sala->tipo = $validated['tipo'];
+        $sala->max_participantes = $validated['max_participantes'];
+
+        // Gerenciar senha
+        if ($validated['tipo'] === 'privada') {
+            // Se forneceu nova senha, atualiza
+            if (!empty($validated['senha'])) {
+                $sala->senha_hash = Hash::make($validated['senha']);
+            }
+            // Se não forneceu senha e não tinha antes, erro
+            elseif (empty($sala->senha_hash)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Salas privadas precisam de senha.'
+                ], 422);
+            }
+        } else {
+            // Se mudou para pública, remove senha
+            $sala->senha_hash = null;
+        }
+
+        $sala->save();
+
+        Log::info('Sala atualizada pelo criador', [
+            'sala_id' => $id,
+            'criador_id' => $userId,
+            'changes' => $validated
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Sala atualizada com sucesso! 🎉',
+            'sala' => $sala->fresh()->load(['criador', 'participantes.usuario'])
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Dados inválidos.',
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        Log::error('Erro ao atualizar sala', [
+            'error' => $e->getMessage(),
+            'sala_id' => $id,
+            'user_id' => Auth::id()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro ao atualizar sala.'
+        ], 500);
+    }
+}
+
+/**
+ * Excluir sala (apenas criador)
+ * DELETE /salas/{id}/excluir
+ */
+public function destroy($id)
+{
+    try {
+        $userId = Auth::id();
+        $sala = Sala::findOrFail($id);
+
+        // Apenas o criador pode excluir
+        if ((int)$sala->criador_id !== (int)$userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Apenas o criador da sala pode excluí-la.'
+            ], 403);
+        }
+
+        $nomeSala = $sala->nome;
+
+        // Deletar arquivos associados (banner e foto de perfil)
+        if (!empty($sala->banner_url)) {
+            $oldPath = preg_replace('~^/storage/~', '', parse_url($sala->banner_url, PHP_URL_PATH) ?? '');
+            if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
+            }
+        }
+
+        if (!empty($sala->profile_photo_url)) {
+            $oldPath = preg_replace('~^/storage/~', '', parse_url($sala->profile_photo_url, PHP_URL_PATH) ?? '');
+            if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
+            }
+        }
+
+        // Deletar sala (cascade deletará participantes, permissões, etc)
+        $sala->delete();
+
+        Log::info('Sala excluída pelo criador', [
+            'sala_id' => $id,
+            'sala_nome' => $nomeSala,
+            'criador_id' => $userId
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Sala '{$nomeSala}' excluída com sucesso! 🗑️",
+            'redirect_to' => route('salas.index')
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Erro ao excluir sala', [
+            'error' => $e->getMessage(),
+            'sala_id' => $id,
+            'user_id' => Auth::id()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro ao excluir sala.'
+        ], 500);
+    }
+}
 
     /**
      * Sair da sala

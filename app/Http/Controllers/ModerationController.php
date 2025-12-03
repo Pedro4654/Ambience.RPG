@@ -10,43 +10,49 @@ class ModerationController extends Controller
     /**
      * Lista de palavras ofensivas customizadas (mesmo do JS)
      */
-    private function getBadWordsList()
-    {
-        return [
-            "arrombada", "arrombadas", "arrombado", "babaca", "bacurinha", "baitola", 
-            "bichona", "bixa", "boceta", "boiola", "bolcinha", "bolsinha", "boquete", 
-            "boqueteira", "boqueteiro", "boquetera", "boquetero", "boquetes", "bosta", 
-            "brecheca", "bucefula", "buceta", "bucetao", "bucetas", "bucetasso", 
-            "bucetinha", "bucetinhas", "bucetonas", "cacete", "cachuleta", "cagalhao", 
-            "carai", "caraio", "caralha", "caralho", "caralhudo", "cassete", "cequelada", 
-            "cequelado", "chalerinha", "chatico", "chavasca", "checheca", "chereca", 
-            "chibio", "chimbica", "chupada", "chupador", "chupadora", "chupando", 
-            "chupeta", "chupetinha", "chupou", "porra", "crossdresser", "cuecao", 
-            "custozinha", "cuzao", "cuzinho", "cuzinhos", "dadeira", "encoxada", 
-            "enrabadas", "fornicada", "fudendo", "fudido", "furustreca", "gostozudas", 
-            "gozada", "gozadas", "greludas", "gulosinha", "katchanga", "bilau", 
-            "lesbofetiche", "lixa-pica", "mede-rola", "megasex", "mela-pentelho", 
-            "meleca", "melequinha", "menage", "menages", "merda", "merdao", "meretriz", 
-            "metendo", "mijada", "otario", "papa-duro", "pau", "pausudas", "pechereca", 
-            "peidao", "peido", "peidorreiro", "peitos", "peituda", "peitudas", 
-            "periquita", "pica", "piranhuda", "piriguetes", "piroca", "pirocao", 
-            "pirocas", "pirocudo", "pitbitoca", "pitchbicha", "pitchbitoca", "pithbicha", 
-            "pithbitoca", "pitibicha", "pitrica", "pixota", "prencheca", "prexeca", 
-            "priquita", "priquito", "punheta", "punheteiro", "pussy", "puta", "putaria", 
-            "putas", "putinha", "quenga", "rabuda", "rabudas", "rameira", "rapariga", 
-            "retardado", "saca-rola", "safada", "safadas", "safado", "safados", 
-            "sequelada", "sexboys", "sexgatas", "sirica", "siririca", "sotravesti", 
-            "suruba", "surubas", "taioba", "tarada", "tchaca", "tcheca", "tchonga", 
-            "tchuchuca", "tchutchuca", "tesuda", "tesudas", "tesudo", "tetinha", 
-            "tezao", "tezuda", "tezudo", "tgatas", "t-girls", "tobinha", "tomba-macho", 
-            "topsexy", "transa", "transando", "travecas", "traveco", "travecos", 
-            "trepada", "trepadas", "vacilao", "vadjaina", "vadia", "vagabunda", 
-            "vagabundo", "vaginismo", "vajoca", "veiaca", "veiaco", "viadinho", "viado", 
-            "xabasca", "xana", "xaninha", "xatico", "xavasca", "xebreca", "xereca", 
-            "xexeca", "xibio", "xoroca", "gay", "xota", "xotinha", "xoxota", "xoxotas", 
-            "xoxotinha", "xulipa", "xumbrega", "xupaxota", "xupeta", "xupetinha"
-        ];
-    }
+    /**
+ * Lista de palavras ofensivas POR CATEGORIA
+ */
+private function getBadWordsCategories()
+{
+    return [
+        // Palavras de baixo calão (profanity) - permitidas para 15+
+        'profanity' => [
+            'porra', 'merda', 'merdao', 'bosta', 'cacete', 'carai', 'caraio', 
+            'caralha', 'caralho', 'caralhudo', 'viado', 'viadinho', 'gay',
+            'otario', 'babaca', 'retardado'
+        ],
+        
+        // Conteúdo sexual (sexual/porn) - bloqueado para menores de 18
+        'sexual' => [
+            'buceta', 'bucetao', 'bucetas', 'bucetasso', 'bucetinha', 'bucetinhas',
+            'boceta', 'periquita', 'xota', 'xotinha', 'xoxota', 'xoxotas', 'xoxotinha',
+            'xereca', 'xexeca', 'chereca', 'xebreca', 'prexeca', 'prencheca',
+            'pau', 'pica', 'piroca', 'pirocao', 'pirocas', 'pirocudo', 'bilau',
+            'penis', 'vagina', 'cuzinho', 'cuzao', 'cu', 'anus',
+            'boquete', 'boqueteira', 'boqueteiro', 'boquetes', 'mamada',
+            'chupada', 'chupador', 'chupadora', 'chupando', 'chupeta', 'chupetinha',
+            'fudendo', 'fudido', 'trepar', 'trepada', 'trepadas', 'transar', 'transa', 'transando',
+            'metendo', 'suruba', 'surubas', 'menage', 'menages',
+            'gozada', 'gozadas', 'gozar', 'gozo', 'ejacular',
+            'punheta', 'punheteiro', 'masturbar', 'masturbacao',
+            'pornografia', 'porno', 'porn', 'xxx', 'sexo', 'sexual',
+            'tesao', 'tezao', 'tezuda', 'tezudo', 'tesuda', 'tesudas', 'tesudo',
+            'peituda', 'peitudas', 'peitos', 'seios', 'mamas',
+            'rabuda', 'rabudas', 'bunda', 'bundao', 'rabo',
+            'safada', 'safadas', 'safado', 'safados', 'putaria',
+            'puta', 'putas', 'putinha', 'prostituta', 'prostituto',
+            'estupro', 'estuprar', 'violacao', 'abuso sexual',
+            'pedofilia', 'pedofilo', 'menor de idade'
+        ]
+    ];
+}
+
+private function getBadWordsList()
+{
+    $categories = $this->getBadWordsCategories();
+    return array_merge($categories['profanity'], $categories['sexual']);
+}
 
     /**
      * Normaliza texto removendo acentos
@@ -81,25 +87,39 @@ class ModerationController extends Controller
     }
 
     /**
-     * Verifica se contém palavras ofensivas usando word boundaries
-     */
-    private function checkBadWords($text)
-    {
-        $badWords = $this->getBadWordsList();
-        $matches = [];
-        
-        // Normalizar texto
-        $normalized = mb_strtolower($text);
-        $normalized = $this->removeDiacritics($normalized);
-        $normalized = $this->applyLeetMap($normalized);
-        $normalized = preg_replace('/[^a-z0-9\s]+/', ' ', $normalized);
-        $normalized = $this->collapseRepeats($normalized);
-        
-        // Separar em palavras
-        $words = preg_split('/\s+/', $normalized, -1, PREG_SPLIT_NO_EMPTY);
-        
+ * Verifica palavras e retorna com categorias
+ */
+private function checkBadWordsWithCategories($text)
+{
+    $categories = $this->getBadWordsCategories();
+    $found = [
+        'profanity' => [],
+        'sexual' => []
+    ];
+    
+    // Normalizar texto
+    $normalized = mb_strtolower($text);
+    $normalized = $this->removeDiacritics($normalized);
+    $normalized = $this->applyLeetMap($normalized);
+    $normalized = preg_replace('/[^a-z0-9\s]+/', ' ', $normalized);
+    $normalized = $this->collapseRepeats($normalized);
+    
+    Log::info('[Moderation] Texto normalizado', [
+        'original' => $text,
+        'normalized' => $normalized
+    ]);
+
+    // Separar em palavras
+    $words = preg_split('/\s+/', $normalized, -1, PREG_SPLIT_NO_EMPTY);
+
+    Log::info('[Moderation] Palavras detectadas', [
+        'words' => $words
+    ]);
+    
+    // Verificar cada categoria
+    foreach ($categories as $category => $badWords) {
         foreach ($badWords as $badWord) {
-            if (strlen($badWord) < 3) continue; // Ignorar palavras muito curtas
+            if (strlen($badWord) < 3) continue;
             
             // Normalizar palavra ofensiva
             $badWordNorm = mb_strtolower($badWord);
@@ -112,21 +132,26 @@ class ModerationController extends Controller
             
             // Verificar se a palavra existe como palavra completa
             if (in_array($badWordNorm, $words)) {
-                $matches[] = $badWord;
+                $found[$category][] = $badWord;
                 continue;
             }
             
-            // Para palavras maiores (>=4), verificar com word boundary
+            // Para palavras maiores, verificar com word boundary
             if (strlen($badWordNorm) >= 4) {
                 $pattern = '/\b' . preg_quote($badWordNorm, '/') . '\b/i';
                 if (preg_match($pattern, $normalized)) {
-                    $matches[] = $badWord;
+                    $found[$category][] = $badWord;
                 }
             }
         }
-        
-        return array_unique($matches);
     }
+    
+    // Remover duplicatas
+    $found['profanity'] = array_unique($found['profanity']);
+    $found['sexual'] = array_unique($found['sexual']);
+    
+    return $found;
+}
 
     /**
      * Limpa o texto substituindo palavras ofensivas
@@ -149,51 +174,68 @@ class ModerationController extends Controller
     }
 
     /**
-     * Endpoint de moderação
-     */
-    public function moderate(Request $request)
-    {
-        $request->validate(['text' => 'required|string']);
-        $text = $request->input('text');
+ * Endpoint de moderação com categorias
+ */
+public function moderate(Request $request)
+{
+    $request->validate(['text' => 'required|string']);
+    $text = $request->input('text');
 
-        try {
-            // Detectar palavras ofensivas
-            $matches = $this->checkBadWords($text);
-            $inappropriate = !empty($matches);
-            
-            // Limpar texto se necessário
-            $cleaned = $inappropriate ? $this->cleanText($text, $matches) : $text;
-            
-            // Log apenas quando detectar algo
-            if ($inappropriate) {
-                Log::info('Moderação detectou conteúdo inapropriado', [
-                    'matches' => $matches,
-                    'text_length' => strlen($text),
-                    'ip' => $request->ip()
-                ]);
-            }
-
-            return response()->json([
-                'inappropriate' => $inappropriate,
-                'matched' => array_values($matches),
-                'cleaned' => $cleaned,
-                'original' => $text,
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Erro na moderação', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            // Em caso de erro, retorna como não inapropriado para não bloquear o usuário
-            return response()->json([
-                'inappropriate' => false,
-                'matched' => [],
-                'cleaned' => $text,
-                'original' => $text,
-                'error' => 'Erro ao processar moderação'
+    try {
+        // Detectar palavras por categoria
+        $categorized = $this->checkBadWordsWithCategories($text);
+        
+        // Determinar flags
+        $flags = [];
+        if (!empty($categorized['profanity'])) {
+            $flags[] = 'profanity'; // ← Era 'profanity', estava correto
+        }
+        if (!empty($categorized['sexual'])) {
+            $flags[] = 'sexual';
+        }
+        
+        $inappropriate = !empty($flags);
+        
+        // Juntar todas as palavras detectadas
+        $allMatches = array_merge($categorized['profanity'], $categorized['sexual']);
+        
+        // Limpar texto se necessário
+        $cleaned = $inappropriate ? $this->cleanText($text, $allMatches) : $text;
+        
+        // Log apenas quando detectar algo
+        if ($inappropriate) {
+            Log::info('Moderação detectou conteúdo inapropriado', [
+                'flags' => $flags,
+                'profanity_count' => count($categorized['profanity']),
+                'sexual_count' => count($categorized['sexual']),
+                'text_length' => strlen($text),
+                'ip' => $request->ip()
             ]);
         }
+
+        return response()->json([
+            'inappropriate' => $inappropriate,
+            'matched' => array_values($allMatches),
+            'flags' => $flags,  // ✅ ADICIONAR FLAGS CATEGORIZADAS
+            'cleaned' => $cleaned,
+            'original' => $text,
+            'categories' => $categorized // ✅ DETALHES POR CATEGORIA
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Erro na moderação', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'inappropriate' => false,
+            'matched' => [],
+            'flags' => [],
+            'cleaned' => $text,
+            'original' => $text,
+            'error' => 'Erro ao processar moderação'
+        ]);
     }
+}
 }

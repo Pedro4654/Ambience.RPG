@@ -34,6 +34,41 @@ Broadcast::routes(['middleware' => ['web', 'auth']]);
 Route::get('/ban-ip', [App\Http\Controllers\ModeracaoUsuarioController::class, 'mostrarIpBan'])
     ->name('public.ip_ban'); // rota pública para mostrar IP ban para visitantes/guests
 
+// Rotas de Chat (dentro do grupo middleware 'auth')
+Route::middleware(['auth'])->prefix('salas/{id}/chat')->name('chat.')->group(function () {
+    
+    // Listar mensagens
+    Route::get('/mensagens', [App\Http\Controllers\ChatController::class, 'listarMensagens'])
+        ->name('mensagens');
+    
+    // Enviar mensagem
+    Route::post('/enviar', [App\Http\Controllers\ChatController::class, 'enviarMensagem'])
+        ->name('enviar');
+
+        Route::post('/typing', [App\Http\Controllers\ChatController::class, 'notificarDigitando'])
+        ->name('typing');
+});
+
+// Rotas de ações em mensagens individuais
+Route::middleware(['auth'])->prefix('chat')->name('chat.')->group(function () {
+    
+
+    // ✅ NOVA ROTA: Editar mensagem
+    Route::put('/mensagens/{id}/editar', [App\Http\Controllers\ChatController::class, 'editarMensagem'])
+        ->name('mensagens.editar');
+        
+    // Deletar mensagem
+    Route::delete('/mensagens/{id}', [App\Http\Controllers\ChatController::class, 'deletarMensagem'])
+        ->name('mensagens.deletar');
+    
+    // Ver conteúdo censurado
+    Route::post('/mensagens/{id}/ver-censurado', [App\Http\Controllers\ChatController::class, 'verConteudoCensurado'])
+        ->name('mensagens.ver-censurado');
+    
+    // Denunciar usuário
+    Route::post('/denunciar-usuario', [App\Http\Controllers\ChatController::class, 'denunciarUsuario'])
+        ->name('denunciar-usuario');
+});
 
     // ==================== ROTAS DE NOTIFICAÇÕES ====================
 Route::middleware(['auth'])->prefix('api/notificacoes')->name('api.notificacoes.')->group(function () {
@@ -475,9 +510,14 @@ Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->g
         ->name('salas.banner.upload')
         ->where('id', '[0-9]+');
 
-    Route::post('/salas/{id}/banner/color', [App\Http\Controllers\SalaController::class, 'setBannerColor'])
-        ->name('salas.banner.color')
-        ->where('id', '[0-9]+');
+    // ADICIONAR novas rotas
+Route::post('/salas/{id}/banner/gradient', [SalaController::class, 'setBannerGradient'])
+    ->middleware('auth')
+    ->name('salas.banner.gradient');
+
+Route::delete('/salas/{id}/banner/gradient', [SalaController::class, 'removeBannerGradient'])
+    ->middleware('auth')
+    ->name('salas.banner.gradient.remove');
 
     Route::delete('/salas/{id}/banner', [App\Http\Controllers\SalaController::class, 'removeBanner'])
         ->name('salas.banner.remove')
@@ -496,6 +536,30 @@ Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->g
     Route::delete('/salas/{id}/profile-photo', [App\Http\Controllers\SalaController::class, 'removeProfilePhoto'])
         ->name('salas.profile.remove')
         ->where('id', '[0-9]+');
+
+        /**
+ * Editar sala (apenas criador)
+ * GET /salas/{id}/editar
+ */
+Route::get('/salas/{id}/editar', [SalaController::class, 'edit'])
+    ->name('salas.edit')
+    ->where('id', '[0-9]+');
+
+/**
+ * Atualizar sala (apenas criador)
+ * PUT /salas/{id}/atualizar
+ */
+Route::put('/salas/{id}/atualizar', [SalaController::class, 'update'])
+    ->name('salas.update')
+    ->where('id', '[0-9]+');
+
+/**
+ * Excluir sala (apenas criador)
+ * DELETE /salas/{id}/excluir
+ */
+Route::delete('/salas/{id}/excluir', [SalaController::class, 'destroy'])
+    ->name('salas.destroy')
+    ->where('id', '[0-9]+');
     /**
      * Sair da sala
      * POST /salas/{id}/sair - Remove usuário da sala (exceto criador)
@@ -687,12 +751,12 @@ Route::get('/api/salas/desativadas', [SalaController::class, 'getSalasDesativada
 
         // ========== LIKES ==========
         Route::post('/curtir', [LikeController::class, 'store'])->name('curtir');
-        Route::delete('/curtir/{post_id}', [LikeController::class, 'destroy'])->name('descurtir');
+        Route::delete('/descurtir/{post_id}', [LikeController::class, 'destroy'])->name('descurtir');
 
 
         // ========== COMENTÁRIOS ==========
         Route::post('/comentar', [CommentController::class, 'store'])->name('comentar');
-        Route::delete('/comentario/{id}', [CommentController::class, 'destroy'])->name('comentario.destroy');
+         Route::delete('/comentario/{id}', [CommentController::class, 'destroy'])->name('comentario.destroy');
     });
 
     // ==================== PERFIL DE USUÁRIO ====================
