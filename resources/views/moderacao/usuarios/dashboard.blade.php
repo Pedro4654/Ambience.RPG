@@ -4,455 +4,413 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Moderação - Usuários</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 40px 20px;
-        }
-
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        /* Header */
-        .page-header {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .header-content h1 {
-            font-size: 32px;
-            color: #1a202c;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .btn {
-            padding: 14px 28px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            border: none;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 16px;
-            padding: 28px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-        }
-
-        .stat-card.border-blue { border-left: 4px solid #3b82f6; }
-        .stat-card.border-yellow { border-left: 4px solid #f59e0b; }
-        .stat-card.border-red { border-left: 4px solid #ef4444; }
-        .stat-card.border-purple { border-left: 4px solid #a855f7; }
-        .stat-card.border-gray { border-left: 4px solid #6b7280; }
-        .stat-card.border-green { border-left: 4px solid #10b981; }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
-        }
-
-        .stat-info h3 {
-            font-size: 14px;
-            font-weight: 600;
-            color: #6b7280;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-value {
-            font-size: 36px;
-            font-weight: 700;
-            color: #1a202c;
-            line-height: 1;
-        }
-
-        .stat-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .stat-icon.blue { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); }
-        .stat-icon.yellow { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); }
-        .stat-icon.red { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); }
-        .stat-icon.purple { background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); }
-        .stat-icon.gray { background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); }
-        .stat-icon.green { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); }
-
-        .stat-icon svg {
-            width: 28px;
-            height: 28px;
-        }
-
-        .stat-icon.blue svg { color: #2563eb; }
-        .stat-icon.yellow svg { color: #d97706; }
-        .stat-icon.red svg { color: #dc2626; }
-        .stat-icon.purple svg { color: #9333ea; }
-        .stat-icon.gray svg { color: #4b5563; }
-        .stat-icon.green svg { color: #059669; }
-
-        /* Content Grid */
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            padding: 32px;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .card-header h2 {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1a202c;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .card-link {
-            color: #667eea;
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .card-link:hover {
-            color: #764ba2;
-        }
-
-        /* Punições Recentes */
-        .punicao-item {
-            padding: 20px;
-            background: #f9fafb;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            transition: background 0.2s;
-        }
-
-        .punicao-item:hover {
-            background: #f3f4f6;
-        }
-
-        .punicao-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .punicao-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .punicao-info {
-            flex: 1;
-        }
-
-        .punicao-username {
-            font-size: 15px;
-            font-weight: 600;
-            color: #1a202c;
-        }
-
-        .punicao-tipo {
-            font-size: 13px;
-            color: #6b7280;
-        }
-
-        .badge {
-            padding: 4px 10px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .badge.yellow { background: #fef3c7; color: #92400e; }
-        .badge.red { background: #fee2e2; color: #991b1b; }
-        .badge.gray { background: #f3f4f6; color: #4b5563; }
-
-        .punicao-details {
-            font-size: 13px;
-            color: #6b7280;
-            line-height: 1.6;
-            margin-top: 8px;
-        }
-
-        .punicao-moderador {
-            font-size: 12px;
-            color: #9ca3af;
-            margin-top: 8px;
-            font-style: italic;
-        }
-
-        /* Moderadores Ativos */
-        .moderador-item {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 16px;
-            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
-            border-radius: 12px;
-            margin-bottom: 12px;
-        }
-
-        .moderador-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #667eea;
-        }
-
-        .moderador-info {
-            flex: 1;
-        }
-
-        .moderador-nome {
-            font-size: 15px;
-            font-weight: 700;
-            color: #1a202c;
-            margin-bottom: 4px;
-        }
-
-        .moderador-nivel {
-            font-size: 12px;
-            color: #6b7280;
-        }
-
-        .moderador-stats {
-            text-align: right;
-        }
-
-        .moderador-count {
-            font-size: 24px;
-            font-weight: 700;
-            color: #667eea;
-        }
-
-        .moderador-label {
-            font-size: 11px;
-            color: #6b7280;
-        }
-
-        /* Usuários Recentes */
-        .usuario-item {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 16px;
-            background: #f9fafb;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.2s;
-        }
-
-        .usuario-item:hover {
-            background: #f3f4f6;
-            transform: translateX(5px);
-        }
-
-        .usuario-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .usuario-info {
-            flex: 1;
-        }
-
-        .usuario-nome {
-            font-size: 15px;
-            font-weight: 600;
-            color: #1a202c;
-            margin-bottom: 4px;
-        }
-
-        .usuario-data {
-            font-size: 13px;
-            color: #6b7280;
-        }
-
-        /* Denúncias Pendentes */
-        .denuncia-item {
-            padding: 20px;
-            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-            border-left: 4px solid #ef4444;
-            border-radius: 12px;
-            margin-bottom: 16px;
-        }
-
-        .denuncia-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
-
-        .denuncia-numero {
-            font-size: 15px;
-            font-weight: 700;
-            color: #667eea;
-        }
-
-        .denuncia-titulo {
-            font-size: 14px;
-            color: #1a202c;
-            margin-bottom: 8px;
-        }
-
-        .denuncia-envolvidos {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: #6b7280;
-        }
-
-        .denuncia-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            color: #667eea;
-            font-size: 13px;
-            font-weight: 600;
-            text-decoration: none;
-            margin-top: 8px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #9ca3af;
-        }
-
-        .empty-state svg {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 16px;
-            color: #cbd5e0;
-        }
-
-        @media (max-width: 1200px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 20px 15px;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .page-header {
-                padding: 20px;
-            }
-
-            .header-content h1 {
-                font-size: 24px;
-            }
-        }
-    </style>
+<style>
+    /* ------------------------------------------------------------------
+       VARIÁVEIS & FUNDAMENTOS (Copiados do Dashboard Original)
+       ------------------------------------------------------------------ */
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@300;400;600;700;800&display=swap');
+
+    :root {
+        --bg-dark: #0a0f14;
+        --card: #1f2a33;
+        --muted: #8b9ba8;
+        --accent: #22c55e;
+        --accent-light: #16a34a;
+        --accent-dark: #15803d;
+        --hero-green: #052e16;
+        --text-on-primary: #e6eef6;
+        --transition-speed: 600ms;
+        --header-bg: rgba(10, 15, 20, 0.75);
+        --btn-gradient-start: #22c55e;
+        --btn-gradient-end: #16a34a;
+        --accent-border: rgba(34, 197, 94, 0.4);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Inter, system-ui, -apple-system, sans-serif;
+        background: linear-gradient(145deg, #0a0f14f4, #141c23f2);
+        color: var(--text-on-primary);
+        -webkit-font-smoothing: antialiased;
+        line-height: 1.5;
+        min-height: 100vh;
+        padding: 40px 20px;
+    }
+
+    .container {
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+    /* ------------------------------------------------------------------
+       HEADER & BOTÕES
+       ------------------------------------------------------------------ */
+    .page-header {
+        background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(12px);
+        margin-bottom: 30px;
+        animation: slideDown 0.5s ease;
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .header-content h1 {
+        font-family: Montserrat, sans-serif;
+        font-size: 32px;
+        color: #fff;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 900;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    /* Botões padronizados com o estilo do original */
+    .btn {
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        border: none;
+        white-space: nowrap;
+    }
+
+    .btn-primary {
+        background: linear-gradient(to right, var(--btn-gradient-start), var(--btn-gradient-end));
+        color: var(--hero-green);
+        box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+    }
+
+    .btn-secondary {
+        background: rgba(34, 197, 94, 0.1);
+        color: var(--accent);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(34, 197, 94, 0.2);
+        transform: translateY(-2px);
+        border-color: var(--accent);
+    }
+
+    /* ------------------------------------------------------------------
+       STATS GRID (Cards do Topo)
+       ------------------------------------------------------------------ */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 22px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.5s ease;
+        animation-fill-mode: both;
+        border: 1px solid rgba(34, 197, 94, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        border-color: rgba(34, 197, 94, 0.3);
+    }
+
+    /* Cores das bordas laterais */
+    .stat-card.border-blue { border-left: 4px solid #3b82f6; }
+    .stat-card.border-yellow, .stat-card.border-orange { border-left: 4px solid #f97316; }
+    .stat-card.border-red { border-left: 4px solid #ef4444; }
+    .stat-card.border-purple { border-left: 4px solid #a855f7; }
+    .stat-card.border-green { border-left: 4px solid #22c55e; }
+    .stat-card.border-gray { border-left: 4px solid #6b7280; }
+
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+
+    .stat-info h3 {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--muted);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+        font-size: 36px;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1;
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    /* Cores dos Ícones */
+    .stat-icon.blue { background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.1)); color: #3b82f6; }
+    .stat-icon.yellow, .stat-icon.orange { background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(234, 88, 12, 0.1)); color: #f97316; }
+    .stat-icon.red { background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.1)); color: #ef4444; }
+    .stat-icon.purple { background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(147, 51, 234, 0.1)); color: #a855f7; }
+    .stat-icon.green { background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.1)); color: #22c55e; }
+    .stat-icon.gray { background: linear-gradient(135deg, rgba(107, 114, 128, 0.2), rgba(75, 85, 99, 0.1)); color: #9ca3af; }
+
+    .stat-icon svg { width: 28px; height: 28px; }
+
+    /* ------------------------------------------------------------------
+       LAYOUT DE CONTEÚDO & CARDS
+       ------------------------------------------------------------------ */
+    .content-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+
+    .card {
+        background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        animation: fadeInUp 0.5s ease;
+        animation-fill-mode: both;
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .card:nth-child(1) { animation-delay: 0.2s; }
+    .card:nth-child(2) { animation-delay: 0.3s; }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .card-header h2 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .card-link {
+        color: var(--accent);
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .card-link:hover { color: var(--accent-light); }
+
+    /* ------------------------------------------------------------------
+       LISTAGENS (Punições, Usuários, Staff)
+       ------------------------------------------------------------------ */
+    /* Punições e Usuários (Estilo Activity Item) */
+    .punicao-item, .usuario-item, .denuncia-item {
+        padding: 20px;
+        background: rgba(34, 197, 94, 0.05);
+        border-radius: 12px;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        border: 1px solid rgba(34, 197, 94, 0.1);
+        margin-bottom: 16px;
+    }
+
+    .punicao-item:hover, .usuario-item:hover, .denuncia-item:hover {
+        background: rgba(34, 197, 94, 0.1);
+        transform: translateX(5px);
+        border-color: rgba(34, 197, 94, 0.2);
+    }
+
+    /* Denúncias Específicas */
+    .denuncia-item {
+        flex-direction: column;
+        gap: 10px;
+        border-left: 3px solid #ef4444; /* Borda vermelha para destaque */
+        background: linear-gradient(90deg, rgba(239, 68, 68, 0.05) 0%, rgba(34, 197, 94, 0.02) 100%);
+    }
+    
+    .denuncia-header {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        align-items: center;
+    }
+
+    /* Moderadores (Estilo Staff Item) */
+    .moderador-item {
+        padding: 20px;
+        background: rgba(34, 197, 94, 0.05);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        border: 1px solid rgba(34, 197, 94, 0.1);
+        margin-bottom: 12px;
+    }
+
+    /* Avatares */
+    .punicao-avatar, .usuario-avatar, .moderador-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid rgba(34, 197, 94, 0.3);
+        flex-shrink: 0;
+    }
+
+    .moderador-avatar {
+        width: 48px;
+        height: 48px;
+        border: 3px solid var(--accent);
+    }
+
+    /* Informações de Texto */
+    .punicao-info, .usuario-info, .moderador-info { flex: 1; }
+
+    .punicao-username, .usuario-nome, .moderador-nome {
+        font-size: 15px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 4px;
+    }
+
+    .punicao-tipo, .usuario-data, .moderador-nivel {
+        font-size: 12px;
+        color: var(--muted);
+    }
+    
+    .punicao-details {
+        margin-top: 8px;
+        font-size: 13px;
+        color: #fff;
+        opacity: 0.9;
+    }
+
+    .punicao-moderador {
+        margin-top: 6px;
+        font-size: 11px;
+        color: var(--muted);
+        font-style: italic;
+    }
+
+    /* Stats do Moderador */
+    .moderador-stats { text-align: right; }
+    .moderador-count { font-size: 24px; font-weight: 700; color: var(--accent); }
+    .moderador-label { font-size: 11px; color: var(--muted); }
+
+    /* Denúncias Textos */
+    .denuncia-numero { font-weight: 700; color: var(--accent); }
+    .denuncia-titulo { font-weight: 600; color: #fff; }
+    .denuncia-envolvidos { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+    .denuncia-link { color: var(--accent); font-size: 13px; font-weight: 600; text-decoration: none; }
+
+    /* Badges */
+    .badge {
+        padding: 4px 10px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .badge.yellow { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .badge.red { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .badge.gray { background: rgba(139, 155, 168, 0.2); color: var(--muted); }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--muted);
+    }
+
+    .empty-state svg {
+        width: 60px;
+        height: 60px;
+        opacity: 0.4;
+        margin-bottom: 16px;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsividade */
+    @media (max-width: 1200px) {
+        .content-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+        body { padding: 20px 15px; }
+        .page-header { padding: 20px; }
+        .stats-grid { grid-template-columns: 1fr; }
+        .header-content h1 { font-size: 24px; }
+    }
+</style>
 </head>
 <body>
     <div class="container">
@@ -460,14 +418,16 @@
         <div class="page-header">
             <div class="header-content">
                 <h1>
-                    🛡️ Moderação de Usuários
+                    Moderação de Usuários
                 </h1>
                 <div class="header-actions">
                     <a href="{{ route('moderacao.usuarios.index') }}" class="btn btn-primary">
                         Ver Todos os Usuários
                     </a>
                     <a href="{{ route('suporte.moderacao.dashboard') }}" class="btn btn-secondary">
-                        Dashboard de Tickets
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg> Dashboard de Tickets
                     </a>
                 </div>
             </div>
@@ -565,7 +525,7 @@
             <!-- Punições Recentes -->
             <div class="card">
                 <div class="card-header">
-                    <h2>⚠️ Punições Recentes</h2>
+                    <h2> Punições Recentes</h2>
                     <a href="{{ route('moderacao.usuarios.index', ['filtro' => 'punidos']) }}" class="card-link">Ver todas →</a>
                 </div>
 
@@ -630,7 +590,7 @@
             <!-- Denúncias Pendentes -->
             <div class="card">
                 <div class="card-header">
-                    <h2>🚨 Denúncias Pendentes</h2>
+                    <h2> Denúncias Pendentes</h2>
                     <a href="{{ route('suporte.moderacao.index', ['filtro' => 'denuncias']) }}" class="card-link">Ver todas →</a>
                 </div>
 
@@ -670,7 +630,7 @@
             <!-- Moderadores Ativos -->
             <div class="card">
                 <div class="card-header">
-                    <h2>👮 Moderadores Mais Ativos</h2>
+                    <h2> Moderadores Mais Ativos</h2>
                 </div>
 
                 @forelse($moderadoresAtivos as $moderador)
@@ -701,7 +661,7 @@
             <!-- Usuários Recentes -->
             <div class="card">
                 <div class="card-header">
-                    <h2>✨ Usuários Recentes</h2>
+                    <h2> Usuários Recentes</h2>
                     <a href="{{ route('moderacao.usuarios.index') }}" class="card-link">Ver todos →</a>
                 </div>
 

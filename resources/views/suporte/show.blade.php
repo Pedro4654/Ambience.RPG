@@ -10,11 +10,31 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     
     <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     
     <style>
+        :root {
+            --bg-dark: #0a0f14;
+            --card: #1f2a33;
+            --muted: #8b9ba8;
+            --accent: #22c55e;
+            --accent-light: #16a34a;
+            --accent-dark: #15803d;
+            --hero-green: #052e16;
+            --text-on-primary: #e6eef6;
+            --transition-speed: 600ms;
+            --header-bg: rgba(10, 15, 20, 0.75);
+    --gradient-start: #022c22;  
+    --gradient-mid:   #034935ff;  
+    --gradient-end:   #1a422fff; 
+            --btn-gradient-start: #22c55e;
+            --btn-gradient-end: #16a34a;
+            --accent-border: rgba(34, 197, 94, 0.4);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -22,8 +42,11 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Inter, system-ui, -apple-system, sans-serif;
+                background: linear-gradient(145deg, #0a0f14f4, #141c23f2);
+            color: var(--text-on-primary);
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
             min-height: 100vh;
             padding: 40px 20px;
         }
@@ -33,27 +56,22 @@
             margin: 0 auto;
         }
 
-        /* Back Button */
         .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 15px;
-            margin-bottom: 24px;
-            transition: opacity 0.2s;
-        }
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 15px;
+        margin-bottom: 24px;
+        transition: all 0.2s;
+    }
 
-        .back-link:hover {
-            opacity: 0.8;
-        }
-
-        .back-link svg {
-            width: 20px;
-            height: 20px;
-        }
+    .back-link:hover {
+        color: var(--accent);
+        transform: translateX(-5px);
+    }
 
         /* Alerts */
         .alert {
@@ -64,35 +82,33 @@
             align-items: center;
             gap: 15px;
             animation: slideIn 0.3s ease-out;
+            background: linear-gradient(145deg, rgba(31, 42, 51, 0.6), rgba(20, 28, 35, 0.4));
+            border-left: 4px solid;
         }
 
         @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .alert-success {
-            background: #d4edda;
-            border-left: 4px solid #28a745;
-            color: #155724;
+            border-left-color: var(--accent);
+            background: linear-gradient(145deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.05));
         }
 
         .alert-error {
-            background: #f8d7da;
-            border-left: 4px solid #dc3545;
-            color: #721c24;
+            border-left-color: #ef4444;
+            background: linear-gradient(145deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
         }
 
         .alert-warning {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            color: #856404;
+            border-left-color: #f59e0b;
+            background: linear-gradient(145deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.05));
+        }
+
+        .alert svg {
+            width: 24px;
+            height: 24px;
         }
 
         /* Grid Layout */
@@ -111,10 +127,27 @@
 
         /* Cards */
         .card {
-            background: white;
+            background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
             padding: 40px;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.05), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover::before {
+            opacity: 1;
         }
 
         /* Ticket Header */
@@ -138,9 +171,10 @@
         }
 
         .ticket-number {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1a202c;
+            font-family: Montserrat, sans-serif;
+            font-size: 28px;
+            font-weight: 900;
+            color: #b2b2b2ff;
         }
 
         .badge {
@@ -152,21 +186,22 @@
             letter-spacing: 0.3px;
         }
 
-        .badge.status-novo { background: #dbeafe; color: #1e40af; }
-        .badge.status-analise { background: #fef3c7; color: #92400e; }
-        .badge.status-resolvido, .badge.status-fechado { background: #d1fae5; color: #065f46; }
-        .badge.status-spam { background: #fee2e2; color: #991b1b; }
-        .badge.status-default { background: #e5e7eb; color: #374151; }
+        .badge.status-novo { background: #3bf66a33; color: #00ff33ff; }
+        .badge.status-analise { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .badge.status-resolvido, .badge.status-fechado { background: rgba(34, 197, 94, 0.2); color: var(--accent); }
+        .badge.status-spam { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .badge.status-default { background: rgba(156, 163, 175, 0.2); color: #9ca3af; }
 
-        .badge.priority-urgente { background: #fee2e2; color: #991b1b; }
-        .badge.priority-alta { background: #ffedd5; color: #9a3412; }
-        .badge.priority-normal { background: #dbeafe; color: #1e40af; }
-        .badge.priority-baixa { background: #e5e7eb; color: #374151; }
+        .badge.priority-urgente { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .badge.priority-alta { background: rgba(251, 146, 60, 0.2); color: #fb923c; }
+        .badge.priority-normal { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .badge.priority-baixa { background: rgba(156, 163, 175, 0.2); color: #9ca3af; }
 
         .ticket-title {
-            font-size: 22px;
-            font-weight: 600;
-            color: #1a202c;
+            font-family: Montserrat, sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
             margin-bottom: 16px;
             line-height: 1.4;
         }
@@ -176,7 +211,7 @@
             align-items: center;
             gap: 20px;
             font-size: 14px;
-            color: #6b7280;
+            color: var(--muted);
             flex-wrap: wrap;
         }
 
@@ -195,8 +230,8 @@
 
         /* Report Alert Card */
         .report-alert-card {
-            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-            border-left: 4px solid #dc2626;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.1));
+            border-left: 4px solid #ef4444;
             padding: 24px;
             border-radius: 12px;
             margin-bottom: 24px;
@@ -208,7 +243,7 @@
         .report-alert-card svg {
             width: 28px;
             height: 28px;
-            color: #dc2626;
+            color: #ef4444;
             flex-shrink: 0;
         }
 
@@ -219,7 +254,7 @@
         .report-content h4 {
             font-size: 17px;
             font-weight: 700;
-            color: #991b1b;
+            color: #fee;
             margin-bottom: 12px;
             display: flex;
             align-items: center;
@@ -227,14 +262,15 @@
         }
 
         .reported-user-card {
-            background: white;
+            background: rgba(31, 42, 51, 0.6);
             border-radius: 10px;
             padding: 16px;
             display: flex;
             align-items: center;
             gap: 16px;
             margin-top: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
         .reported-user-avatar {
@@ -242,7 +278,7 @@
             height: 60px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid #dc2626;
+            border: 3px solid #ef4444;
         }
 
         .reported-user-info {
@@ -252,20 +288,20 @@
         .reported-user-name {
             font-size: 18px;
             font-weight: 700;
-            color: #1a202c;
+            color: #fff;
             margin-bottom: 4px;
         }
 
         .reported-user-username {
             font-size: 14px;
-            color: #6b7280;
+            color: var(--muted);
         }
 
         /* Description */
         .description {
             font-size: 15px;
             line-height: 1.8;
-            color: #374151;
+            color: var(--text-on-primary);
             white-space: pre-wrap;
         }
 
@@ -273,13 +309,13 @@
         .attachments-section {
             margin-top: 32px;
             padding-top: 32px;
-            border-top: 2px solid #f3f4f6;
+            border-top: 2px solid rgba(34, 197, 94, 0.1);
         }
 
         .attachments-title {
             font-size: 14px;
             font-weight: 700;
-            color: #374151;
+            color: var(--accent);
             margin-bottom: 16px;
         }
 
@@ -289,23 +325,25 @@
             gap: 16px;
         }
 
-        /* Anexo de Imagem */
+        /* Attachment Items */
         .attachment-item.image-attachment {
             display: flex;
             flex-direction: column;
             padding: 0;
-            background: #f9fafb;
+            background: rgba(31, 42, 51, 0.6);
             border-radius: 10px;
             overflow: hidden;
             text-decoration: none;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             position: relative;
             cursor: pointer;
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         .attachment-item.image-attachment:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            border-color: var(--accent);
         }
 
         .attachment-image-preview {
@@ -330,29 +368,30 @@
         .attachment-image-name {
             font-size: 12px;
             font-weight: 600;
-            color: #1a202c;
+            color: #fff;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             flex: 1;
         }
 
-        /* Anexo de Vídeo */
+        /* Video Attachment */
         .attachment-item.video-attachment {
             display: flex;
             flex-direction: column;
             padding: 0;
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.1));
             border-radius: 10px;
             overflow: hidden;
             cursor: pointer;
-            transition: all 0.2s ease;
-            border: 2px solid #f59e0b;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(245, 158, 11, 0.3);
         }
 
         .attachment-item.video-attachment:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+            border-color: #f59e0b;
         }
 
         .video-preview-container {
@@ -397,13 +436,13 @@
         .video-name {
             font-size: 13px;
             font-weight: 700;
-            color: #92400e;
+            color: #fff;
             margin-bottom: 6px;
         }
 
         .video-meta {
             font-size: 11px;
-            color: #d97706;
+            color: var(--muted);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -419,123 +458,83 @@
             text-transform: uppercase;
         }
 
-        /* Anexo PDF */
-        .attachment-item.pdf-attachment {
-            display: flex;
-            flex-direction: column;
-            padding: 0;
-            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-            border-radius: 10px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 2px solid #ef4444;
-        }
-
-        .attachment-item.pdf-attachment:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
-        }
-
-        .pdf-preview-icon {
-            width: 100%;
-            height: 160px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-            font-size: 56px;
-        }
-
-        /* Anexo de Texto */
-        .attachment-item.text-attachment {
-            display: flex;
-            flex-direction: column;
-            padding: 0;
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-            border-radius: 10px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 2px solid #22c55e;
-        }
-
-        .attachment-item.text-attachment:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3);
-        }
-
-        .text-preview-icon {
-            width: 100%;
-            height: 160px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-            color: white;
-            font-size: 56px;
-        }
-
-        /* Anexo de Documento Office */
+        /* PDF, Text, GLB, Doc Attachments */
+        .attachment-item.pdf-attachment,
+        .attachment-item.text-attachment,
+        .attachment-item.glb-attachment,
         .attachment-item.doc-attachment {
             display: flex;
             flex-direction: column;
             padding: 0;
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
             border-radius: 10px;
             overflow: hidden;
             cursor: pointer;
-            transition: all 0.2s ease;
-            border: 2px solid #3b82f6;
+            transition: all 0.3s ease;
+            border: 2px solid;
+        }
+
+        .attachment-item.pdf-attachment {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.1));
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .attachment-item.pdf-attachment:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+            border-color: #ef4444;
+        }
+
+        .attachment-item.text-attachment {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(22, 163, 74, 0.1));
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .attachment-item.text-attachment:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);
+            border-color: var(--accent);
+        }
+
+        .attachment-item.glb-attachment {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(8, 145, 178, 0.1));
+            border-color: rgba(6, 182, 212, 0.3);
+        }
+
+        .attachment-item.glb-attachment:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(6, 182, 212, 0.3);
+            border-color: #06b6d4;
+        }
+
+        .attachment-item.doc-attachment {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));
+            border-color: rgba(59, 130, 246, 0.3);
         }
 
         .attachment-item.doc-attachment:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
         }
 
+        .pdf-preview-icon,
+        .text-preview-icon,
+        .glb-preview-icon,
         .doc-preview-icon {
             width: 100%;
             height: 160px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
             font-size: 56px;
         }
 
-        /* Anexo GLB */
-        .attachment-item.glb-attachment {
-            display: flex;
-            flex-direction: column;
-            padding: 0;
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border-radius: 10px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 2px solid #06b6d4;
-        }
+        .pdf-preview-icon { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+        .text-preview-icon { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%); }
+        .glb-preview-icon { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); }
+        .doc-preview-icon { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
 
-        .attachment-item.glb-attachment:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.3);
-        }
-
-        .glb-preview-icon {
-            width: 100%;
-            height: 160px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-            color: white;
-            font-size: 56px;
-        }
-
-        /* Info genérica de anexos */
         .attachment-info-generic {
             padding: 12px;
         }
@@ -547,6 +546,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            color: #fff;
         }
 
         .attachment-meta-generic {
@@ -554,6 +554,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: var(--muted);
         }
 
         .attachment-badge {
@@ -565,27 +566,29 @@
             color: white;
         }
 
-        /* Anexo Normal */
+        /* Normal Attachment */
         .attachment-item {
             display: flex;
             align-items: center;
             gap: 12px;
             padding: 16px;
-            background: #f9fafb;
+            background: rgba(31, 42, 51, 0.6);
             border-radius: 10px;
             text-decoration: none;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         .attachment-item:not(.image-attachment):not(.glb-attachment):not(.video-attachment):not(.pdf-attachment):not(.text-attachment):not(.doc-attachment):hover {
-            background: #f3f4f6;
+            background: rgba(34, 197, 94, 0.1);
             transform: translateY(-2px);
+            border-color: var(--accent);
         }
 
         .attachment-item svg {
             width: 24px;
             height: 24px;
-            color: #6b7280;
+            color: var(--accent);
             flex-shrink: 0;
         }
 
@@ -597,7 +600,7 @@
         .attachment-name {
             font-size: 13px;
             font-weight: 600;
-            color: #1a202c;
+            color: #fff;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -605,27 +608,28 @@
 
         .attachment-size {
             font-size: 11px;
-            color: #6b7280;
+            color: var(--muted);
         }
 
         .attachment-download-btn {
             padding: 6px 10px;
-            background: #667eea;
-            color: white;
+            background: var(--accent);
+            color: var(--hero-green);
             border: none;
             border-radius: 6px;
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
         }
 
         .attachment-download-btn:hover {
-            background: #764ba2;
+            background: var(--accent-light);
+            transform: translateY(-2px);
         }
 
         .attachment-download-btn svg {
@@ -673,7 +677,7 @@
             position: absolute;
             top: -50px;
             right: 0;
-            background: white;
+            background: var(--accent);
             border: none;
             width: 40px;
             height: 40px;
@@ -683,14 +687,15 @@
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            color: #1a202c;
-            transition: all 0.2s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            color: var(--hero-green);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
             z-index: 10001;
+            font-weight: 700;
         }
 
         .modal-close-btn:hover {
-            background: #f3f4f6;
+            background: var(--accent-light);
             transform: rotate(90deg);
         }
 
@@ -698,14 +703,14 @@
             max-width: 90vw;
             max-height: 85vh;
             border-radius: 8px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
 
         .modal-video {
             max-width: 90vw;
             max-height: 85vh;
             border-radius: 8px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
 
         .modal-pdf-viewer {
@@ -713,7 +718,7 @@
             height: 85vh;
             background: white;
             border-radius: 8px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             overflow: auto;
         }
 
@@ -721,11 +726,13 @@
             width: 800px;
             max-width: 90vw;
             max-height: 85vh;
-            background: white;
+            background: rgba(31, 42, 51, 0.95);
             border-radius: 8px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             overflow: auto;
             padding: 30px;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         .modal-text-content {
@@ -733,7 +740,7 @@
             font-size: 14px;
             line-height: 1.6;
             white-space: pre-wrap;
-            color: #1a202c;
+            color: var(--text-on-primary);
         }
 
         .modal-info-bar {
@@ -751,217 +758,227 @@
             bottom: -55px;
             right: 0;
             padding: 10px 20px;
-            background: #667eea;
-            color: white;
+            background: var(--accent);
+            color: var(--hero-green);
             border: none;
             border-radius: 8px;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
         }
 
         .modal-download-btn:hover {
-            background: #764ba2;
+            background: var(--accent-light);
+            transform: translateY(-2px);
+        }
+
+        /* Messages Section */
+        .report-messages-section {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));
+            border-left: 4px solid #3b82f6;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .messages-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #60a5fa;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .reported-messages-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .reported-message-card {
+            background: rgba(31, 42, 51, 0.6);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .reported-message-card.censored {
+            border-color: #fbbf24;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .reported-message-card.deleted {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            opacity: 0.7;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .message-author-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent);
+        }
+
+        .message-author-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            display: block;
+        }
+
+        .message-timestamp {
+            font-size: 12px;
+            color: var(--muted);
+            display: block;
+            margin-top: 2px;
+        }
+
+        .message-content {
+            margin-bottom: 12px;
+        }
+
+        .message-text {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-on-primary);
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .message-text.original {
+            background: rgba(245, 158, 11, 0.2);
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .message-text.censored {
+            background: rgba(239, 68, 68, 0.2);
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        .message-flags {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(34, 197, 94, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-size: 13px;
+        }
+
+        .flag-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .flag-profanity { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .flag-sexual { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .flag-porn { background: rgba(220, 38, 38, 0.2); color: #ef4444; }
+        .flag-harassment { background: rgba(251, 146, 60, 0.2); color: #fb923c; }
+        .flag-swear { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+
+        .message-attachments {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .message-attachment-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid rgba(34, 197, 94, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .message-attachment-image:hover {
+            transform: scale(1.05);
+            border-color: var(--accent);
+        }
+
+        .message-attachment-file {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(31, 42, 51, 0.6);
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--text-on-primary);
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .message-attachment-file:hover {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: var(--accent);
         }
 
         /* Responses */
         .responses-section h3 {
-            font-size: 20px;
+            font-family: Montserrat, sans-serif;
+            font-size: 24px;
             font-weight: 700;
-            color: #1a202c;
+            color: #fff;
             margin-bottom: 20px;
         }
 
         .response-item {
-            background: white;
+            background:linear-gradient(145deg, #0a0f1497, #141c23b5);
             border-radius: 12px;
             padding: 24px;
             margin-bottom: 16px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .response-item:hover {
+            border-color: rgba(34, 197, 94, 0.4);
+            transform: translateY(-2px);
         }
 
         .response-item.internal {
-            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.1));
             border-left: 4px solid #f59e0b;
         }
-
-        /* ========== MENSAGENS DENUNCIADAS ========== */
-.report-messages-section {
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-    border-left: 4px solid #3b82f6;
-    padding: 24px;
-    border-radius: 12px;
-    margin-bottom: 24px;
-}
-
-.messages-title {
-    font-size: 17px;
-    font-weight: 700;
-    color: #1e40af;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-}
-
-.reported-messages-container {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.reported-message-card {
-    background: white;
-    border-radius: 10px;
-    padding: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    border: 2px solid #e5e7eb;
-}
-
-.reported-message-card.censored {
-    border-color: #fbbf24;
-    background: #fffbeb;
-}
-
-.reported-message-card.deleted {
-    border-color: #ef4444;
-    background: #fef2f2;
-    opacity: 0.7;
-}
-
-.message-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.message-author-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.message-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #3b82f6;
-}
-
-.message-author-name {
-    font-size: 15px;
-    font-weight: 700;
-    color: #1a202c;
-    display: block;
-}
-
-.message-timestamp {
-    font-size: 12px;
-    color: #6b7280;
-    display: block;
-    margin-top: 2px;
-}
-
-.message-content {
-    margin-bottom: 12px;
-}
-
-.message-text {
-    font-size: 15px;
-    line-height: 1.6;
-    color: #374151;
-    word-wrap: break-word;
-    white-space: pre-wrap;
-}
-
-.message-text.original {
-    background: #fef3c7;
-    padding: 8px 12px;
-    border-radius: 6px;
-    margin-bottom: 8px;
-}
-
-.message-text.censored {
-    background: #fee2e2;
-    padding: 8px 12px;
-    border-radius: 6px;
-}
-
-.message-flags {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid #e5e7eb;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    font-size: 13px;
-}
-
-.flag-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.flag-profanity { background: #fef3c7; color: #92400e; }
-.flag-sexual { background: #fee2e2; color: #991b1b; }
-.flag-porn { background: #fecaca; color: #7f1d1d; }
-.flag-harassment { background: #fed7aa; color: #9a3412; }
-.flag-swear { background: #fef3c7; color: #854d0e; }
-
-.message-attachments {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid #e5e7eb;
-}
-
-.message-attachment-image {
-    width: 120px;
-    height: 120px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid #e5e7eb;
-    transition: transform 0.2s;
-}
-
-.message-attachment-image:hover {
-    transform: scale(1.05);
-    border-color: #3b82f6;
-}
-
-.message-attachment-file {
-    display: inline-flex;
-    align-items: center;
-    padding: 8px 12px;
-    background: #f3f4f6;
-    border-radius: 6px;
-    text-decoration: none;
-    color: #374151;
-    font-size: 13px;
-    font-weight: 500;
-    transition: background 0.2s;
-}
-
-.message-attachment-file:hover {
-    background: #e5e7eb;
-    color: #1a202c;
-}
 
         .response-header {
             display: flex;
@@ -992,7 +1009,7 @@
         .response-author-name {
             font-size: 15px;
             font-weight: 700;
-            color: #1a202c;
+            color: #fff;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -1000,8 +1017,8 @@
 
         .staff-badge {
             padding: 4px 8px;
-            background: #dbeafe;
-            color: #1e40af;
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
             border-radius: 8px;
             font-size: 10px;
             font-weight: 700;
@@ -1010,13 +1027,13 @@
 
         .response-date {
             font-size: 13px;
-            color: #6b7280;
+            color: var(--muted);
         }
 
         .internal-badge {
             padding: 6px 12px;
-            background: #fef3c7;
-            color: #92400e;
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
             border-radius: 12px;
             font-size: 11px;
             font-weight: 700;
@@ -1026,30 +1043,33 @@
         .response-content {
             font-size: 15px;
             line-height: 1.7;
-            color: #374151;
+            color: var(--text-on-primary);
             white-space: pre-wrap;
         }
 
         .empty-responses {
-            background: #f9fafb;
+            background: rgba(31, 42, 51, 0.4);
             padding: 60px;
             border-radius: 12px;
             text-align: center;
-            color: #9ca3af;
+            color: var(--muted);
         }
 
         /* Reply Form */
         .reply-form-card {
-            background: white;
+            background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
             padding: 32px;
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         .reply-form-title {
-            font-size: 18px;
+            font-family: Montserrat, sans-serif;
+            font-size: 22px;
             font-weight: 700;
-            color: #1a202c;
+            color: #fff;
             margin-bottom: 20px;
         }
 
@@ -1061,36 +1081,39 @@
             display: block;
             font-size: 14px;
             font-weight: 600;
-            color: #374151;
+            color: #fff;
             margin-bottom: 8px;
         }
 
         .form-textarea {
             width: 100%;
             padding: 16px;
-            border: 2px solid #e5e7eb;
+            border: 2px solid rgba(34, 197, 94, 0.2);
             border-radius: 10px;
             font-size: 15px;
             font-family: inherit;
             resize: vertical;
             min-height: 150px;
             transition: all 0.3s ease;
+            background: rgba(31, 42, 51, 0.5);
+            color: var(--text-on-primary);
         }
 
         .form-textarea:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+            background: rgba(31, 42, 51, 0.7);
         }
 
         .input-warn {
             border: 2px solid #e0556b !important;
-            background: #fff6f7 !important;
+            background: rgba(224, 85, 107, 0.1) !important;
         }
 
         .moderation-warning {
             display: none;
-            color: #e0556b;
+            color: #ef4444;
             font-size: 0.85rem;
             margin-top: 4px;
             font-weight: 600;
@@ -1124,7 +1147,7 @@
 
         .checkbox-label {
             font-size: 14px;
-            color: #374151;
+            color: var(--text-on-primary);
             cursor: pointer;
         }
 
@@ -1135,27 +1158,30 @@
         .file-input {
             width: 100%;
             padding: 12px 16px;
-            border: 2px solid #e5e7eb;
+            border: 2px solid rgba(34, 197, 94, 0.2);
             border-radius: 10px;
             font-size: 14px;
             cursor: pointer;
+            background: rgba(31, 42, 51, 0.5);
+            color: var(--text-on-primary);
         }
 
         .btn-submit {
             padding: 14px 32px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(to right, var(--btn-gradient-start), var(--btn-gradient-end));
+            color: var(--hero-green);
             border: none;
             border-radius: 10px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 15px;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
         }
 
         .btn-submit:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
         }
 
         .btn-submit:disabled {
@@ -1165,11 +1191,11 @@
         }
 
         .closed-message {
-            background: #f9fafb;
+            background: rgba(31, 42, 51, 0.4);
             padding: 40px;
             border-radius: 12px;
             text-align: center;
-            color: #6b7280;
+            color: var(--muted);
         }
 
         /* Sidebar */
@@ -1180,16 +1206,19 @@
         }
 
         .sidebar-card {
-            background: white;
+            background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
             padding: 28px;
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         .sidebar-card h3 {
+            font-family: Montserrat, sans-serif;
             font-size: 18px;
             font-weight: 700;
-            color: #1a202c;
+            color: #fff;
             margin-bottom: 20px;
         }
 
@@ -1202,13 +1231,13 @@
         .info-item dt {
             font-size: 13px;
             font-weight: 600;
-            color: #6b7280;
+            color: var(--muted);
             margin-bottom: 4px;
         }
 
         .info-item dd {
             font-size: 14px;
-            color: #1a202c;
+            color: #fff;
         }
 
         /* Moderation Actions */
@@ -1224,24 +1253,31 @@
             display: block;
             font-size: 13px;
             font-weight: 600;
-            color: #374151;
+            color: #fff;
             margin-bottom: 8px;
         }
 
         .mod-select {
             width: 100%;
             padding: 10px 14px;
-            border: 2px solid #e5e7eb;
+            border: 2px solid rgba(34, 197, 94, 0.2);
             border-radius: 8px;
             font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
+            background: rgba(31, 42, 51, 0.5);
+            color: var(--text-on-primary);
+        }
+
+        .mod-select option{
+            background: var(--card);
+            color: var(--text-on-primary);
         }
 
         .mod-select:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
         }
 
         .assign-wrapper {
@@ -1255,18 +1291,19 @@
 
         .btn-assign {
             padding: 10px 20px;
-            background: #667eea;
-            color: white;
+            background: var(--accent);
+            color: var(--hero-green);
             border: none;
             border-radius: 8px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 13px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
         }
 
         .btn-assign:hover {
-            background: #764ba2;
+            background: var(--accent-light);
+            transform: translateY(-2px);
         }
 
         .btn-action {
@@ -1274,15 +1311,76 @@
             padding: 12px;
             border: none;
             border-radius: 8px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
+.btn-action {
+    width: 100%;
+    padding: 12px;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 8px;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.btn-action::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-action:hover::before {
+    left: 100%;
+}
+
+.btn-action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+.btn-action.btn-perfil {
+    background: linear-gradient(135deg, #d23535ff 0%, #d42020ff 100%);
+    margin-bottom: 12px;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.2);
+}
+
+.btn-action.btn-warning {
+    background: linear-gradient(135deg, #ab3838ff 0%, #ce3d3dff 100%);
+}
+
+.btn-action.btn-ban-temp {
+    background: linear-gradient(135deg, #ac3345ff 0%, #be4747ff 100%);
+}
+
+.btn-action.btn-ban-perma {
+    background: linear-gradient(135deg, #c52222ff 0%, #b91c1c 100%);
+}
+
+
         .btn-close {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            color: var(--hero-green);
         }
 
         .btn-reopen {
@@ -1290,10 +1388,80 @@
             color: white;
         }
 
-        .btn-close:hover, .btn-reopen:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        .btn-spam {
+            background: linear-gradient(135deg, #a60808ff 0%, #4f1602ff 100%);
+            color: var(--hero-green);
         }
+
+        .btn-close:hover, .btn-reopen:hover, .btn-spam:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+/* Container opcional para ajustar tudo ao redor do input */
+.file-input {
+  font-size: 14px;
+  color: #e5e7eb;
+}
+
+/* Chrome, Edge, Safari */
+.file-input::-webkit-file-upload-button {
+  -webkit-appearance: none;
+  appearance: none;
+  padding: 14px 32px;
+  background: linear-gradient(to right, var(--btn-gradient-start), var(--btn-gradient-end));
+  color: var(--hero-green);
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
+}
+
+/* Hover (aplicando no input) */
+.file-input:hover::-webkit-file-upload-button {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+}
+
+/* Disabled */
+.file-input:disabled::-webkit-file-upload-button {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Firefox e outros com ::file-selector-button */
+.file-input::file-selector-button {
+  padding: 14px 32px;
+  background: linear-gradient(to right, var(--btn-gradient-start), var(--btn-gradient-end));
+  color: var(--hero-green);
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
+}
+
+/* Hover (aplicando no input) */
+.file-input:hover::file-selector-button {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+}
+
+/* Disabled */
+.file-input:disabled::file-selector-button {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+
+
 
         @media (max-width: 1200px) {
             .grid-layout {
@@ -1327,13 +1495,28 @@
                 bottom: 10px;
             }
         }
+
+        .loading-spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Back Button -->
         <a href="{{ auth()->user()->isStaff() ? route('suporte.moderacao.index') : route('suporte.index') }}" class="back-link">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
             Voltar
@@ -1442,7 +1625,7 @@
             <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
         </svg>
         <div class="report-content">
-            <h4>⚠️ Denúncia de Usuário</h4>
+            <h4> Denúncia de Usuário</h4>
             <div class="reported-user-card">
                 @if($ticket->usuarioDenunciado->avatar_url)
                     <img src="{{ str_starts_with($ticket->usuarioDenunciado->avatar_url, 'http') ? $ticket->usuarioDenunciado->avatar_url : Storage::url($ticket->usuarioDenunciado->avatar_url) }}" 
@@ -1563,7 +1746,7 @@
 
                     @if($ticket->anexos->where('resposta_id', null)->count() > 0)
                         <div class="attachments-section">
-                            <h3 class="attachments-title">📎 Anexos</h3>
+                            <h3 class="attachments-title"><img src="/images/ICONS/anexos.png" alt="Informações" style="width:34px; height:34px; margin-right:6px;"> Anexos</h3>
                             <div class="attachments-grid">
                                 @foreach($ticket->anexos->where('resposta_id', null) as $anexo)
                                     @php
@@ -1708,7 +1891,7 @@
 
                 <!-- Responses -->
                 <div class="responses-section">
-                    <h3>💬 Respostas/Comentários</h3>
+                    <h3> Respostas/Comentários</h3>
                     
                     @forelse($ticket->respostas as $resposta)
     <div class="response-item {{ $resposta->ehInterna() ? 'internal' : '' }}">
@@ -1864,47 +2047,50 @@
 
                 <!-- Reply Form -->
                 @if($ticket->estaAberto())
-                    <div class="reply-form-card">
-                        <h3 class="reply-form-title">✏️ Adicionar Comentário/Resposta</h3>
-                        
-                        <form id="replyForm" action="{{ route('suporte.responder', $ticket->id) }}" method="POST" enctype="multipart/form-data">
-                            @csrf
+                   <div class="reply-form-card">
+    <h3 class="reply-form-title">
+        <img src="/images/ICONS/comentarios.png" alt="Adicionar comentário" style="width:24px; height:24px; margin-right:6px;">
+        Adicionar Comentário/Resposta
+    </h3>
+    
+    <form id="replyForm" action="{{ route('suporte.responder', $ticket->id) }}" method="POST" enctype="multipart/form-data">
+        @csrf
 
-                            <div class="form-group">
-                                <label for="mensagem" class="form-label">Mensagem *</label>
-                                <textarea name="mensagem" 
-                                    id="mensagem"
-                                    required
-                                    minlength="10"
-                                    maxlength="5000"
-                                    placeholder="Digite sua mensagem aqui..."
-                                    class="form-textarea">{{ old('mensagem') }}</textarea>
-                                <small class="moderation-warning" id="mensagem-warning">Conteúdo inapropriado detectado</small>
-                            </div>
+        <div class="form-group">
+            <label for="mensagem" class="form-label">Mensagem *</label>
+            <textarea name="mensagem" 
+                id="mensagem"
+                required
+                minlength="10"
+                maxlength="5000"
+                placeholder="Digite sua mensagem aqui..."
+                class="form-textarea">{{ old('mensagem') }}</textarea>
+            <small class="moderation-warning" id="mensagem-warning">Conteúdo inapropriado detectado</small>
+        </div>
 
-                            @if(auth()->user()->isStaff())
-                                <div class="form-group">
-                                    <div class="checkbox-wrapper">
-                                        <input type="checkbox" name="interno" value="1" id="interno">
-                                        <label for="interno" class="checkbox-label">Nota interna (apenas staff)</label>
-                                    </div>
-                                </div>
-                            @endif
+        @if(auth()->user()->isStaff())
+            <div class="form-group">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" name="interno" value="1" id="interno">
+                    <label for="interno" class="checkbox-label">Nota interna (apenas staff)</label>
+                </div>
+            </div>
+        @endif
 
-                            <div class="form-group">
-                                <label for="anexos" class="form-label">Anexos (opcional)</label>
-                                <input type="file" name="anexos[]" id="anexos" multiple class="file-input" 
-                                       accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.zip,.glb,.mp4,.webm,.mov,.avi,.xls,.xlsx,.ppt,.pptx,.csv">
-                                <small style="display: block; margin-top: 6px; color: #6b7280; font-size: 12px;">
-                                    Formatos aceitos: Imagens, Vídeos, PDFs, Documentos Office, Texto, ZIP, Modelos 3D (GLB). Máximo 100MB por arquivo.
-                                </small>
-                            </div>
+        <div class="form-group">
+            <label for="anexos" class="form-label">Anexos (opcional)</label>
+            <input type="file" name="anexos[]" id="anexos" multiple class="file-input" 
+                   accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt,.zip,.glb,.mp4,.webm,.mov,.avi,.xls,.xlsx,.ppt,.pptx,.csv">
+            <small style="display: block; margin-top: 6px; color: #6b7280; font-size: 12px;">
+                Formatos aceitos: Imagens, Vídeos, PDFs, Documentos Office, Texto, ZIP, Modelos 3D (GLB). Máximo 100MB por arquivo.
+            </small>
+        </div>
 
-                            <button type="submit" class="btn-submit" id="submitBtn">
-                                🚀 Enviar Resposta
-                            </button>
-                        </form>
-                    </div>
+        <button type="submit" class="btn-submit" id="submitBtn">
+             Enviar Resposta
+        </button>
+    </form>
+</div>
                 @else
                     <div class="closed-message">
                         <svg width="64" height="64" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin: 0 auto 16px; color: #cbd5e0;">
@@ -1922,7 +2108,10 @@
             <div class="sidebar">
                 <!-- Ticket Info -->
                 <div class="sidebar-card">
-                    <h3>ℹ️ Informações</h3>
+                    <h3>
+        <img src="/images/ICONS/info.png" alt="Informações" style="width:24px; height:24px; margin-right:6px;">
+        Informações
+    </h3>
                     
                     <dl class="info-list">
                         <div class="info-item">
@@ -1970,44 +2159,47 @@
 
                    <!-- Ações Rápidas de Usuário (se for denúncia) -->
                 @if(auth()->user()->isStaff() && $ticket->ehDenuncia() && $ticket->usuarioDenunciado)
-                    <div class="sidebar-card" style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-left: 4px solid #ef4444;">
-                        <h3 style="color: #991b1b;">👤 Ações do Usuário Denunciado</h3>
-                        
-                        <a href="{{ route('moderacao.usuarios.show', $ticket->usuarioDenunciado->id) }}" class="btn-action" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; width: 100%; padding: 12px; margin-bottom: 12px; text-align: center; text-decoration: none; border-radius: 10px; display: inline-block; font-weight: 600;">
-                            👁️ Ver Perfil Completo
-                        </a>
+                   <div class="sidebar-card">
+    <h3 style="color: #b80101ff;"> 
+        <img src="/images/ICONS/report.png" alt="Informações" style="width:30px; height:30px; margin-right:6px;">
+        Ações do Usuário Denunciado
+    </h3>
+    
+    <a href="{{ route('moderacao.usuarios.show', $ticket->usuarioDenunciado->id) }}" class="btn-action btn-perfil">
+        Ver Perfil Completo
+    </a>
 
-                        @if(!$ticket->usuarioDenunciado->warning_ativo && !$ticket->usuarioDenunciado->ban_tipo)
-                            <button onclick="openPunishmentModal('warning', {{ $ticket->usuarioDenunciado->id }}, {{ $ticket->id }})" class="btn-action" style="width: 100%; padding: 12px; background: #f59e0b; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; margin-bottom: 8px;">
-                                ⚠️ Aplicar Warning
-                            </button>
+    @if(!$ticket->usuarioDenunciado->warning_ativo && !$ticket->usuarioDenunciado->ban_tipo)
+        <button onclick="openPunishmentModal('warning', {{ $ticket->usuarioDenunciado->id }}, {{ $ticket->id }})" class="btn-action btn-warning">
+            Aplicar Warning
+        </button>
 
-                            <button onclick="openPunishmentModal('ban-temp', {{ $ticket->usuarioDenunciado->id }}, {{ $ticket->id }})" class="btn-action" style="width: 100%; padding: 12px; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; margin-bottom: 8px;">
-                                🚫 Ban Temporário
-                            </button>
+        <button onclick="openPunishmentModal('ban-temp', {{ $ticket->usuarioDenunciado->id }}, {{ $ticket->id }})" class="btn-action btn-ban-temp">
+            Ban Temporário
+        </button>
 
-                            <button onclick="openPunishmentModal('perma-ban', {{ $ticket->usuarioDenunciado->id }}, {{ $ticket->id }})" class="btn-action" style="width: 100%; padding: 12px; background: #991b1b; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">
-                                ⛔ Ban Permanente
-                            </button>
-                        @else
-                            <div style="background: #fef3c7; padding: 16px; border-radius: 10px; font-size: 14px; color: #92400e; text-align: center;">
-                                ⚠️ Usuário já possui punição ativa
-                            </div>
-                        @endif
+        <button onclick="openPunishmentModal('perma-ban', {{ $ticket->usuarioDenunciado->id }}, {{ $ticket->id }})" class="btn-action btn-ban-perma">
+            Ban Permanente
+        </button>
+    @else
+        <div style="background: #fef3c7; padding: 16px; border-radius: 10px; font-size: 14px; color: #92400e; text-align: center;">
+            ⚠️ Usuário já possui punição ativa
+        </div>
+    @endif
 
-                        <div style="margin-top: 16px; padding-top: 16px; border-top: 2px solid #fee2e2;">
-                            <div style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">
-                                <strong>Tickets criados:</strong> {{ $ticket->usuarioDenunciado->tickets_count ?? 0 }}<br>
-                                <strong>Denúncias recebidas:</strong> {{ $ticket->usuarioDenunciado->denuncias_recebidas_count ?? 0 }}
-                            </div>
-                        </div>
-                    </div>
+    <div style="margin-top: 16px; padding-top: 16px; border-top: 2px solid #fee2e2;">
+        <div style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">
+            <strong>Tickets criados:</strong> {{ $ticket->usuarioDenunciado->tickets_count ?? 0 }}<br>
+            <strong>Denúncias recebidas:</strong> {{ $ticket->usuarioDenunciado->denuncias_recebidas_count ?? 0 }}
+        </div>
+    </div>
+</div>
                 @endif
 
                 <!-- Staff Actions -->
                 @if(auth()->user()->isStaff())
                     <div class="sidebar-card">
-                        <h3>⚙️ Ações de Moderação</h3>
+                        <h3><img src="/images/ICONS/badge.png" alt="Adicionar comentário" style="width:28px; height:28x; margin-right:6px;">Ações de Moderação</h3>
                         
                         <!-- Atribuir -->
                         <form action="{{ route('suporte.moderacao.atribuir', $ticket->id) }}" method="POST" class="mod-form">
@@ -2057,14 +2249,14 @@
                             <form action="{{ route('suporte.moderacao.fechar', $ticket->id) }}" method="POST" class="mod-form">
                                 @csrf
                                 <button type="submit" class="btn-action btn-close" onclick="return confirm('Tem certeza que deseja fechar este ticket?')">
-                                    ✅ Fechar Ticket
+                                     Fechar Ticket
                                 </button>
                             </form>
                         @else
                             <form action="{{ route('suporte.moderacao.reabrir', $ticket->id) }}" method="POST" class="mod-form">
                                 @csrf
                                 <button type="submit" class="btn-action btn-reopen" onclick="return confirm('Tem certeza que deseja reabrir este ticket?')">
-                                    🔓 Reabrir Ticket
+                                     Reabrir Ticket
                                 </button>
                             </form>
                         @endif
@@ -2073,8 +2265,8 @@
                         @if($ticket->status !== 'spam')
                             <form action="{{ route('suporte.moderacao.marcar-spam', $ticket->id) }}" method="POST" class="mod-form">
                                 @csrf
-                                <button type="submit" class="btn-action" style="background: #dc2626; color: white;" onclick="return confirm('Tem certeza que deseja marcar este ticket como SPAM?')">
-                                    🚫 Marcar como Spam
+                                <button type="submit" class="btn-action btn-spam" style="background: #a60808ff; color: white;" onclick="return confirm('Tem certeza que deseja marcar este ticket como SPAM?')">
+                                     Marcar como Spam
                                 </button>
                             </form>
                         @endif
@@ -2109,79 +2301,113 @@
     <script src="{{ asset('js/glb-viewer.js') }}"></script>
     
     <script>
-    // ==================== MODAL SYSTEM ====================
-    const modal = document.getElementById('universalModal');
-    const modalContainer = document.getElementById('modalContentContainer');
-    const modalInfoBar = document.getElementById('modalInfoBar');
-    const modalDownloadBtn = document.getElementById('modalDownloadBtn');
+// ==================== MODAL SYSTEM ====================
+const modal = document.getElementById('universalModal');
+const modalContainer = document.getElementById('modalContentContainer');
+const modalInfoBar = document.getElementById('modalInfoBar');
+const modalDownloadBtn = document.getElementById('modalDownloadBtn');
 
-    function openImageModal(imageUrl, imageName, imageSize) {
-        modalContainer.innerHTML = `<img src="${imageUrl}" alt="${imageName}" class="modal-image">`;
-        modalInfoBar.textContent = `${imageName} - ${imageSize}`;
-        modalDownloadBtn.href = imageUrl;
-        modalDownloadBtn.download = imageName;
-        modalDownloadBtn.style.display = 'inline-flex';
+// ⚙️ Configurar PDF.js Worker (ADICIONE ISSO NO INÍCIO)
+if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+function openImageModal(imageUrl, imageName, imageSize) {
+    modalContainer.innerHTML = `<img src="${imageUrl}" alt="${imageName}" class="modal-image">`;
+    modalInfoBar.textContent = `${imageName} - ${imageSize}`;
+    modalDownloadBtn.href = imageUrl;
+    modalDownloadBtn.download = imageName;
+    modalDownloadBtn.style.display = 'inline-flex';
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function openVideoModal(videoUrl, videoName) {
+    modalContainer.innerHTML = `
+        <video class="modal-video" controls autoplay>
+            <source src="${videoUrl}" type="video/mp4">
+            Seu navegador não suporta vídeos.
+        </video>
+    `;
+    modalInfoBar.textContent = videoName;
+    modalDownloadBtn.href = videoUrl;
+    modalDownloadBtn.download = videoName;
+    modalDownloadBtn.style.display = 'inline-flex';
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function openPDFModal(pdfUrl, pdfName) {
+    modalContainer.innerHTML = `
+        <div class="modal-pdf-viewer">
+            <div style="text-align: center; padding: 20px; color: white;">
+                <div style="margin-bottom: 15px;">Carregando PDF...</div>
+                <div class="loading-spinner"></div>
+            </div>
+            <canvas id="pdfCanvas" style="display: none;"></canvas>
+            <div id="pdfControls" style="display: none; text-align: center; padding: 20px;">
+                <button onclick="changePDFPage(-1)" style="padding: 10px 20px; margin: 0 10px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">◀ Anterior</button>
+                <span id="pdfPageInfo" style="margin: 0 20px; font-weight: 600; color: white;">Página 1</span>
+                <button onclick="changePDFPage(1)" style="padding: 10px 20px; margin: 0 10px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">Próxima ▶</button>
+            </div>
+        </div>
+    `;
+    modalInfoBar.textContent = pdfName;
+    modalDownloadBtn.href = pdfUrl;
+    modalDownloadBtn.download = pdfName;
+    modalDownloadBtn.style.display = 'inline-flex';
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    loadPDF(pdfUrl);
+}
+
+// PDF.js variables
+let pdfDoc = null;
+let currentPage = 1;
+let totalPages = 0;
+
+async function loadPDF(url) {
+    try {
+        // Verificar se PDF.js está carregado
+        if (typeof pdfjsLib === 'undefined') {
+            throw new Error('PDF.js não está carregado. Adicione o script: https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+        }
+
+        const loadingTask = pdfjsLib.getDocument(url);
+        pdfDoc = await loadingTask.promise;
+        totalPages = pdfDoc.numPages;
         
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function openVideoModal(videoUrl, videoName) {
-        modalContainer.innerHTML = `
-            <video class="modal-video" controls autoplay>
-                <source src="${videoUrl}" type="video/mp4">
-                Seu navegador não suporta vídeos.
-            </video>
-        `;
-        modalInfoBar.textContent = videoName;
-        modalDownloadBtn.href = videoUrl;
-        modalDownloadBtn.download = videoName;
-        modalDownloadBtn.style.display = 'inline-flex';
+        // Mostrar canvas e controles
+        document.getElementById('pdfCanvas').style.display = 'block';
+        document.getElementById('pdfControls').style.display = 'block';
         
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function openPDFModal(pdfUrl, pdfName) {
+        // Esconder loading
+        modalContainer.querySelector('.loading-spinner')?.parentElement.remove();
+        
+        renderPage(currentPage);
+    } catch (error) {
+        console.error('Erro ao carregar PDF:', error);
         modalContainer.innerHTML = `
-            <div class="modal-pdf-viewer">
-                <canvas id="pdfCanvas"></canvas>
-                <div style="text-align: center; padding: 20px;">
-                    <button onclick="changePDFPage(-1)" style="padding: 10px 20px; margin: 0 10px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">◀ Anterior</button>
-                    <span id="pdfPageInfo" style="margin: 0 20px; font-weight: 600;">Página 1</span>
-                    <button onclick="changePDFPage(1)" style="padding: 10px 20px; margin: 0 10px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">Próxima ▶</button>
-                </div>
+            <div style="color: white; padding: 40px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 20px;">⚠️</div>
+                <div style="font-size: 18px; margin-bottom: 10px;">Erro ao carregar PDF</div>
+                <div style="font-size: 14px; color: #ccc;">${error.message}</div>
+                <a href="${modalDownloadBtn.href}" download style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 8px;">
+                    Baixar Arquivo
+                </a>
             </div>
         `;
-        modalInfoBar.textContent = pdfName;
-        modalDownloadBtn.href = pdfUrl;
-        modalDownloadBtn.download = pdfName;
-        modalDownloadBtn.style.display = 'inline-flex';
-        
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-        
-        loadPDF(pdfUrl);
     }
+}
 
-    // PDF.js variables
-    let pdfDoc = null;
-    let currentPage = 1;
-    let totalPages = 0;
-
-    async function loadPDF(url) {
-        try {
-            const loadingTask = pdfjsLib.getDocument(url);
-            pdfDoc = await loadingTask.promise;
-            totalPages = pdfDoc.numPages;
-            renderPage(currentPage);
-        } catch (error) {
-            console.error('Erro ao carregar PDF:', error);
-            modalContainer.innerHTML = '<div style="color: white; padding: 40px; text-align: center;">Erro ao carregar PDF</div>';
-        }
-    }
-
-    async function renderPage(pageNum) {
+async function renderPage(pageNum) {
+    if (!pdfDoc) return;
+    
+    try {
         const page = await pdfDoc.getPage(pageNum);
         const canvas = document.getElementById('pdfCanvas');
         const context = canvas.getContext('2d');
@@ -2193,59 +2419,101 @@
         await page.render({ canvasContext: context, viewport: viewport }).promise;
         
         document.getElementById('pdfPageInfo').textContent = `Página ${pageNum} de ${totalPages}`;
+    } catch (error) {
+        console.error('Erro ao renderizar página:', error);
     }
+}
 
-    function changePDFPage(delta) {
-        currentPage += delta;
-        if (currentPage < 1) currentPage = 1;
-        if (currentPage > totalPages) currentPage = totalPages;
-        renderPage(currentPage);
+function changePDFPage(delta) {
+    currentPage += delta;
+    if (currentPage < 1) currentPage = 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+    renderPage(currentPage);
+}
+
+function openTextModal(textUrl, textName) {
+    modalContainer.innerHTML = `
+        <div class="modal-text-viewer">
+            <div style="text-align: center; padding: 20px; color: white;">
+                <div style="margin-bottom: 15px;">Carregando arquivo...</div>
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+    `;
+    modalInfoBar.textContent = textName;
+    modalDownloadBtn.href = textUrl;
+    modalDownloadBtn.download = textName;
+    modalDownloadBtn.style.display = 'inline-flex';
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    // ✅ CORREÇÃO: Adicionar parâmetro para retornar conteúdo em vez de forçar download
+    fetch(textUrl + '?preview=true')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro ao carregar arquivo');
+            }
+            return response.text();
+        })
+        .then(text => {
+            modalContainer.innerHTML = `
+                <div class="modal-text-viewer">
+                    <h2 style="margin-bottom: 20px; color: white; border-bottom: 2px solid rgba(255,255,255,0.2); padding-bottom: 12px;">${textName}</h2>
+                    <pre class="modal-text-content" style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; color: #e5e7eb; line-height: 1.6; overflow: auto; max-height: 70vh; white-space: pre-wrap; word-wrap: break-word;">${escapeHtml(text)}</pre>
+                </div>
+            `;
+        })
+        .catch(error => {
+            console.error('Erro ao carregar arquivo de texto:', error);
+            modalContainer.innerHTML = `
+                <div style="color: white; padding: 40px; text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">⚠️</div>
+                    <div style="font-size: 18px; margin-bottom: 10px;">Erro ao carregar arquivo</div>
+                    <div style="font-size: 14px; color: #ccc;">${error.message}</div>
+                    <a href="${textUrl}" download style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 8px;">
+                        Baixar Arquivo
+                    </a>
+                </div>
+            `;
+        });
+}
+
+ function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function closeModal(event) {
+    if (event.target.id === 'universalModal' || event.target.classList.contains('modal-close-btn')) {
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        modalContainer.innerHTML = '';
+        modalInfoBar.textContent = '';
+        modalDownloadBtn.style.display = 'none';
+        
+        // Parar vídeos
+        const videos = modalContainer.querySelectorAll('video');
+        videos.forEach(video => {
+            video.pause();
+            video.src = '';
+        });
+        
+        // Reset PDF
+        pdfDoc = null;
+        currentPage = 1;
+        totalPages = 0;
     }
+}
 
-    function openTextModal(textUrl, textName) {
-        fetch(textUrl)
-            .then(response => response.text())
-            .then(text => {
-                modalContainer.innerHTML = `
-                    <div class="modal-text-viewer">
-                        <h2 style="margin-bottom: 20px; color: #1a202c; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px;">${textName}</h2>
-                        <pre class="modal-text-content">${escapeHtml(text)}</pre>
-                    </div>
-                `;
-                modalInfoBar.textContent = textName;
-                modalDownloadBtn.href = textUrl;
-                modalDownloadBtn.download = textName;
-                modalDownloadBtn.style.display = 'inline-flex';
-                
-                modal.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            })
-            .catch(error => {
-                console.error('Erro ao carregar arquivo de texto:', error);
-                modalContainer.innerHTML = '<div style="color: white; padding: 40px; text-align: center;">Erro ao carregar arquivo</div>';
-            });
-    }
-
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    function closeModal(event) {
-        if (event.target.id === 'universalModal' || event.target.classList.contains('modal-close-btn')) {
+// Fechar com ESC
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        if (modal.classList.contains('active')) {
             modal.classList.remove('active');
             document.body.style.overflow = 'auto';
             modalContainer.innerHTML = '';
-            modalInfoBar.textContent = '';
-            modalDownloadBtn.style.display = 'none';
-            
-            // Parar vídeos
-            const videos = modalContainer.querySelectorAll('video');
-            videos.forEach(video => {
-                video.pause();
-                video.src = '';
-            });
             
             // Reset PDF
             pdfDoc = null;
@@ -2253,18 +2521,11 @@
             totalPages = 0;
         }
     }
+});
 
-    // Fechar com ESC
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            if (modal.classList.contains('active')) {
-                modal.classList.remove('active');
-                document.body.style.overflow = 'auto';
-                modalContainer.innerHTML = '';
-            }
-        }
-    });
-
+// Log de inicialização
+console.log('✅ Sistema de preview de arquivos carregado');
+console.log('📦 PDF.js disponível:', typeof pdfjsLib !== 'undefined');
     // ==================== MODERATION SYSTEM ====================
     document.addEventListener('DOMContentLoaded', async function() {
         const form = document.getElementById('replyForm');
@@ -2463,7 +2724,7 @@ function openPunishmentModal(type, userId, ticketId) {
     switch(type) {
         case 'warning':
             form.action = `/moderacao/usuarios/${userId}/warning`;
-            title.textContent = '⚠️ Aplicar Warning';
+            title.textContent = ' Aplicar Warning';
             submitBtn.textContent = 'Aplicar Warning';
             submitBtn.style.background = '#f59e0b';
             break;
@@ -2486,7 +2747,7 @@ function openPunishmentModal(type, userId, ticketId) {
 
         case 'ip-ban':
             form.action = `/moderacao/usuarios/${userId}/ip-ban`;
-            title.textContent = '🛡️ IP Ban';
+            title.textContent = '📡 IP Ban';
             submitBtn.textContent = 'Aplicar IP Ban';
             submitBtn.style.background = '#7f1d1d';
             break;
