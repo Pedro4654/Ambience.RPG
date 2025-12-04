@@ -248,6 +248,73 @@
             color: #fff;
         }
 
+        /* ============================================
+   SCROLLBAR PERSONALIZADA - IDÊNTICA AO SHOW.BLADE.PHP
+   ============================================ */
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(34, 197, 94, 0.3);
+    border-radius: 5px;
+    transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(34, 197, 94, 0.5);
+}
+
+/* Scrollbar para modais */
+.modal-body::-webkit-scrollbar,
+.rpg-modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track,
+.rpg-modal-body::-webkit-scrollbar-track {
+    background: rgba(17, 24, 39, 0.6);
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb,
+.rpg-modal-body::-webkit-scrollbar-thumb {
+    background: rgba(34, 197, 94, 0.3);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover,
+.rpg-modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(34, 197, 94, 0.5);
+}
+
+/* Scrollbar para listas */
+.notification-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notification-list::-webkit-scrollbar-track {
+    background: rgba(17, 24, 39, 0.4);
+    border-radius: 3px;
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+    background: rgba(34, 197, 94, 0.3);
+    border-radius: 3px;
+    transition: background 0.3s ease;
+}
+
+.notification-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(34, 197, 94, 0.5);
+}
+
         .alert-error {
             background: rgba(239, 68, 68, 0.15);
             border-color: #ef4444;

@@ -2883,8 +2883,17 @@
                         </svg>
 Entrar na Sessão
                     </a>
-                
-                @elseif($sessao_ativa->status === 'ativa')
+                @elseif($sessao_ativa->status === 'pausada' && $minhas_permissoes->pode_iniciar_sessao)
+<a href="{{ route('sessoes.show', ['id' => $sessao_ativa->id]) }}" class="btn-action btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="1" y="3" width="15" height="13"/>
+                            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                            <circle cx="5.5" cy="18.5" r="2.5"/>
+                            <circle cx="18.5" cy="18.5" r="2.5"/>
+                        </svg>
+Entrar na Sessão
+</a>
+                @elseif($sessao_ativa->status === 'pausada')
                     {{-- Sessão pausada - não pode entrar --}}
                     <div style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 1rem;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; margin-bottom: 0.5rem; stroke: #fbbf24;">
