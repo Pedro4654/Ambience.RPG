@@ -32,5 +32,70 @@ Route::middleware(['web'])->group(function () {
     Route::put('/owlbear/tokens/{id}', [OwlbearTokenController::class, 'update']);
     Route::delete('/owlbear/tokens/{id}', [OwlbearTokenController::class, 'destroy']);
 
-    });
+    // NOVAS ROTAS - ADICIONE AQUI:
+    
+    // Buscar permissões do usuário
+    Route::get('/permissoes/{sessao_id}/{usuario_id}', [App\Http\Controllers\Api\PermissoesController::class, 'show']);
+    
+    // Buscar mestre_id da sessão
+    Route::get('/sessoes/{sessao_id}/mestre', function($sessao_id) {
+    $sessao = \App\Models\SessaoJogo::find($sessao_id);
+    
+    if (!$sessao) {
+        return response()->json(['criador_id' => null, 'sala_id' => null], 404);
+    }
+    
+    // Buscar criador da sala
+    $sala = \App\Models\Sala::find($sessao->sala_id);
+    
+    return response()->json([
+        'mestre_id' => $sessao->mestre_id,
+        'criador_id' => $sala ? $sala->criador_id : null,
+        'sala_id' => $sessao->sala_id
+    ]);
+})->middleware('web');
 
+    Route::get('/sessoes/{sessao_id}/status', function($sessao_id) {
+    $sessao = \App\Models\SessaoJogo::find($sessao_id);
+    
+    if (!$sessao) {
+        return response()->json(['status' => 'finalizada'], 404);
+    }
+    
+    $sala = \App\Models\Sala::find($sessao->sala_id);
+    
+    return response()->json([
+        'status' => $sessao->status,
+        'criador_id' => $sala ? $sala->criador_id : null,
+        'sala_id' => $sessao->sala_id
+    ]);
+})->middleware('web');
+
+Route::post('/sessoes/{sessao_id}/iniciar', function($sessao_id) {
+    $sessao = \App\Models\SessaoJogo::find($sessao_id);
+    if ($sessao) {
+        $sessao->update(['status' => 'ativa']);
+    }
+    return response()->json(['success' => true]);
+})->middleware('web');
+
+Route::post('/sessoes/{sessao_id}/pausar', function($sessao_id) {
+    $sessao = \App\Models\SessaoJogo::find($sessao_id);
+    if ($sessao) {
+        $sessao->update(['status' => 'pausada']);
+    }
+    return response()->json(['success' => true]);
+})->middleware('web');
+
+Route::post('/sessoes/{sessao_id}/finalizar', function($sessao_id) {
+    $sessao = \App\Models\SessaoJogo::find($sessao_id);
+    if ($sessao) {
+        $sessao->update([
+            'status' => 'finalizada',
+            'data_fim' => now()
+        ]);
+    }
+    return response()->json(['success' => true]);
+})->middleware('web');
+
+}); 
