@@ -7,12 +7,12 @@ use App\Models\Post;
 use App\Models\UserFollower;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Notificacao; // ✅ NOVO
-use Illuminate\Support\Facades\Log; // ✅ NOVO
+use App\Models\Notificacao;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 /**
- * ProfileController - Gerenciamento de Perfil ATUALIZADO
+ * ProfileController - Gerenciamento de Perfil COMPLETO
  */
 class ProfileController extends Controller {
     
@@ -45,10 +45,6 @@ class ProfileController extends Controller {
             ->orderBy('created_at', 'desc')
             ->paginate(12);
         
-        // Estatísticas
-        $num_seguidores = UserFollower::where('seguido_id', $usuario->id)->count();
-        $num_seguindo = UserFollower::where('seguidor_id', $usuario->id)->count();
-        
         // Verificar se está seguindo
         $esta_seguindo = false;
         if (Auth::check()) {
@@ -60,8 +56,6 @@ class ProfileController extends Controller {
         return view('perfil.show', [
             'usuario' => $usuario,
             'posts' => $posts,
-            'num_seguidores' => $num_seguidores,
-            'num_seguindo' => $num_seguindo,
             'esta_seguindo' => $esta_seguindo
         ]);
     }
@@ -87,18 +81,43 @@ class ProfileController extends Controller {
     }
     
     /**
-     * Atualiza informações do perfil
+     * ✅ ATUALIZADO: Agora aceita todos os campos sociais
      */
     public function update(Request $request) {
         $usuario = Auth::user();
         
+        // Validação completa
         $validated = $request->validate([
             'bio' => 'nullable|string|max:500',
             'website' => 'nullable|url|max:255',
-            'privacidade_perfil' => 'required|in:publico,privado'
+            'discord_url' => 'nullable|url|max:255',
+            'youtube_url' => 'nullable|url|max:255',
+            'twitch_url' => 'nullable|url|max:255',
+            'privacidade_perfil' => 'nullable|in:publico,privado'
+        ], [
+            'bio.max' => 'A bio deve ter no máximo 500 caracteres.',
+            'website.url' => 'Digite uma URL válida para o website.',
+            'discord_url.url' => 'Digite uma URL válida para o Discord.',
+            'youtube_url.url' => 'Digite uma URL válida para o YouTube.',
+            'twitch_url.url' => 'Digite uma URL válida para a Twitch.',
         ]);
         
+        // Atualizar usuário
         $usuario->update($validated);
+        
+        Log::info('Perfil atualizado com sucesso', [
+            'user_id' => $usuario->id,
+            'campos_atualizados' => array_keys($validated)
+        ]);
+        
+        // Retornar com mensagem de sucesso
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Perfil atualizado com sucesso!',
+                'redirect' => route('perfil.show', $usuario->username)
+            ]);
+        }
         
         return redirect()->route('perfil.show', $usuario->username)
             ->with('success', 'Perfil atualizado com sucesso!');
@@ -127,10 +146,7 @@ class ProfileController extends Controller {
             'seguido_id' => $usuario_id
         ]);
         
-        // Atualizar contador
-        $usuario->increment('total_seguidores');
-        
-        // ✅ NOVA NOTIFICAÇÃO
+        // Criar notificação
         try {
             Notificacao::notificarNovoSeguidor(Auth::id(), $usuario_id);
             Log::info('Notificação de seguidor criada', [
@@ -155,9 +171,6 @@ class ProfileController extends Controller {
         UserFollower::where('seguidor_id', Auth::id())
             ->where('seguido_id', $usuario_id)
             ->delete();
-        
-        // Atualizar contador
-        $usuario->decrement('total_seguidores');
         
         return back()->with('success', 'Você deixou de seguir ' . $usuario->username);
     }

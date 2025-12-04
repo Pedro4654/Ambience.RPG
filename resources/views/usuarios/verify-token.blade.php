@@ -144,6 +144,10 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     margin-bottom: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .btn-resend:hover {
@@ -212,6 +216,9 @@ body {
     font-size: 0.9rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .info-box small {
@@ -260,7 +267,10 @@ body {
 
         @if (session('status'))
         <div class="alert alert-success">
-            ✓ {{ session('status') }}
+            <svg style="display: inline; margin-right: 0.5rem;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            {{ session('status') }}
         </div>
         @endif
 
@@ -268,7 +278,13 @@ body {
         <div class="alert alert-danger">
             <ul>
                 @foreach ($errors->all() as $error)
-                    <li>✗ {{ $error }}</li>
+                    <li>
+                        <svg style="display: inline; margin-right: 0.5rem;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                        {{ $error }}
+                    </li>
                 @endforeach
             </ul>
         </div>
@@ -295,7 +311,10 @@ body {
             @csrf
             <input type="hidden" name="email" value="{{ session('email') }}">
             <button type="submit" class="btn-resend">
-                🔄 Reenviar Código
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+                Reenviar Código
             </button>
         </form>
 
@@ -304,7 +323,13 @@ body {
         <hr class="divider">
         
         <div class="info-box">
-            <h6>⏰ Importante:</h6>
+            <h6>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                Importante:
+            </h6>
             <small>
                 • O código expira em <strong>15 minutos</strong><br>
                 • Máximo de <strong>5 tentativas por hora</strong><br>
@@ -406,7 +431,19 @@ resendForm.addEventListener('submit', async function(e) {
     // Desabilitar botão
     resendBtn.disabled = true;
     const originalText = resendBtn.textContent;
-    resendBtn.textContent = '⏳ Reenviando...';
+    resendBtn.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="2" x2="12" y2="6"></line>
+            <line x1="12" y1="18" x2="12" y2="22"></line>
+            <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+            <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+            <line x1="2" y1="12" x2="6" y2="12"></line>
+            <line x1="18" y1="12" x2="22" y2="12"></line>
+            <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+            <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+        </svg>
+        Reenviando...
+    `;
     
     try {
         const formData = new FormData(this);
@@ -424,7 +461,7 @@ resendForm.addEventListener('submit', async function(e) {
         
         if (response.ok) {
             // Mostrar mensagem de sucesso
-            showAlert('✓ Código reenviado com sucesso! Verifique seu email.', 'success');
+            showAlert('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display: inline; margin-right: 0.5rem;"><polyline points="20 6 9 17 4 12"></polyline></svg> Código reenviado com sucesso! Verifique seu email.', 'success');
             
             // Limpar as caixas
             boxes.forEach(box => {
@@ -437,17 +474,22 @@ resendForm.addEventListener('submit', async function(e) {
         } else {
             // Mostrar mensagem de erro
             const errorMsg = data.message || 'Erro ao reenviar código. Tente novamente.';
-            showAlert('✗ ' + errorMsg, 'danger');
+            showAlert('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display: inline; margin-right: 0.5rem;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> ' + errorMsg, 'danger');
         }
         
     } catch (error) {
         console.error('Erro:', error);
-        showAlert('✗ Erro de conexão. Tente novamente.', 'danger');
+        showAlert('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display: inline; margin-right: 0.5rem;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Erro de conexão. Tente novamente.', 'danger');
     } finally {
         // Reabilitar botão após 3 segundos
         setTimeout(() => {
             resendBtn.disabled = false;
-            resendBtn.textContent = originalText;
+            resendBtn.innerHTML = `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+                Reenviar Código
+            `;
         }, 3000);
     }
 });
@@ -462,7 +504,7 @@ function showAlert(message, type) {
     // Cria novo alerta
     const alert = document.createElement('div');
     alert.className = `alert alert-${type} dynamic-alert`;
-    alert.textContent = message;
+    alert.innerHTML = message;
     alert.style.animation = 'slideIn 0.3s ease';
     
     // Insere antes das caixas de código
@@ -504,6 +546,5 @@ function showAlert(message, type) {
     animation: slideIn 0.3s ease;
 }
 </style>
-
 
 @endsection

@@ -8,6 +8,7 @@ use App\Http\Controllers\SavedPostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\SessaoController;
 use App\Http\Controllers\ModeracaoUsuarioController;
 use App\Http\Controllers\IpBanRecursoController;
 use App\Http\Controllers\ModerationController;
@@ -28,6 +29,8 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
+Broadcast::routes(['middleware' => ['web', 'auth']]);
+
 Route::get('/ban-ip', [App\Http\Controllers\ModeracaoUsuarioController::class, 'mostrarIpBan'])
     ->name('public.ip_ban'); // rota pública para mostrar IP ban para visitantes/guests
 
@@ -47,7 +50,9 @@ Route::middleware(['auth'])->prefix('salas/{id}/chat')->name('chat.')->group(fun
     // Enviar mensagem
     Route::post('/enviar', [App\Http\Controllers\ChatController::class, 'enviarMensagem'])
         ->name('enviar');
-    
+
+        Route::post('/typing', [App\Http\Controllers\ChatController::class, 'notificarDigitando'])
+        ->name('typing');
 });
 
 // Rotas de ações em mensagens individuais
@@ -379,6 +384,8 @@ Route::middleware('guest.custom')->group(function () {
         ->name('usuarios.resend.token');
 });
 
+
+
 // ========== ROTAS PÚBLICAS DE CONVITE (FORA DO MIDDLEWARE AUTH) ==========
 
 /**
@@ -412,9 +419,7 @@ Route::post('/salas/{id}/iniciar-sessao', [SalaController::class, 'iniciarSessao
  * Visualizar sala de sessão
  * GET /sessoes/{id}
  */
-Route::get('/sessoes/{id}', [SalaController::class, 'showSessao'])
-    ->name('sessoes.show')
-    ->where('id', '[0-9]+');
+
 
 /**
  * Obter sessão ativa da sala
@@ -442,6 +447,11 @@ Route::post('/sessoes/{id}/entrar', [SalaController::class, 'entrarNaSessao'])
 
 
 // ==================== ROTAS PROTEGIDAS (COM AUTENTICAÇÃO) ====================
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/sessoes/{id}', [SessaoController::class, 'show'])->name('sessoes.show');
+});
+
 Route::middleware(['auth', App\Http\Middleware\VerificarAutenticacao::class])->group(function () {
 
     // ========== ROTAS DE USUÁRIOS ==========
@@ -532,6 +542,30 @@ Route::delete('/salas/{id}/banner/gradient', [SalaController::class, 'removeBann
     Route::delete('/salas/{id}/profile-photo', [App\Http\Controllers\SalaController::class, 'removeProfilePhoto'])
         ->name('salas.profile.remove')
         ->where('id', '[0-9]+');
+
+        /**
+ * Editar sala (apenas criador)
+ * GET /salas/{id}/editar
+ */
+Route::get('/salas/{id}/editar', [SalaController::class, 'edit'])
+    ->name('salas.edit')
+    ->where('id', '[0-9]+');
+
+/**
+ * Atualizar sala (apenas criador)
+ * PUT /salas/{id}/atualizar
+ */
+Route::put('/salas/{id}/atualizar', [SalaController::class, 'update'])
+    ->name('salas.update')
+    ->where('id', '[0-9]+');
+
+/**
+ * Excluir sala (apenas criador)
+ * DELETE /salas/{id}/excluir
+ */
+Route::delete('/salas/{id}/excluir', [SalaController::class, 'destroy'])
+    ->name('salas.destroy')
+    ->where('id', '[0-9]+');
     /**
      * Sair da sala
      * POST /salas/{id}/sair - Remove usuário da sala (exceto criador)
@@ -723,12 +757,12 @@ Route::get('/api/salas/desativadas', [SalaController::class, 'getSalasDesativada
 
         // ========== LIKES ==========
         Route::post('/curtir', [LikeController::class, 'store'])->name('curtir');
-        Route::delete('/curtir/{post_id}', [LikeController::class, 'destroy'])->name('descurtir');
+        Route::delete('/descurtir/{post_id}', [LikeController::class, 'destroy'])->name('descurtir');
 
 
         // ========== COMENTÁRIOS ==========
         Route::post('/comentar', [CommentController::class, 'store'])->name('comentar');
-        Route::delete('/comentario/{id}', [CommentController::class, 'destroy'])->name('comentario.destroy');
+         Route::delete('/comentario/{id}', [CommentController::class, 'destroy'])->name('comentario.destroy');
     });
 
     // ==================== PERFIL DE USUÁRIO ====================

@@ -2249,8 +2249,6 @@ border: 1px solid #ccc;
 }
 } catch (error) {
     console.error('[Invite Links Premium] ❌ Erro ao criar:', error);
-    showAlert('danger', 'Erro', 'Erro de conexão ao criar link.');
-    showToast('error', 'Erro', 'Falha na comunicação com o servidor.');
 } finally {
     submitBtn.setAttribute('data-loading', 'false');
     submitBtn.disabled = false;

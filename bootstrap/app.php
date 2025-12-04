@@ -13,12 +13,17 @@ use App\Http\Middleware\VerificarPunicoes;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__ . '/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__ . '/../routes/console.php',
         channels: __DIR__ . '/../routes/channels.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+        // ADICIONE ISSO PARA DESABILITAR CSRF NAS ROTAS API
+        $middleware->validateCsrfTokens(except: [
+            'api/*',
+            'broadcasting/auth',
+        ]);
 
         $middleware->web(append: [
             HandleAppearance::class,
@@ -26,7 +31,8 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
             VerificarPunicoes::class,
         ]);
-
+ 
+        
         $middleware->redirectGuestsTo('login');
 
         // Adicionar middleware de verificação de punições

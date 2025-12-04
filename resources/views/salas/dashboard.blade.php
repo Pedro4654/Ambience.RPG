@@ -28,6 +28,7 @@
             --accent-glow: rgba(34, 197, 94, 0.2);
             --gradient-start: #052e16;
             --gradient-end: #065f46;
+            --muted: #8b9ba8;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -1512,6 +1513,298 @@
                 white-space: nowrap;
             }
         }
+
+        .notification-btn{
+  position:relative;
+  width:42px;
+  height:42px;
+  border-radius:10px;
+  background:rgba(34,197,94,0.08);
+  border:1px solid rgba(34,197,94,0.15);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:all .25s;
+}
+
+.notification-btn:hover{
+  background:rgba(34,197,94,0.15);
+  border-color:rgba(34,197,94,0.3);
+  transform:translateY(-2px);
+}
+
+/* ========== ESTILOS PARA NOTIFICAÇÕES ========== */
+.notification-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(34, 197, 94, 0.1);
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.notification-item:hover {
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.notification-item.nao-lida {
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.notification-item.nao-lida::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent);
+}
+
+.notification-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notification-icon.blue {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.notification-icon.green {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.notification-icon.red {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.notification-icon.yellow {
+  background: rgba(234, 179, 8, 0.1);
+  color: #eab308;
+}
+
+.notification-icon.purple {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+}
+
+.notification-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-message {
+  font-size: 14px;
+  color: #e5e7eb;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.notification-time {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.notification-actions {
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.notification-item:hover .notification-actions {
+  opacity: 1;
+}
+
+.notification-action-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: var(--muted);
+}
+
+.notification-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.notification-action-btn.marcar-lida:hover {
+  color: var(--accent);
+}
+
+.notification-action-btn.remover:hover {
+  color: #ef4444;
+}
+
+.notification-action-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Scrollbar personalizada */
+.notification-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+  background: rgba(34, 197, 94, 0.3);
+  border-radius: 3px;
+}
+
+.notification-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 197, 94, 0.5);
+}
+
+.notification-btn svg{
+  width:20px;
+  height:20px;
+  stroke:var(--accent);
+  fill:none;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.notification-badge{
+  position:absolute;
+  top:-4px;
+  right:-4px;
+  width:18px;
+  height:18px;
+  background:#ef4444;
+  border-radius:50%;
+  border:2px solid var(--bg-dark);
+  font-size:10px;
+  font-weight:700;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* Modal de Notificações */
+.notification-modal{
+  position:fixed;
+  top:80px;
+  right:32px;
+  width:360px;
+  background:linear-gradient(145deg,rgba(31,42,51,0.95),rgba(20,28,35,0.95));
+  border:1px solid rgba(34,197,94,0.2);
+  border-radius:16px;
+  padding:24px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.6);
+  backdrop-filter:blur(12px);
+  z-index:200;
+  display:none;
+  animation:slideDown .25s ease;
+}
+
+@keyframes slideDown{
+  from{
+    opacity:0;
+    transform:translateY(-10px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.notification-modal.active{
+  display:block;
+}
+
+.notification-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+  padding-bottom:12px;
+  border-bottom:1px solid rgba(34,197,94,0.15);
+}
+
+.notification-header h3{
+  font-size:16px;
+  font-weight:700;
+  color:#fff;
+}
+
+.notification-close{
+  width:28px;
+  height:28px;
+  border-radius:6px;
+  background:transparent;
+  border:none;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all .2s;
+}
+
+.notification-close:hover{
+  background:rgba(255,255,255,0.05);
+}
+
+.notification-close svg{
+  width:16px;
+  height:16px;
+  stroke:#8b9ba8;
+  stroke-width:2;
+}
+
+.notification-empty{
+  text-align:center;
+  padding:32px 16px;
+  color:var(--muted);
+}
+
+.notification-empty svg{
+  width:48px;
+  height:48px;
+  margin:0 auto 12px;
+  stroke:var(--muted);
+  opacity:0.4;
+}
+
+.notification-empty p{
+  font-size:14px;
+  line-height:1.6;
+}
     </style>
 </head>
 <body>
@@ -1626,6 +1919,7 @@
     <p>Você não tem notificações no momento.<br>Quando algo acontecer, você verá aqui!</p>
   </div>
 </div>
+
 
     <div class="main-container">
         <!-- Alerta de Salas Desativadas -->
@@ -4266,42 +4560,6 @@ $(document).on('click', '[onclick*="toggleStatusSala"]', function() {
     color: var(--accent);
 }
 
-/* ========== ESTILOS PARA NOTIFICAÇÕES ========== */
-.notification-list {
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 0;
-}
-
-.notification-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 14px 20px;
-  border-bottom: 1px solid rgba(34, 197, 94, 0.1);
-  cursor: pointer;
-  transition: all 0.2s;
-  position: relative;
-}
-
-.notification-item:hover {
-  background: rgba(34, 197, 94, 0.05);
-}
-
-.notification-item.nao-lida {
-  background: rgba(34, 197, 94, 0.08);
-}
-
-.notification-item.nao-lida::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: var(--accent);
-}
-
 /* ========== ESTILOS ADICIONAIS PARA MODAIS STAFF ========== */
 
 /* Toggle Switch Customizado */
@@ -4444,134 +4702,10 @@ $(document).on('click', '[onclick*="toggleStatusSala"]', function() {
   max-width: 600px;
 }
 
-.notification-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.notification-icon.blue {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
-}
-
-.notification-icon.green {
-  background: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
-}
-
-.notification-icon.red {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-}
-
-.notification-icon.yellow {
-  background: rgba(234, 179, 8, 0.1);
-  color: #eab308;
-}
-
-.notification-icon.purple {
-  background: rgba(168, 85, 247, 0.1);
-  color: #a855f7;
-}
-
-.notification-icon svg {
-  width: 20px;
-  height: 20px;
-}
-
-.notification-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.notification-message {
-  font-size: 14px;
-  color: #e5e7eb;
-  margin-bottom: 4px;
-  line-height: 1.4;
-}
-
-.notification-time {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.notification-actions {
-  display: flex;
-  gap: 6px;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.notification-item:hover .notification-actions {
-  opacity: 1;
-}
-
-.notification-action-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  color: var(--muted);
-}
-
-.notification-action-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-}
-
-.notification-action-btn.marcar-lida:hover {
-  color: var(--accent);
-}
-
-.notification-action-btn.remover:hover {
-  color: #ef4444;
-}
-
-.notification-action-btn svg {
-  width: 14px;
-  height: 14px;
-}
-
-/* Scrollbar personalizada */
-.notification-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.notification-list::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 3px;
-}
-
-.notification-list::-webkit-scrollbar-thumb {
-  background: rgba(34, 197, 94, 0.3);
-  border-radius: 3px;
-}
-
-.notification-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(34, 197, 94, 0.5);
-}
 
 @media (max-width: 768px) {
     .nav-links {
         display: none;
-    }
-    
-    .notification-modal {
-        right: 16px;
-        left: 16px;
-        width: auto;
     }
     
     .footer-columns {
@@ -4587,8 +4721,6 @@ $(document).on('click', '[onclick*="toggleStatusSala"]', function() {
     .logo-img {
         height: 40px;
     }
-    
-    .notification-btn,
     .user-avatar,
     .user-avatar-default {
         width: 36px;
@@ -4617,53 +4749,6 @@ $(document).on('click', '[onclick*="toggleStatusSala"]', function() {
     gap: 16px;
     flex-shrink: 0;
     margin-left: auto;
-}
-
-.notification-btn {
-    position: relative;
-    width: 42px;
-    height: 42px;
-    border-radius: 10px;
-    background: rgba(34, 197, 94, 0.08);
-    border: 1px solid rgba(34, 197, 94, 0.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.25s;
-}
-
-.notification-btn:hover {
-    background: rgba(34, 197, 94, 0.15);
-    border-color: rgba(34, 197, 94, 0.3);
-    transform: translateY(-2px);
-}
-
-.notification-btn svg {
-    width: 20px;
-    height: 20px;
-    stroke: var(--accent);
-    fill: none;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-.notification-badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 18px;
-    height: 18px;
-    background: #ef4444;
-    border-radius: 50%;
-    border: 2px solid var(--bg-dark);
-    font-size: 10px;
-    font-weight: 700;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .user-avatar-wrapper {
@@ -4854,59 +4939,6 @@ $(document).on('click', '[onclick*="toggleStatusSala"]', function() {
     color: #ef4444;
 }
 
-/* Modal de Notificações */
-.notification-modal {
-    position: fixed;
-    top: 80px;
-    right: 32px;
-    width: 360px;
-    background: linear-gradient(145deg, rgba(31, 42, 51, 0.95), rgba(20, 28, 35, 0.95));
-    border: 1px solid rgba(34, 197, 94, 0.2);
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(12px);
-    z-index: 200;
-    display: none;
-    animation: slideDown 0.25s ease;
-}
-
-.notification-modal.active {
-    display: block;
-}
-
-.notification-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid rgba(34, 197, 94, 0.15);
-}
-
-.notification-header h3 {
-    font-size: 16px;
-    font-weight: 700;
-    color: #fff;
-}
-
-.notification-close {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-}
-
-.notification-close:hover {
-    background: rgba(255, 255, 255, 0.05);
-}
-
 .badge-staff-access {
     position: absolute;
     top: 0.75rem;
@@ -4947,32 +4979,6 @@ $(document).on('click', '[onclick*="toggleStatusSala"]', function() {
 .badge-staff-access i {
     font-size: 0.75rem;
     opacity: 0.9;
-}
-
-.notification-close svg {
-    width: 16px;
-    height: 16px;
-    stroke: #8b9ba8;
-    stroke-width: 2;
-}
-
-.notification-empty {
-    text-align: center;
-    padding: 32px 16px;
-    color: var(--muted);
-}
-
-.notification-empty svg {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 12px;
-    stroke: var(--muted);
-    opacity: 0.4;
-}
-
-.notification-empty p {
-    font-size: 14px;
-    line-height: 1.6;
 }
 
 /* Footer */
@@ -6051,299 +6057,9 @@ a.btn-enter * {
   </div>
   <div class="footer-bottom">© 2025 Ambience RPG. Todos os direitos reservados.</div>
 </footer>
+
+
 <script>
-// ========== SISTEMA DE NOTIFICAÇÕES ==========
-(function(){
-  const notificationBtn = document.getElementById('notificationBtn');
-  const notificationModal = document.getElementById('notificationModal');
-  const closeNotificationModal = document.getElementById('closeNotificationModal');
-
-  if(!notificationBtn || !notificationModal) return;
-
-  let notificacoes = [];
-  let offset = 0;
-  const limit = 10;
-
-  // Carregar notificações
-  async function carregarNotificacoes(append = false) {
-    try {
-      const response = await fetch(`/api/notificacoes?limit=${limit}&offset=${offset}`);
-      const data = await response.json();
-
-      if (data.success) {
-        if (append) {
-          notificacoes = [...notificacoes, ...data.notificacoes];
-        } else {
-          notificacoes = data.notificacoes;
-        }
-
-        renderizarNotificacoes();
-        atualizarBadge(data.total_nao_lidas);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar notificações:', error);
-    }
-  }
-
-  // Renderizar notificações no DOM
-  function renderizarNotificacoes() {
-    const container = document.querySelector('.notification-list');
-    if (!container) {
-      const emptyDiv = notificationModal.querySelector('.notification-empty');
-      if (emptyDiv) {
-        emptyDiv.remove();
-      }
-
-      const list = document.createElement('div');
-      list.className = 'notification-list';
-      notificationModal.appendChild(list);
-      renderizarNotificacoes();
-      return;
-    }
-
-    if (notificacoes.length === 0) {
-      container.innerHTML = `
-        <div class="notification-empty">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          <p>Você não tem notificações no momento.<br>Quando algo acontecer, você verá aqui!</p>
-        </div>
-      `;
-      return;
-    }
-
-    container.innerHTML = notificacoes.map(notif => `
-      <div class="notification-item ${notif.lida ? 'lida' : 'nao-lida'}" data-id="${notif.id}">
-        <div class="notification-icon ${notif.cor}">
-          ${getIconSvg(notif.icone)}
-        </div>
-        <div class="notification-content">
-          <p class="notification-message">${notif.mensagem}</p>
-          <span class="notification-time">${notif.tempo}</span>
-        </div>
-        <div class="notification-actions">
-          ${!notif.lida ? `
-            <button class="notification-action-btn marcar-lida" data-id="${notif.id}" title="Marcar como lida">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-            </button>
-          ` : ''}
-          <button class="notification-action-btn remover" data-id="${notif.id}" title="Remover">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-    `).join('');
-
-    adicionarEventListeners();
-  }
-
-  // Atualizar badge de contador
-  function atualizarBadge(count) {
-    let badge = notificationBtn.querySelector('.notification-badge');
-    
-    if (count > 0) {
-      if (!badge) {
-        badge = document.createElement('span');
-        badge.className = 'notification-badge';
-        notificationBtn.appendChild(badge);
-      }
-      badge.textContent = count > 99 ? '99+' : count;
-    } else {
-      if (badge) {
-        badge.remove();
-      }
-    }
-  }
-
-  // Marcar notificação como lida
-  async function marcarComoLida(id) {
-    try {
-      const response = await fetch(`/api/notificacoes/${id}/marcar-lida`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-        }
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        const notif = notificacoes.find(n => n.id === id);
-        if (notif) {
-          notif.lida = true;
-        }
-        renderizarNotificacoes();
-        atualizarBadge(data.total_nao_lidas);
-      }
-    } catch (error) {
-      console.error('Erro ao marcar como lida:', error);
-    }
-  }
-
-  // Remover notificação
-  async function removerNotificacao(id) {
-    try {
-      const response = await fetch(`/api/notificacoes/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-        }
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        notificacoes = notificacoes.filter(n => n.id !== id);
-        renderizarNotificacoes();
-        atualizarBadge(data.total_nao_lidas);
-      }
-    } catch (error) {
-      console.error('Erro ao remover notificação:', error);
-    }
-  }
-
-  // Adicionar event listeners
-  function adicionarEventListeners() {
-    document.querySelectorAll('.marcar-lida').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const id = parseInt(btn.dataset.id);
-        marcarComoLida(id);
-      });
-    });
-
-    document.querySelectorAll('.remover').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const id = parseInt(btn.dataset.id);
-        removerNotificacao(id);
-      });
-    });
-
-    document.querySelectorAll('.notification-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const notif = notificacoes.find(n => n.id === parseInt(item.dataset.id));
-        if (notif && notif.link) {
-          if (!notif.lida) {
-            marcarComoLida(notif.id);
-          }
-          window.location.href = notif.link;
-        }
-      });
-    });
-  }
-
-  // Obter ícone SVG
-  function getIconSvg(icone) {
-    const icones = {
-      'UserPlus': '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>',
-      'Heart': '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
-      'MessageCircle': '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
-      'AtSign': '<circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/>',
-      'Mail': '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>',
-      'Bell': '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>'
-    };
-
-    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icones[icone] || icones['Bell']}</svg>`;
-  }
-
-  // Abrir/fechar modal
-  notificationBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    notificationModal.classList.toggle('active');
-    const userDropdown = document.getElementById('userDropdown');
-    if(userDropdown) userDropdown.classList.remove('active');
-
-    if (notificationModal.classList.contains('active')) {
-      carregarNotificacoes();
-    }
-  });
-
-  if(closeNotificationModal) {
-    closeNotificationModal.addEventListener('click', () => {
-      notificationModal.classList.remove('active');
-    });
-  }
-
-  document.addEventListener('click', (e) => {
-    if(!notificationModal.contains(e.target) && !notificationBtn.contains(e.target)) {
-      notificationModal.classList.remove('active');
-    }
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if(e.key === 'Escape' && notificationModal.classList.contains('active')) {
-      notificationModal.classList.remove('active');
-    }
-  });
-
-  // Polling para verificar novas notificações a cada 30 segundos
-  setInterval(async () => {
-    try {
-      const response = await fetch('/api/notificacoes/count');
-      const data = await response.json();
-      
-      if (data.success) {
-        atualizarBadge(data.count);
-      }
-    } catch (error) {
-      console.error('Erro ao verificar notificações:', error);
-    }
-  }, 30000);
-
-  // Carregar contador inicial
-  (async () => {
-    try {
-      const response = await fetch('/api/notificacoes/count');
-      const data = await response.json();
-      
-      if (data.success) {
-        atualizarBadge(data.count);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar contador inicial:', error);
-    }
-  })();
-})();
-
-// ========== DROPDOWN DE USUÁRIO ==========
-(function(){
-  const userAvatarBtn = document.getElementById('userAvatarBtn');
-  const userDropdown = document.getElementById('userDropdown');
-
-  if(!userAvatarBtn || !userDropdown) return;
-
-  userAvatarBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    userDropdown.classList.toggle('active');
-    const notificationModal = document.getElementById('notificationModal');
-    if(notificationModal) notificationModal.classList.remove('active');
-  });
-
-  document.addEventListener('click', (e) => {
-    if(!userDropdown.contains(e.target) && !userAvatarBtn.contains(e.target)) {
-      userDropdown.classList.remove('active');
-    }
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if(e.key === 'Escape' && userDropdown.classList.contains('active')) {
-      userDropdown.classList.remove('active');
-    }
-  });
-})();
-</script>
-<script>
-    // ========== SISTEMA DE MODAIS RPG ==========
 // ========== SISTEMA DE MODAIS RPG ==========
 (function() {
   // Função para abrir modal
@@ -7102,6 +6818,303 @@ document.getElementById('formCriarSala').addEventListener('moderation:blocked', 
     true // autoClose para voltar ao form
   );
 });
+
+(function(){
+  const notificationBtn = document.getElementById('notificationBtn');
+  const notificationModal = document.getElementById('notificationModal');
+  const closeNotificationModal = document.getElementById('closeNotificationModal');
+  const notificationBadge = document.querySelector('.notification-badge');
+
+  if(!notificationBtn || !notificationModal) return;
+
+  let notificacoes = [];
+  let offset = 0;
+  const limit = 10;
+
+  // Carregar notificações
+  async function carregarNotificacoes(append = false) {
+    try {
+      const response = await fetch(`/api/notificacoes?limit=${limit}&offset=${offset}`);
+      const data = await response.json();
+
+      if (data.success) {
+        if (append) {
+          notificacoes = [...notificacoes, ...data.notificacoes];
+        } else {
+          notificacoes = data.notificacoes;
+        }
+
+        renderizarNotificacoes();
+        atualizarBadge(data.total_nao_lidas);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar notificações:', error);
+    }
+  }
+
+  // Renderizar notificações no DOM
+  function renderizarNotificacoes() {
+    const container = document.querySelector('.notification-list');
+    if (!container) {
+      // Criar container se não existir
+      const emptyDiv = notificationModal.querySelector('.notification-empty');
+      if (emptyDiv) {
+        emptyDiv.remove();
+      }
+
+      const list = document.createElement('div');
+      list.className = 'notification-list';
+      notificationModal.appendChild(list);
+      renderizarNotificacoes();
+      return;
+    }
+
+    if (notificacoes.length === 0) {
+      container.innerHTML = `
+        <div class="notification-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <p>Você não tem notificações no momento.<br>Quando algo acontecer, você verá aqui!</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = notificacoes.map(notif => `
+      <div class="notification-item ${notif.lida ? 'lida' : 'nao-lida'}" data-id="${notif.id}">
+        <div class="notification-icon ${notif.cor}">
+          ${getIconSvg(notif.icone)}
+        </div>
+        <div class="notification-content">
+          <p class="notification-message">${notif.mensagem}</p>
+          <span class="notification-time">${notif.tempo}</span>
+        </div>
+        <div class="notification-actions">
+          ${!notif.lida ? `
+            <button class="notification-action-btn marcar-lida" data-id="${notif.id}" title="Marcar como lida">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </button>
+          ` : ''}
+          <button class="notification-action-btn remover" data-id="${notif.id}" title="Remover">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    // Adicionar event listeners
+    adicionarEventListeners();
+  }
+
+  // Atualizar badge de contador
+  function atualizarBadge(count) {
+    if (count > 0) {
+      if (!notificationBadge) {
+        const badge = document.createElement('span');
+        badge.className = 'notification-badge';
+        badge.textContent = count > 99 ? '99+' : count;
+        notificationBtn.appendChild(badge);
+      } else {
+        notificationBadge.textContent = count > 99 ? '99+' : count;
+      }
+    } else {
+      if (notificationBadge) {
+        notificationBadge.remove();
+      }
+    }
+  }
+
+  // Marcar notificação como lida
+  async function marcarComoLida(id) {
+    try {
+      const response = await fetch(`/api/notificacoes/${id}/marcar-lida`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Atualizar notificação localmente
+        const notif = notificacoes.find(n => n.id === id);
+        if (notif) {
+          notif.lida = true;
+        }
+        renderizarNotificacoes();
+        atualizarBadge(data.total_nao_lidas);
+      }
+    } catch (error) {
+      console.error('Erro ao marcar como lida:', error);
+    }
+  }
+
+  // Remover notificação
+  async function removerNotificacao(id) {
+    try {
+      const response = await fetch(`/api/notificacoes/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Remover notificação localmente
+        notificacoes = notificacoes.filter(n => n.id !== id);
+        renderizarNotificacoes();
+        atualizarBadge(data.total_nao_lidas);
+      }
+    } catch (error) {
+      console.error('Erro ao remover notificação:', error);
+    }
+  }
+
+  // Adicionar event listeners
+  function adicionarEventListeners() {
+    // Marcar como lida
+    document.querySelectorAll('.marcar-lida').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = parseInt(btn.dataset.id);
+        marcarComoLida(id);
+      });
+    });
+
+    // Remover
+    document.querySelectorAll('.remover').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = parseInt(btn.dataset.id);
+        removerNotificacao(id);
+      });
+    });
+
+    // Clicar na notificação (ir para o link)
+    document.querySelectorAll('.notification-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const notif = notificacoes.find(n => n.id === parseInt(item.dataset.id));
+        if (notif && notif.link) {
+          if (!notif.lida) {
+            marcarComoLida(notif.id);
+          }
+          window.location.href = notif.link;
+        }
+      });
+    });
+  }
+
+  // Obter ícone SVG
+  function getIconSvg(icone) {
+    const icones = {
+      'UserPlus': '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>',
+      'Heart': '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
+      'MessageCircle': '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+      'AtSign': '<circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/>',
+      'Mail': '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>',
+      'Bell': '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>'
+    };
+
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icones[icone] || icones['Bell']}</svg>`;
+  }
+
+  // Abrir/fechar modal
+  notificationBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    notificationModal.classList.toggle('active');
+    const userDropdown = document.getElementById('userDropdown');
+    if(userDropdown) userDropdown.classList.remove('active');
+
+    if (notificationModal.classList.contains('active')) {
+      carregarNotificacoes();
+    }
+  });
+
+  if(closeNotificationModal) {
+    closeNotificationModal.addEventListener('click', () => {
+      notificationModal.classList.remove('active');
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if(!notificationModal.contains(e.target) && e.target !== notificationBtn) {
+      notificationModal.classList.remove('active');
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && notificationModal.classList.contains('active')) {
+      notificationModal.classList.remove('active');
+    }
+  });
+
+  // Polling para verificar novas notificações a cada 30 segundos
+  setInterval(async () => {
+    try {
+      const response = await fetch('/api/notificacoes/count');
+      const data = await response.json();
+      
+      if (data.success) {
+        atualizarBadge(data.count);
+      }
+    } catch (error) {
+      console.error('Erro ao verificar notificações:', error);
+    }
+  }, 30000);
+
+  // Carregar contador inicial
+  (async () => {
+    try {
+      const response = await fetch('/api/notificacoes/count');
+      const data = await response.json();
+      
+      if (data.success) {
+        atualizarBadge(data.count);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar contador inicial:', error);
+    }
+  })();
+})();
+
+// ========== DROPDOWN DE USUÁRIO ==========
+(function(){
+  const userAvatarBtn = document.getElementById('userAvatarBtn');
+  const userDropdown = document.getElementById('userDropdown');
+
+  if(!userAvatarBtn || !userDropdown) return;
+
+  userAvatarBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    userDropdown.classList.toggle('active');
+    const notificationModal = document.getElementById('notificationModal');
+    if(notificationModal) notificationModal.classList.remove('active');
+  });
+
+  document.addEventListener('click', (e) => {
+    if(!userDropdown.contains(e.target) && !userAvatarBtn.contains(e.target)) {
+      userDropdown.classList.remove('active');
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && userDropdown.classList.contains('active')) {
+      userDropdown.classList.remove('active');
+    }
+  });
+})();
 </script>
 </body>
 </html>
