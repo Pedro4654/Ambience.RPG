@@ -8,13 +8,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg-dark:#0a0f14;
-  --card:#1f2937;
-  --muted:#8b9ba8;
-  --accent:#22c55e;
-  --accent-light:#16a34a;
-  --accent-dark:#15803d;
-  --text-primary:#e6eef6;
+  --bg-dark: #0a0f14;
+  --card: #1f2937;
+  --muted: #8b9ba8;
+  --accent: #22c55e;
+  --accent-light: #16a34a;
+  --accent-dark: #15803d;
+  --text-primary: #e6eef6;
   --transition-speed:600ms;
 }
 
@@ -154,7 +154,7 @@ body{
 
 /* ========== CARD DO FORMULÁRIO ========== */
 .register-card{
-  background:rgba(17,24,39,0.95);
+  background:rgba(17, 24, 39, 0);
   backdrop-filter:blur(20px);
   border-radius:24px;
   padding:2.5rem;
@@ -162,6 +162,7 @@ body{
   border:1px solid rgba(34,197,94,0.1);
   position:relative;
   overflow:hidden;
+  z-index: 0;
 }
 
 .register-card::before{
@@ -171,9 +172,10 @@ body{
   left:-50%;
   width:200%;
   height:200%;
-  background:radial-gradient(circle,rgba(34,197,94,0.1) 0%,transparent 70%);
+  background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
   animation:glowPulse 4s ease-in-out infinite;
   pointer-events:none;
+  z-index: -1;
 }
 
 /* ========== HEADER ========== */
@@ -192,7 +194,7 @@ body{
 }
 
 .logo-img{
-  height:60px;
+  height:100px;
   width:auto;
   filter:drop-shadow(0 4px 8px rgba(34,197,94,0.4));
 }
@@ -216,7 +218,7 @@ body{
 
 /* ========== BARRA DE AFINIDADE ========== */
 .affinity-bar{
-  background:#111827;
+  background: #0e1422ff;
   border-radius:12px;
   padding:1rem 1.25rem;
   margin-bottom:2rem;
@@ -331,7 +333,7 @@ body{
 .form-select{
   width:100%;
   padding:0.875rem 1rem;
-  background:#1f2937;
+  background: #0e1422ff;
   border:2px solid #374151;
   border-radius:10px;
   font-size:0.95rem;
@@ -423,7 +425,7 @@ textarea.form-input{
   justify-content:flex-start !important;
   gap:0.75rem !important;
   padding:0.875rem 1rem !important;
-  background:#1f2937 !important;
+  background: #0e1422ff !important;
   border:2px solid #374151 !important;
   border-radius:10px !important;
   cursor:pointer !important;
@@ -462,17 +464,18 @@ textarea.form-input{
 
 /* ========== CHECKBOX DE TERMOS ========== */
 .terms-box{
-  background:#111827;
-  border:2px solid #374151;
+  background: #020617; 
+  border: 1px solid #4b5563;
   border-radius:12px;
   padding:1.25rem;
   margin:1.5rem 0;
   transition:all 0.3s;
+  box-shadow: 0 0 0 1px rgba(15,23,42,0.9);
 }
 
 .terms-box.active{
-  border-color:var(--accent);
-  background:rgba(34,197,94,0.05);
+  background: rgba(34,197,94,0.06);
+  border-color: var(--accent);
 }
 
 .terms-label{
@@ -480,7 +483,7 @@ textarea.form-input{
   align-items:flex-start;
   gap:0.75rem;
   cursor:pointer;
-  color:#d1d5db;
+  color: #e5e7eb; 
   font-size:0.875rem;
   line-height:1.6;
 }
@@ -509,8 +512,9 @@ textarea.form-input{
   display:block;
   margin-top:0.75rem;
   font-size:0.75rem;
-  color:#9ca3af;
+  color: #fbbf24; 
   padding-left:calc(20px + 0.75rem);
+  font-weight: 500;
 }
 
 /* ========== BOTÃO DE SUBMIT ========== */
@@ -530,7 +534,28 @@ textarea.form-input{
   letter-spacing:1px;
   position:relative;
   overflow:hidden;
-  margin-top:1rem;
+  margin-top:2rem;
+  animation:floatIn 0.6s ease 0.7s backwards;
+}
+
+/* mesmo efeito de glow do login */
+.submit-button::before{
+  content:'';
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:0;
+  height:0;
+  border-radius:50%;
+  background:rgba(255,255,255,0.3);
+  transform:translate(-50%,-50%);
+  transition:width 0.6s,height 0.6s;
+}
+
+/* animação só quando não estiver desabilitado */
+.submit-button:not(:disabled):hover::before{
+  width:300px;
+  height:300px;
 }
 
 .submit-button:disabled{
@@ -539,9 +564,14 @@ textarea.form-input{
   transform:none!important;
 }
 
+/* hover e active iguais ao login */
 .submit-button:not(:disabled):hover{
   transform:translateY(-4px);
   box-shadow:0 8px 20px rgba(34,197,94,0.5);
+}
+
+.submit-button:not(:disabled):active{
+  transform:translateY(-2px);
 }
 
 /* ========== LINK PARA LOGIN ========== */
@@ -582,7 +612,7 @@ textarea.form-input{
 .character-preview{
   position:sticky;
   top:2rem;
-  background:rgba(17,24,39,0.95);
+  background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
   backdrop-filter:blur(20px);
   border-radius:24px;
   padding:2rem;
@@ -613,7 +643,7 @@ textarea.form-input{
 }
 
 .character-card{
-  background:#111827;
+  background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
   border-radius:16px;
   padding:1.5rem;
   text-align:center;
@@ -632,7 +662,7 @@ textarea.form-input{
   margin:0 auto 1.5rem;
   border-radius:16px;
   overflow:hidden;
-  background:linear-gradient(135deg,#064e3b,#052e16);
+  background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
   border:3px solid #374151;
   transition:border-color 0.3s;
   position:relative;
@@ -708,150 +738,315 @@ textarea.form-input{
   color:#ef4444;
 }
 
-/* ========== MODAIS ========== */
-.terms-modal{
-  display:none;
-  position:fixed;
-  z-index:9999;
-  left:0;
-  top:0;
-  width:100%;
-  height:100%;
-  background-color:rgba(0,0,0,0.8);
-}
+/* Demo buttons */
+        .demo-btn {
+            padding: 16px 32px;
+            background: linear-gradient(to right, var(--btn-gradient-start), var(--btn-gradient-end));
+            color: #052e16;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
+        }
 
-.terms-modal-content{
-  background-color:#1f2937;
-  margin:3% auto;
-  width:90%;
-  max-width:800px;
-  border-radius:12px;
-  box-shadow:0 10px 40px rgba(0,0,0,0.5);
-  display:flex;
-  flex-direction:column;
-  max-height:85vh;
-}
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+        }
 
-.terms-modal-header{
-  padding:20px 30px;
-  background:linear-gradient(135deg,#10b981 0%,#059669 100%);
-  color:white;
-  border-radius:12px 12px 0 0;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
+        /* ========== MODAIS MODERNIZADOS ========== */
+        .terms-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
 
-.terms-modal-header h2{
-  margin:0;
-  font-size:24px;
-  font-weight:600;
-}
+        .terms-modal.active {
+            display: flex;
+        }
 
-.terms-close{
-  background:rgba(255,255,255,0.2);
-  border:none;
-  color:white;
-  font-size:32px;
-  font-weight:bold;
-  cursor:pointer;
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:background 0.3s;
-}
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
 
-.terms-close:hover{
-  background:rgba(255,255,255,0.3);
-}
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-.progress-container{
-  background:#374151;
-  height:6px;
-  margin:0;
-}
+        .terms-modal-content {
+            background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
+            margin: 2% auto;
+            width: 92%;
+            max-width: 900px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+            animation: slideUp 0.4s ease;
+            overflow: hidden;
+        }
 
-.progress-bar{
-  height:100%;
-  background:linear-gradient(90deg,#10b981 0%,#059669 100%);
-  width:0%;
-  transition:width 0.1s ease;
-}
+        .terms-modal-header {
+            padding: 28px 36px;
+            background: linear-gradient(135deg, var(--btn-gradient-start) 0%, var(--btn-gradient-end) 100%);
+            color: var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(34, 197, 94, 0.3);
+        }
 
-.progress-text{
-  display:block;
-  padding:8px 30px;
-  color:#9ca3af;
-  font-size:13px;
-  background:#111827;
-  border-bottom:1px solid #374151;
-}
+        .terms-modal-header h2 {
+            margin: 0;
+            font-family: Montserrat, sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-.terms-modal-body{
-  padding:30px;
-  overflow-y:auto;
-  flex:1;
-  line-height:1.8;
-  color:#d1d5db;
-  background:#1f2937;
-}
+        .terms-close {
+            background: var(--card);
+            border: 2px solid rgba(5, 46, 22, 0.3);
+            color: var(--accent);
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
 
-.terms-modal-body h3{
-  color:#10b981;
-  margin-top:25px;
-  margin-bottom:15px;
-  font-size:20px;
-  font-weight:600;
-}
+        .terms-close:hover {
+            background: var(--card);
+            transform: scale(1.1);
+            color: var(--accent);
+        }
 
-.terms-modal-body p{
-  margin-bottom:15px;
-  color:#d1d5db;
-}
+        .progress-container {
+            background: rgba(10, 15, 20, 0.6);
+            height: 8px;
+            margin: 0;
+            position: relative;
+            overflow: hidden;
+        }
 
-.terms-modal-body ul,.terms-modal-body ol{
-  margin-left:20px;
-  margin-bottom:15px;
-}
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--btn-gradient-start) 0%, var(--btn-gradient-end) 100%);
+            width: 0%;
+            transition: width 0.2s ease;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+        }
 
-.terms-modal-body strong{
-  color:#f9fafb;
-}
+        .progress-text {
+            display: block;
+            padding: 12px 36px;
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 600;
+            background: rgba(10, 15, 20, 0.4);
+            border-bottom: 1px solid rgba(34, 197, 94, 0.1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-.terms-modal-footer{
-  padding:20px 30px;
-  background:#111827;
-  border-radius:0 0 12px 12px;
-  display:flex;
-  justify-content:flex-end;
-  border-top:1px solid #374151;
-}
+        .terms-modal-body {
+            padding: 36px;
+            overflow-y: auto;
+            flex: 1;
+            line-height: 1.8;
+            color: var(--text-on-primary);
+            background: linear-gradient(145deg, rgba(10, 15, 20, 0.3), rgba(20, 28, 35, 0.3));
+        }
 
-.terms-btn-confirm{
-  background:linear-gradient(135deg,#10b981 0%,#059669 100%);
-  color:white;
-  border:none;
-  padding:12px 30px;
-  border-radius:6px;
-  font-size:16px;
-  font-weight:600;
-  cursor:pointer;
-  transition:transform 0.2s,box-shadow 0.2s;
-}
+        /* Scrollbar customizada */
+        .terms-modal-body::-webkit-scrollbar {
+            width: 10px;
+        }
 
-.terms-btn-confirm:hover:not(:disabled){
-  transform:translateY(-2px);
-  box-shadow:0 5px 15px rgba(16,185,129,0.4);
-}
+        .terms-modal-body::-webkit-scrollbar-track {
+            background: rgba(10, 15, 20, 0.6);
+            border-radius: 10px;
+        }
 
-.terms-btn-confirm:disabled{
-  background:#4b5563;
-  cursor:not-allowed;
-  opacity:0.6;
-}
+        .terms-modal-body::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--btn-gradient-start), var(--btn-gradient-end));
+            border-radius: 10px;
+            border: 2px solid rgba(10, 15, 20, 0.6);
+        }
+
+        .terms-modal-body::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--btn-gradient-end), var(--btn-gradient-start));
+        }
+
+        .terms-modal-body h3 {
+            color: var(--accent);
+            margin-top: 32px;
+            margin-bottom: 16px;
+            font-family: Montserrat, sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .terms-modal-body h3:first-child {
+            margin-top: 0;
+        }
+
+        .terms-modal-body h3::before {
+            content: "▸";
+            color: var(--accent);
+            font-size: 24px;
+        }
+
+        .terms-modal-body p {
+            margin-bottom: 16px;
+            color: var(--text-on-primary);
+            font-size: 15px;
+        }
+
+        .terms-modal-body ul,
+        .terms-modal-body ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+            color: var(--text-on-primary);
+        }
+
+        .terms-modal-body li {
+            margin-bottom: 10px;
+            padding-left: 8px;
+            position: relative;
+        }
+
+        .terms-modal-body ul li::marker {
+            color: var(--accent);
+        }
+
+        .terms-modal-body strong {
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .terms-modal-footer {
+            padding: 24px 36px;
+            background: rgba(10, 15, 20, 0.6);
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid var(--border-color);
+            gap: 16px;
+        }
+
+        .terms-btn-confirm {
+            background: var(--accent);
+            color: var (--accent);
+            border: none;
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .terms-btn-confirm:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.5);
+        }
+
+        .terms-btn-confirm:disabled {
+            background: linear-gradient(to right, #4b5563, #374151);
+            color: #9ca3af;
+            cursor: not-allowed;
+            opacity: 0.5;
+            box-shadow: none;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .terms-modal-content {
+                width: 95%;
+                max-height: 95vh;
+                margin: 2.5% auto;
+            }
+
+            .terms-modal-header {
+                padding: 20px 24px;
+            }
+
+            .terms-modal-header h2 {
+                font-size: 22px;
+            }
+
+            .terms-modal-body {
+                padding: 24px;
+            }
+
+            .terms-modal-body h3 {
+                font-size: 18px;
+            }
+
+            .terms-modal-footer {
+                padding: 20px 24px;
+            }
+
+            .progress-text,
+            .terms-modal-body {
+                padding-left: 24px;
+                padding-right: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .terms-modal-header h2 {
+                font-size: 18px;
+            }
+
+            .terms-close {
+                width: 36px;
+                height: 36px;
+                font-size: 24px;
+            }
+
+            .terms-btn-confirm {
+                padding: 14px 28px;
+                font-size: 14px;
+            }
+        }
 
 /* ========== RESPONSIVO ========== */
 @media(max-width:1024px){
@@ -1124,138 +1319,140 @@ textarea.form-input{
 </div>
 
 <!-- Modal de Termos de Serviço -->
-<div id="termsModal" class="terms-modal">
-  <div class="terms-modal-content">
-    <div class="terms-modal-header">
-      <h2>📜 Termos de Serviço</h2>
-      <button class="terms-close" data-modal="termsModal">&times;</button>
+    <div id="termsModal" class="terms-modal">
+        <div class="terms-modal-content">
+            <div class="terms-modal-header">
+                <h2> Termos de Serviço</h2>
+                <button class="terms-close" data-modal="termsModal" onclick="closeModal('termsModal')">&times;</button>
+            </div>
+            <div class="progress-container">
+                <div id="termsProgress" class="progress-bar"></div>
+            </div>
+            <span id="termsProgressText" class="progress-text">0% concluído</span>
+            <div id="termsBody" class="terms-modal-body">
+                <h3>1. Aceitação dos Termos</h3>
+                <p>Ao acessar e usar o Ambience RPG, você concorda em cumprir estes Termos de Serviço. Se você não concordar com alguma parte destes termos, não deverá usar nosso serviço.</p>
+
+                <h3>2. Descrição do Serviço</h3>
+                <p>O Ambience RPG é uma plataforma online dedicada a jogos de RPG por texto, onde os usuários podem criar personagens, participar de campanhas e interagir com uma comunidade de jogadores.</p>
+
+                <h3>3. Conta de Usuário</h3>
+                <p><strong>Responsabilidade:</strong> Você é responsável por manter a confidencialidade de sua conta e senha.</p>
+                <p><strong>Informações Precisas:</strong> Você concorda em fornecer informações precisas e atualizadas durante o registro.</p>
+
+                <h3>4. Conduta do Usuário</h3>
+                <p>Ao usar o Ambience RPG, você concorda em <strong>NÃO</strong>:</p>
+                <ul>
+                    <li>Usar linguagem ofensiva, discriminatória ou assediadora</li>
+                    <li>Compartilhar conteúdo ilegal, explícito ou inadequado</li>
+                    <li>Fazer spam, trolling ou qualquer comportamento disruptivo</li>
+                    <li>Tentar hackear, exploitar bugs ou comprometer a segurança da plataforma</li>
+                    <li>Falsificar identidade ou se passar por outros usuários</li>
+                    <li>Usar bots, scripts automatizados ou ferramentas de terceiros não autorizadas</li>
+                </ul>
+
+                <h3>5. Conteúdo do Usuário</h3>
+                <p><strong>Propriedade:</strong> Você mantém os direitos sobre o conteúdo que cria (personagens, histórias, etc.).</p>
+                <p><strong>Licença:</strong> Ao postar conteúdo, você nos concede uma licença não exclusiva para exibir, armazenar e distribuir esse conteúdo na plataforma.</p>
+                <p><strong>Moderação:</strong> Reservamos o direito de remover conteúdo que viole estes termos ou nossas diretrizes da comunidade.</p>
+
+                <h3>6. Suspensão e Banimento</h3>
+                <p>Podemos suspender ou encerrar sua conta se você violar estes Termos de Serviço, sem aviso prévio.</p>
+
+                <h3>7. Limitação de Responsabilidade</h3>
+                <p>O Ambience RPG é fornecido "como está". Não garantimos que o serviço estará sempre disponível, livre de erros ou seguro contra ataques.</p>
+
+                <h3>8. Modificações nos Termos</h3>
+                <p>Podemos atualizar estes Termos de Serviço a qualquer momento. Você será notificado sobre mudanças significativas.</p>
+
+                <h3>9. Lei Aplicável</h3>
+                <p>Estes termos são regidos pelas leis do Brasil.</p>
+
+                <h3>10. Contato</h3>
+                <p>Se você tiver dúvidas sobre estes Termos de Serviço, entre em contato conosco através do email: <strong>suporte@ambiencerpg.com</strong></p>
+            </div>
+            <div class="terms-modal-footer">
+                <button id="termsConfirmBtn" class="terms-btn-confirm" disabled>✓ Li e Aceito</button>
+            </div>
+        </div>
     </div>
-    <div class="progress-container">
-      <div id="termsProgress" class="progress-bar"></div>
+
+    <!-- Modal de Política de Privacidade -->
+    <div id="privacyModal" class="terms-modal">
+        <div class="terms-modal-content">
+            <div class="terms-modal-header">
+                <h2> Política de Privacidade</h2>
+                <button class="terms-close" data-modal="termsModal" onclick="closeModal('privacyModal')">&times;</button>
+            </div>
+            <div class="progress-container">
+                <div id="privacyProgress" class="progress-bar"></div>
+            </div>
+            <span id="privacyProgressText" class="progress-text">0% concluído</span>
+            <div id="privacyBody" class="terms-modal-body">
+                <h3>1. Informações que Coletamos</h3>
+                <p><strong>Informações de Registro:</strong></p>
+                <ul>
+                    <li>Nome de usuário</li>
+                    <li>Endereço de email</li>
+                    <li>Data de nascimento</li>
+                    <li>Avatar/foto de perfil (opcional)</li>
+                </ul>
+                <p><strong>Informações de Uso:</strong></p>
+                <ul>
+                    <li>Endereço IP</li>
+                    <li>Tipo de navegador</li>
+                    <li>Páginas visitadas</li>
+                    <li>Tempo de uso da plataforma</li>
+                </ul>
+
+                <h3>2. Como Usamos Suas Informações</h3>
+                <p>Usamos suas informações para:</p>
+                <ul>
+                    <li>Fornecer e melhorar nossos serviços</li>
+                    <li>Personalizar sua experiência</li>
+                    <li>Comunicar atualizações e notificações importantes</li>
+                    <li>Garantir a segurança da plataforma</li>
+                    <li>Cumprir obrigações legais</li>
+                </ul>
+
+                <h3>3. Compartilhamento de Informações</h3>
+                <p><strong>NÃO vendemos</strong> suas informações pessoais a terceiros.</p>
+                <p>Podemos compartilhar informações com:</p>
+                <ul>
+                    <li>Provedores de serviços (hospedagem, email)</li>
+                    <li>Autoridades legais, quando exigido por lei</li>
+                </ul>
+
+                <h3>4. Cookies</h3>
+                <p>Usamos cookies para melhorar sua experiência, manter sua sessão ativa e analisar o uso da plataforma.</p>
+
+                <h3>5. Segurança</h3>
+                <p>Implementamos medidas de segurança para proteger suas informações, incluindo criptografia de senhas e proteção contra acesso não autorizado.</p>
+
+                <h3>6. Seus Direitos</h3>
+                <p>Você tem o direito de:</p>
+                <ul>
+                    <li><strong>Acessar</strong> suas informações pessoais</li>
+                    <li><strong>Corrigir</strong> dados incorretos</li>
+                    <li><strong>Excluir</strong> sua conta e dados associados</li>
+                    <li><strong>Exportar</strong> seus dados</li>
+                </ul>
+
+                <h3>7. Alterações nesta Política</h3>
+                <p>Podemos atualizar esta Política de Privacidade periodicamente. Notificaremos você sobre mudanças significativas.</p>
+
+                <h3>8. Contato</h3>
+                <p>Para questões sobre esta Política de Privacidade ou para exercer seus direitos, entre em contato: <strong>privacidade@ambiencerpg.com</strong></p>
+
+                <p><strong>Última atualização:</strong> Novembro de 2025</p>
+            </div>
+            <div class="terms-modal-footer">
+                <button id="privacyConfirmBtn" class="terms-btn-confirm" disabled>✓ Li e Aceito</button>
+            </div>
+        </div>
     </div>
-    <span id="termsProgressText" class="progress-text">0% concluído</span>
-    <div id="termsBody" class="terms-modal-body">
-      <h3>1. Aceitação dos Termos</h3>
-      <p>Ao acessar e usar o Ambience RPG, você concorda em cumprir estes Termos de Serviço. Se você não concordar com alguma parte destes termos, não deverá usar nosso serviço.</p>
 
-      <h3>2. Descrição do Serviço</h3>
-      <p>O Ambience RPG é uma plataforma online dedicada a jogos de RPG por texto, onde os usuários podem criar personagens, participar de campanhas e interagir com uma comunidade de jogadores.</p>
-
-      <h3>3. Conta de Usuário</h3>
-      <p><strong>Responsabilidade:</strong> Você é responsável por manter a confidencialidade de sua conta e senha.</p>
-      <p><strong>Informações Precisas:</strong> Você concorda em fornecer informações precisas e atualizadas durante o registro.</p>
-
-      <h3>4. Conduta do Usuário</h3>
-      <p>Ao usar o Ambience RPG, você concorda em <strong>NÃO</strong>:</p>
-      <ul>
-        <li>Usar linguagem ofensiva, discriminatória ou assediadora</li>
-        <li>Compartilhar conteúdo ilegal, explícito ou inadequado</li>
-        <li>Fazer spam, trolling ou qualquer comportamento disruptivo</li>
-        <li>Tentar hackear, explorar bugs ou comprometer a segurança da plataforma</li>
-        <li>Falsificar identidade ou se passar por outros usuários</li>
-        <li>Usar bots, scripts automatizados ou ferramentas de terceiros não autorizadas</li>
-      </ul>
-
-      <h3>5. Conteúdo do Usuário</h3>
-      <p><strong>Propriedade:</strong> Você mantém os direitos sobre o conteúdo que cria (personagens, histórias, etc.).</p>
-      <p><strong>Licença:</strong> Ao postar conteúdo, você nos concede uma licença não exclusiva para exibir, armazenar e distribuir esse conteúdo na plataforma.</p>
-      <p><strong>Moderação:</strong> Reservamos o direito de remover conteúdo que viole estes termos ou nossas diretrizes da comunidade.</p>
-
-      <h3>6. Suspensão e Banimento</h3>
-      <p>Podemos suspender ou encerrar sua conta se você violar estes Termos de Serviço, sem aviso prévio.</p>
-
-      <h3>7. Limitação de Responsabilidade</h3>
-      <p>O Ambience RPG é fornecido "como está". Não garantimos que o serviço estará sempre disponível, livre de erros ou seguro contra ataques.</p>
-
-      <h3>8. Modificações nos Termos</h3>
-      <p>Podemos atualizar estes Termos de Serviço a qualquer momento. Você será notificado sobre mudanças significativas.</p>
-
-      <h3>9. Lei Aplicável</h3>
-      <p>Estes termos são regidos pelas leis do Brasil.</p>
-
-      <h3>10. Contato</h3>
-      <p>Se você tiver dúvidas sobre estes Termos de Serviço, entre em contato conosco através do email: <strong>suporte@ambiencerpg.com</strong></p>
-    </div>
-    <div class="terms-modal-footer">
-      <button id="termsConfirmBtn" class="terms-btn-confirm" disabled>Li e Aceito</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal de Política de Privacidade -->
-<div id="privacyModal" class="terms-modal">
-  <div class="terms-modal-content">
-    <div class="terms-modal-header">
-      <h2>🔒 Política de Privacidade</h2>
-      <button class="terms-close" data-modal="privacyModal">&times;</button>
-    </div>
-    <div class="progress-container">
-      <div id="privacyProgress" class="progress-bar"></div>
-    </div>
-    <span id="privacyProgressText" class="progress-text">0% concluído</span>
-    <div id="privacyBody" class="terms-modal-body">
-      <h3>1. Informações que Coletamos</h3>
-      <p><strong>Informações de Registro:</strong></p>
-      <ul>
-        <li>Nome de usuário</li>
-        <li>Endereço de email</li>
-        <li>Data de nascimento</li>
-        <li>Avatar/foto de perfil (opcional)</li>
-      </ul>
-      <p><strong>Informações de Uso:</strong></p>
-      <ul>
-        <li>Endereço IP</li>
-        <li>Tipo de navegador</li>
-        <li>Páginas visitadas</li>
-        <li>Tempo de uso da plataforma</li>
-      </ul>
-
-      <h3>2. Como Usamos Suas Informações</h3>
-      <p>Usamos suas informações para:</p>
-      <ul>
-        <li>Fornecer e melhorar nossos serviços</li>
-        <li>Personalizar sua experiência</li>
-        <li>Comunicar atualizações e notificações importantes</li>
-        <li>Garantir a segurança da plataforma</li>
-        <li>Cumprir obrigações legais</li>
-      </ul>
-
-      <h3>3. Compartilhamento de Informações</h3>
-      <p><strong>NÃO vendemos</strong> suas informações pessoais a terceiros.</p>
-      <p>Podemos compartilhar informações com:</p>
-      <ul>
-        <li>Provedores de serviços (hospedagem, email)</li>
-        <li>Autoridades legais, quando exigido por lei</li>
-      </ul>
-
-      <h3>4. Cookies</h3>
-      <p>Usamos cookies para melhorar sua experiência, manter sua sessão ativa e analisar o uso da plataforma.</p>
-
-      <h3>5. Segurança</h3>
-      <p>Implementamos medidas de segurança para proteger suas informações, incluindo criptografia de senhas e proteção contra acesso não autorizado.</p>
-
-      <h3>6. Seus Direitos</h3>
-      <p>Você tem o direito de:</p>
-      <ul>
-        <li><strong>Acessar</strong> suas informações pessoais</li>
-        <li><strong>Corrigir</strong> dados incorretos</li>
-        <li><strong>Excluir</strong> sua conta e dados associados</li>
-        <li><strong>Exportar</strong> seus dados</li>
-      </ul>
-
-      <h3>7. Alterações nesta Política</h3>
-      <p>Podemos atualizar esta Política de Privacidade periodicamente. Notificaremos você sobre mudanças significativas.</p>
-
-      <h3>8. Contato</h3>
-      <p>Para questões sobre esta Política de Privacidade ou para exercer seus direitos, entre em contato: <strong>privacidade@ambiencerpg.com</strong></p>
-
-      <p><strong>Última atualização:</strong> Novembro de 2025</p>
-    </div>
-    <div class="terms-modal-footer">
-      <button id="privacyConfirmBtn" class="terms-btn-confirm" disabled>Li e Aceito</button>
-    </div>
-  </div>
-</div>
+    <script>
 
 <!-- Scripts de moderação (carregado do seu sistema) -->
 <script src="{{ asset('js/moderation.js') }}"></script>

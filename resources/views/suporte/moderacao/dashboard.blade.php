@@ -5,7 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Dashboard de Moderação - Ambience RPG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-dark: #0a0f14;
+            --card: #1f2a33;
+            --muted: #8b9ba8;
+            --accent: #22c55e;
+            --accent-light: #16a34a;
+            --accent-dark: #15803d;
+            --hero-green: #052e16;
+            --text-on-primary: #e6eef6;
+            --transition-speed: 600ms;
+            --header-bg: rgba(10, 15, 20, 0.75);
+            --gradient-start: #022c22;
+            --gradient-mid: #034935ff;
+            --gradient-end: #22553dff;
+            --btn-gradient-start: #22c55e;
+            --btn-gradient-end: #16a34a;
+            --accent-border: rgba(34, 197, 94, 0.4);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,8 +33,11 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Inter, system-ui, -apple-system, sans-serif;
+            background: linear-gradient(145deg, #0a0f14f4, #141c23f2);
+            color: var(--text-on-primary);
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
             min-height: 100vh;
             padding: 40px 20px;
         }
@@ -26,12 +49,14 @@
 
         /* Header */
         .page-header {
-            background: white;
+            background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
             padding: 30px;
             border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
             margin-bottom: 30px;
             animation: slideDown 0.5s ease;
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         @keyframes slideDown {
@@ -54,16 +79,18 @@
         }
 
         .header-info h1 {
+            font-family: Montserrat, sans-serif;
             font-size: 32px;
-            color: #1a202c;
+            color: #fff;
             margin-bottom: 8px;
             display: flex;
             align-items: center;
             gap: 12px;
+            font-weight: 900;
         }
 
         .header-info p {
-            color: #718096;
+            color: var(--muted);
             font-size: 16px;
         }
 
@@ -81,16 +108,19 @@
         .search-input {
             width: 100%;
             padding: 14px 48px 14px 48px;
-            border: 2px solid #e5e7eb;
+            border: 2px solid rgba(34, 197, 94, 0.2);
             border-radius: 12px;
             font-size: 15px;
             transition: all 0.3s ease;
+            background: rgba(10, 15, 20, 0.4);
+            color: var(--text-on-primary);
+            font-family: Inter, sans-serif;
         }
 
         .search-input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
         }
 
         .search-icon {
@@ -100,7 +130,7 @@
             transform: translateY(-50%);
             width: 20px;
             height: 20px;
-            color: #9ca3af;
+            color: var(--muted);
         }
 
         .quick-filters {
@@ -112,34 +142,30 @@
 
         .filter-chip {
             padding: 6px 14px;
-            background: white;
-            border: 2px solid #e5e7eb;
+            background: rgba(34, 197, 94, 0.1);
+            border: 2px solid rgba(34, 197, 94, 0.2);
             border-radius: 20px;
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
-            color: #4b5563;
+            color: var(--muted);
         }
 
         .filter-chip:hover {
-            border-color: #667eea;
-            color: #667eea;
+            border-color: var(--accent);
+            color: var(--accent);
             transform: translateY(-2px);
+            background: rgba(34, 197, 94, 0.2);
         }
-
-        .filter-chip.blue:hover { background: #dbeafe; border-color: #3b82f6; color: #1e40af; }
-        .filter-chip.orange:hover { background: #ffedd5; border-color: #f97316; color: #9a3412; }
-        .filter-chip.red:hover { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
-        .filter-chip.green:hover { background: #d1fae5; border-color: #10b981; color: #065f46; }
 
         .btn-view-all {
             padding: 14px 28px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(to right, var(--btn-gradient-start), var(--btn-gradient-end));
+            color: var(--hero-green);
             border: none;
             border-radius: 12px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 15px;
             cursor: pointer;
             text-decoration: none;
@@ -148,29 +174,33 @@
             gap: 8px;
             transition: all 0.3s ease;
             white-space: nowrap;
+            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
         }
 
         .btn-view-all:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
         }
 
         /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+            gap: 22px;
             margin-bottom: 30px;
         }
 
         .stat-card {
-            background: white;
+            background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
             border-radius: 16px;
             padding: 28px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
             animation: fadeInUp 0.5s ease;
             animation-fill-mode: both;
+            border: 1px solid rgba(34, 197, 94, 0.1);
+            position: relative;
+            overflow: hidden;
         }
 
         @keyframes fadeInUp {
@@ -189,9 +219,23 @@
         .stat-card:nth-child(3) { animation-delay: 0.3s; }
         .stat-card:nth-child(4) { animation-delay: 0.4s; }
 
+        .stat-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.05), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
         }
 
         .stat-card.border-blue { border-left: 4px solid #3b82f6; }
@@ -209,7 +253,7 @@
         .stat-info h3 {
             font-size: 14px;
             font-weight: 600;
-            color: #6b7280;
+            color: var(--muted);
             margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -218,13 +262,13 @@
         .stat-value {
             font-size: 36px;
             font-weight: 700;
-            color: #1a202c;
+            color: #fff;
             line-height: 1;
         }
 
         .stat-subtitle {
             font-size: 12px;
-            color: #9ca3af;
+            color: var(--muted);
             margin-top: 4px;
         }
 
@@ -238,20 +282,20 @@
             flex-shrink: 0;
         }
 
-        .stat-icon.blue { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); }
-        .stat-icon.orange { background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%); }
-        .stat-icon.purple { background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); }
-        .stat-icon.red { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); }
+        .stat-icon.blue { background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.1)); }
+        .stat-icon.orange { background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(234, 88, 12, 0.1)); }
+        .stat-icon.purple { background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(147, 51, 234, 0.1)); }
+        .stat-icon.red { background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.1)); }
 
         .stat-icon svg {
             width: 28px;
             height: 28px;
         }
 
-        .stat-icon.blue svg { color: #2563eb; }
-        .stat-icon.orange svg { color: #ea580c; }
-        .stat-icon.purple svg { color: #9333ea; }
-        .stat-icon.red svg { color: #dc2626; }
+        .stat-icon.blue svg { color: #3b82f6; }
+        .stat-icon.orange svg { color: #f97316; }
+        .stat-icon.purple svg { color: #a855f7; }
+        .stat-icon.red svg { color: #ef4444; }
 
         /* Secondary Stats */
         .secondary-stats {
@@ -264,25 +308,26 @@
         .secondary-card {
             border-radius: 16px;
             padding: 32px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             color: white;
             position: relative;
             overflow: hidden;
             animation: fadeInUp 0.5s ease;
             animation-fill-mode: both;
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         .secondary-card:nth-child(1) { 
             animation-delay: 0.5s;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));
         }
         .secondary-card:nth-child(2) { 
             animation-delay: 0.6s;
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.1));
         }
         .secondary-card:nth-child(3) { 
             animation-delay: 0.7s;
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.1));
         }
 
         .secondary-card::before {
@@ -292,7 +337,7 @@
             right: -20%;
             width: 200px;
             height: 200px;
-            background: rgba(255,255,255,0.1);
+            background: rgba(34, 197, 94, 0.05);
             border-radius: 50%;
         }
 
@@ -354,12 +399,13 @@
         }
 
         .chart-card {
-            background: white;
+            background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
             border-radius: 16px;
             padding: 32px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             animation: fadeInUp 0.5s ease;
             animation-fill-mode: both;
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         .chart-card:nth-child(1) { animation-delay: 0.8s; }
@@ -380,7 +426,7 @@
         .chart-header h2 {
             font-size: 20px;
             font-weight: 700;
-            color: #1a202c;
+            color: #fff;
         }
 
         .chart-item {
@@ -401,25 +447,25 @@
         .chart-label {
             font-size: 14px;
             font-weight: 600;
-            color: #374151;
+            color: var(--text-on-primary);
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .chart-label:hover {
-            color: #667eea;
+            color: var(--accent);
         }
 
         .chart-value {
             font-size: 15px;
             font-weight: 700;
-            color: #1a202c;
+            color: #fff;
         }
 
         .progress-bar {
             width: 100%;
             height: 12px;
-            background: #f3f4f6;
+            background: rgba(34, 197, 94, 0.1);
             border-radius: 6px;
             overflow: hidden;
             position: relative;
@@ -462,14 +508,14 @@
 
         .chart-percentage {
             font-size: 12px;
-            color: #6b7280;
+            color: var(--muted);
             margin-top: 6px;
         }
 
         .empty-chart {
             text-align: center;
             padding: 60px 20px;
-            color: #9ca3af;
+            color: var(--muted);
         }
 
         /* Recent Activity */
@@ -481,12 +527,13 @@
         }
 
         .activity-card {
-            background: white;
+            background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
             border-radius: 16px;
             padding: 32px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             animation: fadeInUp 0.5s ease;
             animation-fill-mode: both;
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         .activity-card:nth-child(1) { animation-delay: 1s; }
@@ -513,11 +560,11 @@
         .activity-title h2 {
             font-size: 20px;
             font-weight: 700;
-            color: #1a202c;
+            color: #fff;
         }
 
         .activity-link {
-            color: #667eea;
+            color: var(--accent);
             font-size: 14px;
             font-weight: 600;
             text-decoration: none;
@@ -525,7 +572,7 @@
         }
 
         .activity-link:hover {
-            color: #764ba2;
+            color: var(--accent-light);
         }
 
         .activity-list {
@@ -536,17 +583,19 @@
 
         .activity-item {
             padding: 20px;
-            background: #f9fafb;
+            background: rgba(34, 197, 94, 0.05);
             border-radius: 12px;
             text-decoration: none;
             color: inherit;
             transition: all 0.3s ease;
             display: block;
+            border: 1px solid rgba(34, 197, 94, 0.1);
         }
 
         .activity-item:hover {
-            background: #f3f4f6;
+            background: rgba(34, 197, 94, 0.1);
             transform: translateX(5px);
+            border-color: rgba(34, 197, 94, 0.2);
         }
 
         .activity-item-header {
@@ -560,7 +609,7 @@
         .ticket-number {
             font-size: 15px;
             font-weight: 700;
-            color: #667eea;
+            color: var(--accent);
         }
 
         .badge {
@@ -572,15 +621,15 @@
             letter-spacing: 0.3px;
         }
 
-        .badge.status-novo { background: #dbeafe; color: #1e40af; }
-        .badge.status-analise { background: #fef3c7; color: #92400e; }
-        .badge.status-resolvido { background: #d1fae5; color: #065f46; }
-        .badge.status-default { background: #e5e7eb; color: #4b5563; }
+        .badge.status-novo { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .badge.status-analise { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .badge.status-resolvido { background: rgba(34, 197, 94, 0.2); color: var(--accent); }
+        .badge.status-default { background: rgba(139, 155, 168, 0.2); color: var(--muted); }
 
         .activity-item-title {
             font-size: 15px;
             font-weight: 600;
-            color: #1a202c;
+            color: #fff;
             margin-bottom: 10px;
         }
 
@@ -589,7 +638,7 @@
             align-items: center;
             gap: 16px;
             font-size: 13px;
-            color: #6b7280;
+            color: var(--muted);
         }
 
         .meta-user {
@@ -603,15 +652,15 @@
             height: 20px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #e5e7eb;
+            border: 2px solid rgba(34, 197, 94, 0.3);
         }
 
         .user-initial {
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+            color: var(--hero-green);
             font-size: 10px;
             font-weight: 700;
             display: flex;
@@ -627,24 +676,26 @@
         .empty-activity svg {
             width: 80px;
             height: 80px;
-            color: #cbd5e0;
+            color: var(--muted);
+            opacity: 0.4;
             margin-bottom: 16px;
         }
 
         .empty-activity p {
-            color: #9ca3af;
+            color: var(--muted);
             font-size: 15px;
         }
 
         /* Staff List */
         .staff-item {
             padding: 20px;
-            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+            background: rgba(34, 197, 94, 0.05);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 16px;
+            border: 1px solid rgba(34, 197, 94, 0.1);
         }
 
         .staff-info {
@@ -659,20 +710,20 @@
             height: 48px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid #667eea;
+            border: 3px solid var(--accent);
             flex-shrink: 0;
         }
 
         .staff-details h4 {
             font-size: 15px;
             font-weight: 700;
-            color: #1a202c;
+            color: #fff;
             margin-bottom: 4px;
         }
 
         .staff-details p {
             font-size: 12px;
-            color: #6b7280;
+            color: var(--muted);
             text-transform: capitalize;
         }
 
@@ -683,21 +734,22 @@
         .staff-count-value {
             font-size: 28px;
             font-weight: 700;
-            color: #667eea;
+            color: var(--accent);
         }
 
         .staff-count-label {
             font-size: 11px;
-            color: #6b7280;
+            color: var(--muted);
         }
 
         /* Quick Actions */
         .quick-actions {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
             border-radius: 16px;
             padding: 40px;
-            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
             animation: fadeInUp 0.5s ease 1.2s both;
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         .quick-actions h2 {
@@ -714,9 +766,9 @@
         }
 
         .action-card {
-            background: rgba(255, 255, 255, 0.15);
+            background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.2);
             border-radius: 12px;
             padding: 24px;
             text-align: center;
@@ -726,8 +778,9 @@
         }
 
         .action-card:hover {
-            background: rgba(255, 255, 255, 0.25);
+            background: #0f5a2b33;
             transform: translateY(-5px);
+            border-color: rgba(34, 197, 94, 0.4);
         }
 
         .action-card svg {
@@ -799,7 +852,7 @@
             <div class="header-content">
                 <div class="header-info">
                     <h1>
-                        🛡️ Dashboard de Moderação
+                         Dashboard de Moderação
                     </h1>
                     <p>Visão geral do sistema de suporte</p>
                 </div>
@@ -820,16 +873,16 @@
                         
                         <div class="quick-filters">
                             <button type="button" onclick="document.querySelector('input[name=busca]').value='categoria:duvida'; this.form.submit();" class="filter-chip blue">
-                                💭 Dúvidas
+                                 Dúvidas
                             </button>
                             <button type="button" onclick="document.querySelector('input[name=busca]').value='categoria:problema_tecnico'; this.form.submit();" class="filter-chip orange">
-                                ⚙️ Problemas
+                                 Problemas
                             </button>
                             <button type="button" onclick="document.querySelector('input[name=busca]').value='categoria:denuncia'; this.form.submit();" class="filter-chip red">
-                                ⚠️ Denúncias
+                                 Denúncias
                             </button>
                             <button type="button" onclick="document.querySelector('input[name=busca]').value='categoria:sugestao'; this.form.submit();" class="filter-chip green">
-                                💡 Sugestões
+                                 Sugestões
                             </button>
                         </div>
                     </form>
@@ -1115,7 +1168,7 @@
             <div class="activity-card">
                 <div class="activity-header">
                     <div class="activity-title">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #667eea;">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--accent);">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>
                         <h2>Staff com Mais Tickets Abertos</h2>
@@ -1160,7 +1213,7 @@
 
         <!-- Quick Actions -->
         <div class="quick-actions">
-            <h2>⚡ Ações Rápidas</h2>
+            <h2> Ações Rápidas</h2>
             
             <div class="actions-grid">
                 <a href="{{ route('suporte.moderacao.index', ['filtro' => 'novos']) }}" class="action-card">

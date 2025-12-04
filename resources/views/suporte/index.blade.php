@@ -3,8 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ambience RPG</title>
+    <title>Meus Tickets - Ambience RPG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-dark: #0a0f14;
+            --card: #1f2a33;
+            --muted: #8b9ba8;
+            --accent: #22c55e;
+            --accent-light: #16a34a;
+            --accent-dark: #15803d;
+            --hero-green: #052e16;
+            --text-on-primary: #e6eef6;
+            --transition-speed: 600ms;
+            --header-bg: rgba(10, 15, 20, 0.75);
+    --gradient-start: #022c22;  
+    --gradient-mid:   #034935ff;  
+    --gradient-end:   #22553dff; 
+            --btn-gradient-start: #22c55e;
+            --btn-gradient-end: #16a34a;
+            --accent-border: rgba(34, 197, 94, 0.4);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,8 +32,11 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Inter, system-ui, -apple-system, sans-serif;
+            background: linear-gradient(145deg, #0a0f14f4, #141c23f2);
+            color: var(--text-on-primary);
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
             min-height: 100vh;
             padding: 40px 20px;
         }
@@ -23,35 +46,56 @@
             margin: 0 auto;
         }
 
-        /* Header Section */
+       .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 15px;
+        margin-bottom: 24px;
+        transition: all 0.2s;
+    }
+
+    .back-link:hover {
+        color: var(--accent);
+        transform: translateX(-5px);
+    }
+
+        /* Page Header */
         .page-header {
-            background: white;
-            padding: 30px;
+            background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
+            padding: 40px;
             border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
             margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 20px;
             flex-wrap: wrap;
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         .header-content h1 {
-            font-size: 32px;
-            color: #1a202c;
+            font-family: Montserrat, sans-serif;
+            font-size: 36px;
+            color: #fff;
             margin-bottom: 8px;
+            font-weight: 900;
         }
 
         .header-content p {
-            color: #718096;
+            color: var(--muted);
             font-size: 16px;
         }
 
         .btn {
             padding: 14px 28px;
             border-radius: 10px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 15px;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -59,18 +103,24 @@
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            font-family: Inter, sans-serif;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(to right, var(--btn-gradient-start), var(--btn-gradient-end));
+            color: var(--hero-green);
+            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+        }
+
+        .btn svg {
+            width: 20px;
+            height: 20px;
         }
 
         /* Alerts */
@@ -82,6 +132,8 @@
             align-items: center;
             gap: 15px;
             animation: slideIn 0.3s ease-out;
+            background: linear-gradient(145deg, rgba(31, 42, 51, 0.6), rgba(20, 28, 35, 0.4));
+            border-left: 4px solid;
         }
 
         @keyframes slideIn {
@@ -96,15 +148,18 @@
         }
 
         .alert-success {
-            background: #d4edda;
-            border-left: 4px solid #28a745;
-            color: #155724;
+            border-left-color: var(--accent);
+            background: linear-gradient(145deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.05));
         }
 
         .alert-error {
-            background: #f8d7da;
-            border-left: 4px solid #dc3545;
-            color: #721c24;
+            border-left-color: #ef4444;
+            background: linear-gradient(145deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+        }
+
+        .alert svg {
+            width: 24px;
+            height: 24px;
         }
 
         /* Stats Cards */
@@ -116,19 +171,36 @@
         }
 
         .stat-card {
-            background: white;
+            background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
             padding: 25px;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             display: flex;
             align-items: center;
             gap: 20px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(34, 197, 94, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.05), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
         }
 
         .stat-icon {
@@ -139,15 +211,12 @@
             align-items: center;
             justify-content: center;
             font-size: 24px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.1));
         }
-
-        .stat-icon.blue { background: #e3f2fd; }
-        .stat-icon.orange { background: #fff3e0; }
-        .stat-icon.green { background: #e8f5e9; }
 
         .stat-content h3 {
             font-size: 14px;
-            color: #718096;
+            color: var(--muted);
             margin-bottom: 8px;
             font-weight: 500;
         }
@@ -155,21 +224,23 @@
         .stat-content p {
             font-size: 32px;
             font-weight: 700;
-            color: #1a202c;
+            color: #fff;
         }
 
         /* Tickets List */
         .tickets-container {
-            background: white;
+            background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
             border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
             overflow: hidden;
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         .ticket-item {
             padding: 25px 30px;
-            border-bottom: 2px solid #f7fafc;
-            transition: background 0.2s ease;
+            border-bottom: 2px solid rgba(34, 197, 94, 0.1);
+            transition: all 0.3s ease;
             cursor: pointer;
         }
 
@@ -178,7 +249,7 @@
         }
 
         .ticket-item:hover {
-            background: #f7fafc;
+            background: rgba(34, 197, 94, 0.05);
         }
 
         .ticket-header {
@@ -192,12 +263,13 @@
         .ticket-id {
             font-size: 18px;
             font-weight: 700;
-            color: #667eea;
+            color: var(--accent);
             text-decoration: none;
+            transition: color 0.2s;
         }
 
         .ticket-id:hover {
-            color: #764ba2;
+            color: var(--accent-light);
         }
 
         .badge {
@@ -209,29 +281,29 @@
             letter-spacing: 0.5px;
         }
 
-        .badge.status-novo { background: #e3f2fd; color: #1976d2; }
-        .badge.status-em_analise { background: #fff9c4; color: #f57c00; }
-        .badge.status-aguardando_resposta { background: #f3e5f5; color: #7b1fa2; }
-        .badge.status-resolvido { background: #e8f5e9; color: #388e3c; }
-        .badge.status-fechado { background: #e0e0e0; color: #616161; }
+        .badge.status-novo { background: #3bf66a33; color: #00ff33ff; }
+        .badge.status-em_analise { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .badge.status-aguardando_resposta { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+        .badge.status-resolvido { background: rgba(34, 197, 94, 0.2); color: var(--accent); }
+        .badge.status-fechado { background: rgba(156, 163, 175, 0.2); color: #9ca3af; }
 
-        .badge.priority-urgente { background: #ffebee; color: #c62828; }
-        .badge.priority-alta { background: #fff3e0; color: #e65100; }
-        .badge.priority-normal { background: #e3f2fd; color: #1976d2; }
-        .badge.priority-baixa { background: #f5f5f5; color: #757575; }
+        .badge.priority-urgente { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .badge.priority-alta { background: rgba(251, 146, 60, 0.2); color: #fb923c; }
+        .badge.priority-normal { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .badge.priority-baixa { background: rgba(156, 163, 175, 0.2); color: #9ca3af; }
 
-        .badge.category { background: #f5f5f5; color: #424242; }
+        .badge.category { background: rgba(34, 197, 94, 0.1); color: var(--muted); }
 
         .ticket-title {
             font-size: 18px;
             font-weight: 600;
-            color: #2d3748;
+            color: #fff;
             margin-bottom: 10px;
             line-height: 1.4;
         }
 
         .ticket-description {
-            color: #718096;
+            color: var(--muted);
             font-size: 15px;
             line-height: 1.6;
             margin-bottom: 15px;
@@ -243,7 +315,7 @@
             flex-wrap: wrap;
             align-items: center;
             font-size: 14px;
-            color: #718096;
+            color: var(--muted);
         }
 
         .ticket-meta-item {
@@ -258,7 +330,7 @@
         }
 
         .ticket-meta-item.denuncia {
-            color: #dc3545;
+            color: #ef4444;
             font-weight: 600;
         }
 
@@ -268,11 +340,11 @@
 
         .btn-view {
             padding: 10px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(to right, var(--btn-gradient-start), var(--btn-gradient-end));
+            color: var(--hero-green);
             border-radius: 8px;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 14px;
             display: inline-block;
             transition: all 0.3s ease;
@@ -280,7 +352,7 @@
 
         .btn-view:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
         }
 
         /* Empty State */
@@ -290,20 +362,22 @@
         }
 
         .empty-state svg {
-            width: 120px;
-            height: 120px;
-            color: #cbd5e0;
+            width: 80px;
+            height: 80px;
+            color: var(--muted);
+            opacity: 0.4;
             margin-bottom: 20px;
         }
 
         .empty-state h3 {
             font-size: 24px;
-            color: #2d3748;
+            color: #fff;
             margin-bottom: 10px;
+            font-weight: 700;
         }
 
         .empty-state p {
-            color: #718096;
+            color: var(--muted);
             font-size: 16px;
             margin-bottom: 25px;
         }
@@ -311,7 +385,7 @@
         /* Pagination */
         .pagination-container {
             padding: 25px 30px;
-            border-top: 2px solid #f7fafc;
+            border-top: 2px solid rgba(34, 197, 94, 0.1);
         }
 
         @media (max-width: 768px) {
@@ -320,11 +394,11 @@
             }
 
             .page-header {
-                padding: 20px;
+                padding: 25px 20px;
             }
 
             .header-content h1 {
-                font-size: 24px;
+                font-size: 28px;
             }
 
             .stats-grid {
@@ -345,14 +419,29 @@
                 padding: 5px 12px;
             }
         }
+
+        .stat-icon img {
+    width: 44px;
+    height: 44px;
+}
+
     </style>
 </head>
 <body>
     <div class="container">
+
+    <!-- Back Button -->
+        <!-- Botão de voltar para HOME (/) -->
+<a href="{{ auth()->user()->isStaff() ? route('suporte.moderacao.index') : route('home') }}" class="back-link">
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Voltar
+</a>
         <!-- Page Header -->
         <div class="page-header">
             <div class="header-content">
-                <h1>🎫 Meus Tickets</h1>
+                <h1> Meus Tickets</h1>
                 <p>Gerencie suas solicitações de suporte</p>
             </div>
             <a href="{{ route('suporte.create') }}" class="btn btn-primary">
@@ -385,7 +474,9 @@
         <!-- Statistics -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon blue">📊</div>
+                <div class="stat-icon">
+                    <img src="/images/ICONS/grafico.png" alt="Resolvido">
+                </div>
                 <div class="stat-content">
                     <h3>Total de Tickets</h3>
                     <p>{{ $tickets->total() }}</p>
@@ -393,20 +484,26 @@
             </div>
 
             <div class="stat-card">
-                <div class="stat-icon orange">⏳</div>
-                <div class="stat-content">
-                    <h3>Abertos</h3>
+    <div class="stat-icon">
+        <img src="/images/ICONS/ampulheta.png" alt="Resolvido">
+    </div>
+    <div class="stat-content">
+        <h3>Abertos</h3>
                     <p>{{ $totalAbertos }}</p>
-                </div>
-            </div>
+    </div>
+</div>
+
 
             <div class="stat-card">
-                <div class="stat-icon green">✅</div>
-                <div class="stat-content">
-                    <h3>Resolvidos</h3>
-                    <p>{{ $totalFechados }}</p>
-                </div>
-            </div>
+    <div class="stat-icon">
+        <img src="/images/ICONS/confirm.png" alt="Resolvido">
+    </div>
+    <div class="stat-content">
+        <h3>Resolvidos</h3>
+        <p>{{ $totalFechados }}</p>
+    </div>
+</div>
+
         </div>
 
         <!-- Tickets List -->
@@ -469,7 +566,7 @@
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                     </svg>
-                                    Denúncia: @{{ $ticket->usuarioDenunciado->username }}
+                                    Denúncia: {{ '@' . $ticket->usuarioDenunciado->username }}
                                 </div>
                             @endif
                         </div>
@@ -497,7 +594,7 @@
                     <h3>Nenhum ticket ainda</h3>
                     <p>Você ainda não criou nenhum ticket de suporte.</p>
                     <a href="{{ route('suporte.create') }}" class="btn btn-primary">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
                         Criar Primeiro Ticket
