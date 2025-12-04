@@ -28,6 +28,12 @@ console.log('[Chat] 🛡️ Permissões carregadas', {
     ehCriadorSala: this.ehCriadorSala
 });
 
+this.isInGrid = window.location.pathname.includes('/sessoes/');
+    if (this.isInGrid) {
+        console.log('[Chat] 🎮 Chat iniciado na GRID');
+        this.setupFloatingBehavior();
+    }
+
         // Elementos DOM
         this.messagesContainer = document.getElementById('chatMessages');
         this.messageInput = document.getElementById('chatMessageInput');
@@ -49,6 +55,11 @@ this.typingText = document.getElementById('chatTypingText');
     this.typingTimeout = null;
     this.isTyping = false;
     this.typingDebounceMs = 2000;
+    this.resizeState = null;
+    this.dimensionsBadge = null;
+
+     this.currentResizeHandlers = null;
+    this.currentDragHandlers = null;
 
         this.init();
     }
@@ -57,7 +68,8 @@ this.typingText = document.getElementById('chatTypingText');
         console.log('[Chat] 🚀 Inicializando...', {
             salaId: this.salaId,
             userId: this.userId,
-            userAge: this.userAge
+            userAge: this.userAge,
+            isInGrid: this.isInGrid
         });
 
         await this.initModeration();
@@ -65,6 +77,12 @@ this.typingText = document.getElementById('chatTypingText');
         this.setupEventListeners();
         this.setupWebSocket();
 
+        if (this.isInGrid) {
+        setTimeout(() => {
+            this.setupFloatingBehavior();
+        }, 100);
+    }
+    
         setTimeout(() => {
     this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
     console.log('[Chat] 📍 Scroll posicionado no final:', this.messagesContainer.scrollHeight);
@@ -248,6 +266,9 @@ this.typingText = document.getElementById('chatTypingText');
             }
         }, 1000);
         
+
+        this.initResize();
+
         console.log('[Chat] ✅ WebSocket configurado');
     }
 
@@ -1535,6 +1556,529 @@ menu.style.left = `${left}px`;
         this.updateSelectedMessagesDisplay();
     }
 
+/**
+ * Configurar comportamento flutuante do chat na grid
+ */
+setupFloatingBehavior() {
+    console.log('[Chat] 🎮 Configurando chat flutuante para grid');
+    
+    // Adicionar classe para identificação
+    this.container.classList.add('chat-in-grid');
+    
+    // ✅ Inicializar variáveis de controle
+    this.resizeState = null;
+    this.dragState = null;
+    this.dimensionsBadge = null;
+    this.currentResizeHandlers = null;
+    this.currentDragHandlers = null;
+    
+    // Restaurar posição e tamanho salvos
+    this.restoreChatState();
+    
+    // Adicionar handles de resize
+    this.addResizeHandles();
+    
+    // Tornar arrastável
+    this.makeDraggable();
+    
+    // Adicionar badge de dimensões
+    this.addDimensionsBadge();
+    
+    // Salvar estado ao redimensionar/mover
+    this.setupAutoSave();
+}
+
+/**
+ * Adicionar handles de resize
+ */
+/**
+ * Adicionar handles de resize
+ */
+addResizeHandles() {
+    // Remover handles existentes primeiro
+    this.container.querySelectorAll('.chat-resize-handle').forEach(h => h.remove());
+    
+    const handles = `
+        <!-- Bordas -->
+        <div class="chat-resize-handle chat-resize-handle-top" data-direction="n"></div>
+        <div class="chat-resize-handle chat-resize-handle-bottom" data-direction="s"></div>
+        <div class="chat-resize-handle chat-resize-handle-left" data-direction="w"></div>
+        <div class="chat-resize-handle chat-resize-handle-right" data-direction="e"></div>
+        
+        <!-- Cantos -->
+        <div class="chat-resize-handle chat-resize-handle-corner chat-resize-handle-nw" data-direction="nw"></div>
+        <div class="chat-resize-handle chat-resize-handle-corner chat-resize-handle-ne" data-direction="ne"></div>
+        <div class="chat-resize-handle chat-resize-handle-corner chat-resize-handle-sw" data-direction="sw"></div>
+        <div class="chat-resize-handle chat-resize-handle-corner chat-resize-handle-se" data-direction="se"></div>
+    `;
+    
+    this.container.insertAdjacentHTML('beforeend', handles);
+    
+    // Configurar eventos após DOM atualizar
+    requestAnimationFrame(() => {
+        this.setupResizeEvents();
+    });
+    
+    console.log('[Chat] ✅ Handles de resize adicionados');
+}
+
+
+/**
+ * Configurar eventos de resize
+ */
+setupResizeEvents() {
+    const handles = this.container.querySelectorAll('.chat-resize-handle');
+    
+    console.log('[Chat] 🔧 Configurando', handles.length, 'handles de resize');
+    
+    handles.forEach((handle, index) => {
+        handle.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.startResize(e);
+        });
+        
+        console.log(`[Chat] ✅ Handle ${index + 1}:`, handle.dataset.direction);
+    });
+}
+
+startResize(e) {
+    const target = e.target.closest('.chat-resize-handle');
+    if (!target) return;
+    
+    const direction = target.dataset.direction;
+    if (!direction) return;
+    
+    console.log('[Chat] 🔲 Preparando resize:', direction);
+    
+    this.resizeState = {
+        isResizing: false,
+        isWaitingForMovement: true,
+        direction: direction,
+        startX: e.clientX,
+        startY: e.clientY,
+        startWidth: this.container.offsetWidth,
+        startHeight: this.container.offsetHeight,
+        startLeft: this.container.offsetLeft,
+        startTop: this.container.offsetTop
+    };
+    
+    const cursorMap = {
+        'n': 'ns-resize', 's': 'ns-resize', 'e': 'ew-resize', 'w': 'ew-resize',
+        'ne': 'nesw-resize', 'nw': 'nwse-resize', 'se': 'nwse-resize', 'sw': 'nesw-resize'
+    };
+    document.body.style.cursor = cursorMap[direction] || 'default';
+    
+    // ✅ CRÍTICO: Criar funções bound para poder remover depois
+    const moveHandler = (e) => this.doResize(e);
+    const stopHandler = () => this.stopResize();
+    
+    this.currentResizeHandlers = { move: moveHandler, stop: stopHandler };
+    
+    // ✅ CRÍTICO: Listeners no DOCUMENT, não no container
+    document.addEventListener('mousemove', moveHandler, true);
+    document.addEventListener('mouseup', stopHandler, true);
+    
+    console.log('[Chat] ✅ Listeners adicionados');
+}
+
+doResize(e) {
+    if (!this.resizeState) return;
+    
+    const { direction, startX, startY, startWidth, startHeight, startLeft, startTop, isWaitingForMovement } = this.resizeState;
+    
+    const deltaX = e.clientX - startX;
+    const deltaY = e.clientY - startY;
+    
+    // ✅ SE AINDA ESTÁ AGUARDANDO MOVIMENTO, VERIFICAR SE PASSOU DO THRESHOLD
+    if (isWaitingForMovement) {
+        const MOVEMENT_THRESHOLD = 5; // pixels mínimos de movimento
+        const totalMovement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        
+        if (totalMovement < MOVEMENT_THRESHOLD) {
+            // Ainda não moveu o suficiente, não fazer nada
+            return;
+        }
+        
+        // ✅ PASSOU DO THRESHOLD - ATIVAR RESIZE AGORA!
+        console.log('[Chat] 🔲 Resize ativado! Movimento:', totalMovement.toFixed(2), 'px');
+        this.resizeState.isResizing = true;
+        this.resizeState.isWaitingForMovement = false;
+        
+        // Ativar feedback visual AGORA
+        this.container.classList.add('is-resizing');
+        document.body.style.userSelect = 'none';
+    }
+    
+    // ✅ SÓ EXECUTA SE JÁ PASSOU DO THRESHOLD
+    if (!this.resizeState.isResizing) return;
+    
+    let newWidth = startWidth;
+    let newHeight = startHeight;
+    let newLeft = startLeft;
+    let newTop = startTop;
+    
+    const minWidth = 320;
+    const minHeight = 400;
+    const maxWidth = window.innerWidth - 40;
+    const maxHeight = window.innerHeight - 40;
+    
+    // ✅ HORIZONTAL (Leste/Oeste)
+    if (direction.includes('e')) {
+        // Arrastar para DIREITA = aumenta largura
+        newWidth = startWidth + deltaX;
+        newWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
+    }
+    
+    if (direction.includes('w')) {
+        // Arrastar para ESQUERDA = diminui largura E move container
+        const proposedWidth = startWidth - deltaX;
+        if (proposedWidth >= minWidth && proposedWidth <= maxWidth) {
+            newWidth = proposedWidth;
+            newLeft = startLeft + deltaX;
+            
+            // Não ultrapassar borda esquerda
+            if (newLeft < 0) {
+                newWidth = startWidth + startLeft;
+                newLeft = 0;
+            }
+        }
+    }
+    
+    // ✅ VERTICAL (Norte/Sul)
+    if (direction.includes('s')) {
+        // Arrastar para BAIXO = aumenta altura
+        newHeight = startHeight + deltaY;
+        newHeight = Math.max(minHeight, Math.min(maxHeight, newHeight));
+    }
+    
+    if (direction.includes('n')) {
+        // Arrastar para CIMA = diminui altura E move container
+        const proposedHeight = startHeight - deltaY;
+        if (proposedHeight >= minHeight && proposedHeight <= maxHeight) {
+            newHeight = proposedHeight;
+            newTop = startTop + deltaY;
+            
+            // Não ultrapassar borda superior
+            if (newTop < 0) {
+                newHeight = startHeight + startTop;
+                newTop = 0;
+            }
+        }
+    }
+    
+    // ✅ Não sair da tela (lado direito)
+    if (newLeft + newWidth > window.innerWidth) {
+        newWidth = window.innerWidth - newLeft;
+    }
+    
+    // ✅ Não sair da tela (lado inferior)
+    if (newTop + newHeight > window.innerHeight) {
+        newHeight = window.innerHeight - newTop;
+    }
+    
+    // ✅ Aplicar estilos em tempo real
+    this.container.style.setProperty('width', `${newWidth}px`, 'important');
+    this.container.style.setProperty('height', `${newHeight}px`, 'important');
+    this.container.style.setProperty('left', `${newLeft}px`, 'important');
+    this.container.style.setProperty('top', `${newTop}px`, 'important');
+    this.container.style.setProperty('right', 'auto', 'important');
+    this.container.style.setProperty('bottom', 'auto', 'important');
+    
+    // Atualizar badge
+    this.updateDimensionsBadge(newWidth, newHeight);
+}
+
+/**
+ * Parar resize (AO SOLTAR O MOUSE)
+ */
+stopResize() {
+    console.log('[Chat] 🛑 stopResize() DISPARADO');
+    
+    if (!this.resizeState) {
+        console.log('[Chat] ⚠️ Já estava limpo');
+        return;
+    }
+    
+    // ✅ REMOVER LISTENERS COM CAPTURE=TRUE
+    if (this.currentResizeHandlers) {
+        document.removeEventListener('mousemove', this.currentResizeHandlers.move, true);
+        document.removeEventListener('mouseup', this.currentResizeHandlers.stop, true);
+        this.currentResizeHandlers = null;
+        console.log('[Chat] 🧹 Listeners REMOVIDOS');
+    }
+    
+    // ✅ Limpar visual
+    this.container.classList.remove('is-resizing');
+    document.body.style.userSelect = '';
+    document.body.style.cursor = '';
+    
+    // ✅ Salvar se redimensionou
+    if (this.resizeState.isResizing) {
+        this.saveChatState();
+    }
+    
+    // ✅ Resetar estado
+    this.resizeState = null;
+    
+    console.log('[Chat] ✅✅✅ RESIZE COMPLETAMENTE LIMPO');
+}
+
+
+/**
+ * Tornar chat arrastável (COM DRAG)
+ */
+makeDraggable() {
+    const header = this.container.querySelector('.ambience-chat-top');
+    if (!header) {
+        console.warn('[Chat] Header não encontrado');
+        return;
+    }
+    
+    header.style.cursor = 'grab';
+    header.title = 'Arrastar para mover o chat';
+    
+    const onMouseDown = (e) => {
+        // Não arrastar se clicar em botões ou handles
+        if (e.target.closest('.ambience-toggle-btn') || 
+            e.target.closest('.chat-resize-handle')) {
+            return;
+        }
+        
+        // Só arrastar se clicar no header
+        if (!e.target.closest('.ambience-chat-top')) {
+            return;
+        }
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log('[Chat] 🖐️ Iniciando drag');
+        
+        // ✅ Guardar estado inicial
+        this.dragState = {
+            isDragging: true,
+            startX: e.clientX,
+            startY: e.clientY,
+            startLeft: this.container.offsetLeft,
+            startTop: this.container.offsetTop
+        };
+        
+        // ✅ Feedback visual
+        this.container.classList.add('is-dragging');
+        this.container.style.transition = 'none';
+        header.style.cursor = 'grabbing';
+        document.body.style.userSelect = 'none';
+        
+        // ✅ Criar handlers removíveis
+        this.currentDragHandlers = {
+            move: (e) => this.doDrag(e),
+            stop: () => this.stopDrag()
+        };
+        
+        // Adicionar listeners
+        document.addEventListener('mousemove', this.currentDragHandlers.move);
+        document.addEventListener('mouseup', this.currentDragHandlers.stop);
+        document.addEventListener('mouseleave', this.currentDragHandlers.stop);
+    };
+    
+    header.addEventListener('mousedown', onMouseDown);
+    
+    console.log('[Chat] ✅ Drag configurado');
+}
+
+/**
+ * Executar drag (ENQUANTO ARRASTA)
+ */
+doDrag(e) {
+    if (!this.dragState?.isDragging) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const deltaX = e.clientX - this.dragState.startX;
+    const deltaY = e.clientY - this.dragState.startY;
+    
+    let newLeft = this.dragState.startLeft + deltaX;
+    let newTop = this.dragState.startTop + deltaY;
+    
+    // Limites da tela
+    const maxX = window.innerWidth - this.container.offsetWidth;
+    const maxY = window.innerHeight - this.container.offsetHeight;
+    
+    newLeft = Math.max(0, Math.min(newLeft, maxX));
+    newTop = Math.max(0, Math.min(newTop, maxY));
+    
+    this.container.style.left = `${newLeft}px`;
+    this.container.style.top = `${newTop}px`;
+    this.container.style.right = 'auto';
+    this.container.style.bottom = 'auto';
+}
+
+/**
+ * Parar drag (AO SOLTAR O MOUSE)
+ */
+stopDrag() {
+    if (!this.dragState?.isDragging) return;
+    
+    console.log('[Chat] ✅ Drag finalizado');
+    
+    const header = this.container.querySelector('.ambience-chat-top');
+    
+    // ✅ Remover listeners
+    if (this.currentDragHandlers) {
+        document.removeEventListener('mousemove', this.currentDragHandlers.move);
+        document.removeEventListener('mouseup', this.currentDragHandlers.stop);
+        document.removeEventListener('mouseleave', this.currentDragHandlers.stop);
+        this.currentDragHandlers = null;
+    }
+    
+    // ✅ Resetar visual
+    this.container.classList.remove('is-dragging');
+    this.container.style.transition = '';
+    if (header) header.style.cursor = 'grab';
+    document.body.style.userSelect = '';
+    
+    // ✅ Resetar estado
+    this.dragState = null;
+    
+    // Salvar
+    this.saveChatState();
+}
+
+/**
+ * Adicionar badge de dimensões
+ */
+addDimensionsBadge() {
+    const badge = document.createElement('div');
+    badge.className = 'chat-dimensions-badge';
+    badge.textContent = '0 × 0';
+    this.container.appendChild(badge);
+    this.dimensionsBadge = badge;
+}
+
+/**
+ * Atualizar badge de dimensões
+ */
+updateDimensionsBadge(width, height) {
+    if (this.dimensionsBadge) {
+        this.dimensionsBadge.textContent = `${Math.round(width)} × ${Math.round(height)}`;
+    }
+}
+
+/**
+ * Salvar estado do chat
+ */
+saveChatState() {
+    const state = {
+        width: this.container.offsetWidth,
+        height: this.container.offsetHeight,
+        left: this.container.offsetLeft,
+        top: this.container.offsetTop
+    };
+    
+    try {
+        localStorage.setItem('ambience_chat_state', JSON.stringify(state));
+        console.log('[Chat] 💾 Estado salvo:', state);
+    } catch (error) {
+        console.warn('[Chat] Erro ao salvar:', error);
+    }
+}
+
+/**
+ * Restaurar estado do chat
+ */
+restoreChatState() {
+    try {
+        const savedState = localStorage.getItem('ambience_chat_state');
+        if (!savedState) return;
+        
+        const state = JSON.parse(savedState);
+        
+        const minWidth = 320;
+        const minHeight = 400;
+        const maxWidth = window.innerWidth - 40;
+        const maxHeight = window.innerHeight - 40;
+        
+        const width = Math.max(minWidth, Math.min(state.width, maxWidth));
+        const height = Math.max(minHeight, Math.min(state.height, maxHeight));
+        const left = Math.max(0, Math.min(state.left, window.innerWidth - width));
+        const top = Math.max(0, Math.min(state.top, window.innerHeight - height));
+        
+        this.container.style.width = `${width}px`;
+        this.container.style.height = `${height}px`;
+        this.container.style.left = `${left}px`;
+        this.container.style.top = `${top}px`;
+        this.container.style.right = 'auto';
+        this.container.style.bottom = 'auto';
+        
+        console.log('[Chat] ✅ Estado restaurado:', { width, height, left, top });
+    } catch (error) {
+        console.warn('[Chat] Erro ao restaurar:', error);
+    }
+}
+
+/**
+ * Auto-save ao redimensionar janela
+ */
+setupAutoSave() {
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            const maxWidth = window.innerWidth - 40;
+            const maxHeight = window.innerHeight - 40;
+            
+            if (this.container.offsetWidth > maxWidth) {
+                this.container.style.width = `${maxWidth}px`;
+            }
+            if (this.container.offsetHeight > maxHeight) {
+                this.container.style.height = `${maxHeight}px`;
+            }
+            
+            const maxLeft = window.innerWidth - this.container.offsetWidth;
+            const maxTop = window.innerHeight - this.container.offsetHeight;
+            
+            if (this.container.offsetLeft > maxLeft) {
+                this.container.style.left = `${Math.max(0, maxLeft)}px`;
+            }
+            if (this.container.offsetTop > maxTop) {
+                this.container.style.top = `${Math.max(0, maxTop)}px`;
+            }
+            
+            this.saveChatState();
+        }, 250);
+    });
+}
+
+/**
+ * Limpar todos os listeners
+ */
+cleanup() {
+    console.log('[Chat] 🧹 Limpando listeners...');
+    
+    // Limpar resize
+    if (this.currentResizeHandlers) {
+        document.removeEventListener('mousemove', this.currentResizeHandlers.move);
+        document.removeEventListener('mouseup', this.currentResizeHandlers.stop);
+        document.removeEventListener('mouseleave', this.currentResizeHandlers.stop);
+        this.currentResizeHandlers = null;
+    }
+    
+    // Limpar drag
+    if (this.currentDragHandlers) {
+        document.removeEventListener('mousemove', this.currentDragHandlers.move);
+        document.removeEventListener('mouseup', this.currentDragHandlers.stop);
+        document.removeEventListener('mouseleave', this.currentDragHandlers.stop);
+        this.currentDragHandlers = null;
+    }
+    
+    // Limpar typing
+    this.clearTypingState();
+    
+    console.log('[Chat] ✅ Cleanup completo');
+}
+
     scrollToBottom(smooth = false) {
         const scrollOptions = {
             top: this.messagesContainer.scrollHeight,
@@ -1585,6 +2129,13 @@ menu.style.left = `${left}px`;
     }
 }
 
+document.addEventListener('mouseup', () => {
+    console.log('[DEBUG] 🖱️ MouseUp global detectado');
+    if (window.chatSystem && window.chatSystem.resizeState) {
+        console.log('[DEBUG] ⚠️ ResizeState ainda ativo:', window.chatSystem.resizeState);
+    }
+});
+
 // Inicializar
 let chatSystem;
 document.addEventListener('DOMContentLoaded', () => {
@@ -1596,7 +2147,19 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 window.addEventListener('beforeunload', () => {
-    if (chatSystem) {
-        chatSystem.clearTypingState();
+    if (chatSystem && typeof chatSystem.cleanup === 'function') {
+        chatSystem.cleanup();
+    }
+});
+
+// ✅ Limpar ao ocultar página
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden && chatSystem) {
+        if (chatSystem.resizeState?.isResizing) {
+            chatSystem.stopResize();
+        }
+        if (chatSystem.dragState?.isDragging) {
+            chatSystem.stopDrag();
+        }
     }
 });

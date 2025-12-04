@@ -5,509 +5,539 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $usuario->username }} - Moderação</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 40px 20px;
-        }
-
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        /* Back Button */
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 15px;
-            margin-bottom: 24px;
-            transition: opacity 0.2s;
-        }
-
-        .back-link:hover {
-            opacity: 0.8;
-        }
-
-        /* Grid Layout */
-        .grid-layout {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 30px;
-        }
-
-        /* Main Content */
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            padding: 40px;
-        }
-
-        /* Profile Header */
-        .profile-header {
-            display: flex;
-            gap: 24px;
-            align-items: flex-start;
-            margin-bottom: 32px;
-        }
-
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid #667eea;
-        }
-
-        .profile-info {
-            flex: 1;
-        }
-
-        .profile-name {
-            font-size: 32px;
-            font-weight: 700;
-            color: #1a202c;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .profile-email {
-            font-size: 16px;
-            color: #6b7280;
-            margin-bottom: 16px;
-        }
-
-        .profile-badges {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .badge {
-            padding: 6px 14px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        .badge.nivel-admin { background: #fef3c7; color: #92400e; }
-        .badge.nivel-moderador { background: #dbeafe; color: #1e40af; }
-        .badge.nivel-usuario { background: #e5e7eb; color: #374151; }
-        .badge.status-ativo { background: #d1fae5; color: #065f46; }
-        .badge.status-inativo { background: #fee2e2; color: #991b1b; }
-        .badge.warning { background: #fef3c7; color: #92400e; }
-        .badge.ban { background: #fee2e2; color: #991b1b; }
-        .badge.ip-ban { background: #fecaca; color: #7f1d1d; }
-
-        /* Bio */
-        .profile-bio {
-            margin-top: 20px;
-            padding: 20px;
-            background: #f9fafb;
-            border-radius: 12px;
-            font-size: 15px;
-            line-height: 1.6;
-            color: #374151;
-        }
-
-        /* Stats Grid */
-        .stats-mini-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-top: 24px;
-        }
-
-        .stat-mini {
-            padding: 16px;
-            background: #f9fafb;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .stat-mini-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1a202c;
-            margin-bottom: 4px;
-        }
-
-        .stat-mini-label {
-            font-size: 12px;
-            color: #6b7280;
-            font-weight: 600;
-        }
-
-        /* Section Title */
-        .section-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1a202c;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        /* Histórico de Punições */
-        .historico-item {
-            padding: 20px;
-            background: #f9fafb;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            border-left: 4px solid;
-        }
-
-        .historico-item.yellow { border-color: #f59e0b; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); }
-        .historico-item.red { border-color: #ef4444; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); }
-        .historico-item.gray { border-color: #6b7280; background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); }
-
-        .historico-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
-
-        .historico-tipo {
-            font-size: 16px;
-            font-weight: 700;
-            color: #1a202c;
-        }
-
-        .historico-motivo {
-            font-size: 14px;
-            color: #374151;
-            line-height: 1.6;
-            margin-bottom: 12px;
-        }
-
-        .historico-meta {
-            font-size: 13px;
-            color: #6b7280;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        /* Tickets List */
-        .ticket-item {
-            padding: 20px;
-            background: #f9fafb;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-            transition: all 0.2s;
-        }
-
-        .ticket-item:hover {
-            background: #f3f4f6;
-            transform: translateX(5px);
-        }
-
-        .ticket-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .ticket-numero {
-            font-size: 16px;
-            font-weight: 700;
-            color: #667eea;
-        }
-
-        .ticket-titulo {
-            font-size: 14px;
-            color: #1a202c;
-            margin-bottom: 8px;
-        }
-
-        .ticket-meta {
-            font-size: 13px;
-            color: #6b7280;
-        }
-
-        .badge.ticket-novo { background: #dbeafe; color: #1e40af; }
-        .badge.ticket-analise { background: #fef3c7; color: #92400e; }
-        .badge.ticket-resolvido { background: #d1fae5; color: #065f46; }
-        .badge.ticket-fechado { background: #e5e7eb; color: #374151; }
-        .badge.ticket-denuncia { background: #fee2e2; color: #991b1b; }
-
-        /* Contas Associadas */
-        .conta-associada {
-            padding: 16px;
-            background: #fef3c7;
-            border: 2px solid #f59e0b;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .conta-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .conta-info {
-            flex: 1;
-        }
-
-        .conta-username {
-            font-size: 14px;
-            font-weight: 600;
-            color: #1a202c;
-        }
-
-        .conta-email {
-            font-size: 12px;
-            color: #6b7280;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .sidebar-card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            padding: 28px;
-        }
-
-        .sidebar-card h3 {
-            font-size: 18px;
-            font-weight: 700;
-            color: #1a202c;
-            margin-bottom: 20px;
-        }
-
-        .info-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .info-item dt {
-            font-size: 13px;
-            font-weight: 600;
-            color: #6b7280;
-            margin-bottom: 4px;
-        }
-
-        .info-item dd {
-            font-size: 14px;
-            color: #1a202c;
-        }
-
-        /* Action Buttons */
-        .action-form {
-            margin-bottom: 12px;
-        }
-
-        .btn-action {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: white;
-        }
-
-        .btn-ban {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-        }
-
-        .btn-ip-ban {
-            background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%);
-            color: white;
-        }
-
-        .btn-delete {
-            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-            color: white;
-        }
-
-        .btn-reactivate {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-        }
-
-        .btn-action:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #9ca3af;
-        }
-
-        @media (max-width: 1200px) {
-            .grid-layout {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 20px 15px;
-            }
-
-            .card, .sidebar-card {
-                padding: 24px 20px;
-            }
-
-            .profile-header {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-
-            .stats-mini-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        /* Modal de Punição */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 16px;
-            padding: 32px;
-            max-width: 500px;
-            width: 90%;
-        }
-
-        .modal-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1a202c;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-
-        .form-input, .form-textarea {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            font-size: 15px;
-            font-family: inherit;
-            transition: all 0.3s ease;
-        }
-
-        .form-input:focus, .form-textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .btn-cancel {
-            flex: 1;
-            padding: 14px;
-            background: #e5e7eb;
-            color: #374151;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-submit {
-            flex: 1;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-    </style>
+<style>
+    /* ------------------------------------------------------------------
+       VARIÁVEIS & FUNDAMENTOS (Tema Ambience RPG)
+       ------------------------------------------------------------------ */
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@300;400;600;700;800&display=swap');
+
+    :root {
+        --bg-dark: #0a0f14;
+        --card: #1f2a33;
+        --muted: #8b9ba8;
+        --accent: #22c55e;
+        --accent-light: #16a34a;
+        --text-on-primary: #e6eef6;
+        --btn-gradient-start: #22c55e;
+        --btn-gradient-end: #16a34a;
+        --border-color: rgba(34, 197, 94, 0.2);
+        
+        /* Cores de Status/Ação */
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --danger-dark: #991b1b;
+        --success: #10b981;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Inter, system-ui, -apple-system, sans-serif;
+        background: linear-gradient(145deg, #0a0f14f4, #141c23f2);
+        color: var(--text-on-primary);
+        min-height: 100vh;
+        padding: 40px 20px;
+    }
+
+    .container {
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+    /* ------------------------------------------------------------------
+       NAVEGAÇÃO & LAYOUT
+       ------------------------------------------------------------------ */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 15px;
+        margin-bottom: 24px;
+        transition: all 0.2s;
+    }
+
+    .back-link:hover {
+        color: var(--accent);
+        transform: translateX(-5px);
+    }
+
+    .grid-layout {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 30px;
+    }
+
+    .main-content {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    /* ------------------------------------------------------------------
+       CARDS GERAIS
+       ------------------------------------------------------------------ */
+    .card, .sidebar-card {
+        background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        padding: 32px;
+        border: 1px solid var(--border-color);
+        animation: fadeInUp 0.5s ease both;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ------------------------------------------------------------------
+       PERFIL HEADER
+       ------------------------------------------------------------------ */
+    .profile-header {
+        display: flex;
+        gap: 24px;
+        align-items: flex-start;
+        margin-bottom: 32px;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--accent);
+        box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+    }
+
+    .profile-info { flex: 1; }
+
+    .profile-name {
+        font-family: Montserrat, sans-serif;
+        font-size: 32px;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .profile-email {
+        font-size: 16px;
+        color: var(--muted);
+        margin-bottom: 16px;
+    }
+
+    .profile-badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    /* Badges unificados */
+    .badge {
+        padding: 6px 14px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        border: 1px solid transparent;
+    }
+
+    .badge.nivel-admin { background: rgba(234, 179, 8, 0.15); color: #facc15; border-color: rgba(234, 179, 8, 0.2); }
+    .badge.nivel-moderador { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border-color: rgba(59, 130, 246, 0.2); }
+    .badge.nivel-usuario { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border-color: rgba(148, 163, 184, 0.2); }
+    
+    .badge.status-ativo { background: rgba(34, 197, 94, 0.15); color: #4ade80; border-color: rgba(34, 197, 94, 0.2); }
+    .badge.status-inativo { background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.2); }
+    
+    .badge.warning { background: rgba(249, 115, 22, 0.15); color: #fb923c; border-color: rgba(249, 115, 22, 0.2); }
+    .badge.ban { background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.2); }
+    .badge.ip-ban { background: rgba(153, 27, 27, 0.3); color: #fca5a5; border-color: rgba(153, 27, 27, 0.4); }
+
+    /* Bio */
+    .profile-bio {
+        margin-top: 20px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        font-size: 15px;
+        line-height: 1.6;
+        color: var(--text-on-primary);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Stats Grid Mini */
+    .stats-mini-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-top: 24px;
+    }
+
+    .stat-mini {
+        padding: 16px;
+        background: rgba(34, 197, 94, 0.05);
+        border-radius: 12px;
+        text-align: center;
+        border: 1px solid rgba(34, 197, 94, 0.1);
+        transition: all 0.3s;
+    }
+
+    .stat-mini:hover {
+        background: rgba(34, 197, 94, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .stat-mini-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--accent);
+        margin-bottom: 4px;
+    }
+
+    .stat-mini-label {
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    /* ------------------------------------------------------------------
+       HISTÓRICO & LISTAS
+       ------------------------------------------------------------------ */
+    .section-title {
+        font-family: Montserrat, sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* Histórico */
+    .historico-item {
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        border-left: 4px solid;
+    }
+
+    .historico-item.yellow { 
+        border-color: var(--warning); 
+        background: linear-gradient(90deg, rgba(245, 158, 11, 0.05) 0%, transparent 100%); 
+    }
+    .historico-item.red { 
+        border-color: var(--danger); 
+        background: linear-gradient(90deg, rgba(239, 68, 68, 0.05) 0%, transparent 100%); 
+    }
+    .historico-item.gray { 
+        border-color: var(--muted); 
+        background: linear-gradient(90deg, rgba(139, 155, 168, 0.05) 0%, transparent 100%); 
+    }
+
+    .historico-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+
+    .historico-tipo {
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .historico-motivo {
+        font-size: 14px;
+        color: #ccc;
+        line-height: 1.6;
+        margin-bottom: 12px;
+    }
+
+    .historico-meta {
+        font-size: 13px;
+        color: var(--muted);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    /* Tickets */
+    .ticket-item {
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        margin-bottom: 16px;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        transition: all 0.3s;
+    }
+
+    .ticket-item:hover {
+        background: rgba(34, 197, 94, 0.05);
+        border-color: var(--accent);
+        transform: translateX(5px);
+    }
+
+    .ticket-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .ticket-numero {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .ticket-titulo {
+        font-size: 15px;
+        color: #fff;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    .ticket-meta { font-size: 13px; color: var(--muted); }
+
+    /* Badges de Tickets */
+    .badge.ticket-novo { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .badge.ticket-analise { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .badge.ticket-resolvido { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    .badge.ticket-fechado { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; }
+    .badge.ticket-denuncia { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+    /* Contas Associadas */
+    .conta-associada {
+        padding: 16px;
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: 12px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.2s;
+    }
+
+    .conta-associada:hover {
+        background: rgba(245, 158, 11, 0.15);
+        border-color: rgba(245, 158, 11, 0.5);
+    }
+
+    .conta-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .conta-info { flex: 1; }
+    .conta-username { font-size: 14px; font-weight: 600; color: #fff; }
+    .conta-email { font-size: 12px; color: var(--muted); }
+
+    /* ------------------------------------------------------------------
+       SIDEBAR & ACTIONS
+       ------------------------------------------------------------------ */
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .sidebar-card h3 {
+        font-family: Montserrat, sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 20px;
+    }
+
+    .info-list { display: flex; flex-direction: column; gap: 16px; }
+
+    .info-item dt {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-item dd { font-size: 15px; color: #fff; font-weight: 500; }
+
+    /* Action Buttons */
+    .btn-action {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-warning {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .btn-warning:hover { background: rgba(245, 158, 11, 0.25); border-color: #fbbf24; transform: translateY(-2px); }
+
+    .btn-ban {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .btn-ban:hover { background: rgba(239, 68, 68, 0.25); border-color: #f87171; transform: translateY(-2px); }
+
+    .btn-ip-ban {
+        background: rgba(153, 27, 27, 0.2);
+        color: #fca5a5;
+        border: 1px solid rgba(153, 27, 27, 0.4);
+    }
+    .btn-ip-ban:hover { background: rgba(153, 27, 27, 0.3); border-color: #fca5a5; transform: translateY(-2px); }
+
+    .btn-reactivate {
+        background: rgba(34, 197, 94, 0.15);
+        color: #4ade80;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    .btn-reactivate:hover { background: rgba(34, 197, 94, 0.25); border-color: #4ade80; transform: translateY(-2px); }
+
+    .empty-state { text-align: center; padding: 40px; color: var(--muted); }
+
+    /* ------------------------------------------------------------------
+       MODAL DE PUNIÇÃO
+       ------------------------------------------------------------------ */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(5px);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal.active { display: flex; animation: fadeIn 0.3s ease; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal-content {
+        background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 32px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-title {
+        font-family: Montserrat, sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 24px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+
+    .form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-on-primary);
+        margin-bottom: 8px;
+    }
+
+    .form-input, .form-textarea {
+        width: 100%;
+        padding: 14px 16px;
+        background: rgba(10, 15, 20, 0.6);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 15px;
+        font-family: Inter, sans-serif;
+        color: #fff;
+        transition: all 0.3s ease;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
+
+    .form-textarea { resize: vertical; min-height: 120px; }
+
+    .modal-actions { display: flex; gap: 12px; margin-top: 30px; }
+
+    .btn-cancel {
+        flex: 1;
+        padding: 14px;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--muted);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-cancel:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+
+    .btn-submit {
+        flex: 1;
+        padding: 14px;
+        background: linear-gradient(to right, var(--btn-gradient-start), var(--btn-gradient-end));
+        color: #052e16;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4); }
+
+    /* Responsividade */
+    @media (max-width: 1200px) {
+        .grid-layout { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+        body { padding: 20px 15px; }
+        .card, .sidebar-card { padding: 24px 20px; }
+        .profile-header { flex-direction: column; align-items: center; text-align: center; }
+        .stats-mini-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
 </head>
 <body>
     <div class="container">
@@ -619,7 +649,7 @@
 
                 <!-- Tickets do Usuário -->
                 <div class="card">
-                    <h2 class="section-title">🎫 Tickets Relacionados</h2>
+                    <h2 class="section-title"> Tickets Relacionados</h2>
 
                     @forelse($tickets as $ticket)
                         <a href="{{ route('suporte.show', $ticket->id) }}" class="ticket-item">
@@ -672,7 +702,7 @@
             <div class="sidebar">
                 <!-- Informações -->
                 <div class="sidebar-card">
-                    <h3>ℹ️ Informações</h3>
+                    <h3><img src="/images/ICONS/info.png" alt="Informações" style="width:24px; height:24px; margin-right:6px;"> Informações</h3>
                     
                     <dl class="info-list">
                         <div class="info-item">
@@ -700,7 +730,7 @@
                 <!-- Ações de Moderação -->
                 <!-- Ações de Moderação -->
                 <div class="sidebar-card">
-    <h3>⚙️ Ações de Moderação</h3>
+    <h3><img src="/images/ICONS/badge.png" alt="Adicionar comentário" style="width:28px; height:28x; margin-right:6px;"> Ações de Moderação</h3>
 
     @if(!$usuario->warning_ativo && !$usuario->ban_tipo && !$usuario->ip_ban_ativo)
         <!-- Sem punições - mostrar botões de punir -->
@@ -709,7 +739,7 @@
         <button type="button" 
                 onclick="openPunishmentModal('warning', {{ $usuario->id }})" 
                 class="btn-action btn-warning">
-            ⚠️ Aplicar Warning
+             Aplicar Warning
         </button>
 
         <!-- Ban Temporário -->
@@ -717,7 +747,7 @@
                 onclick="openPunishmentModal('ban-temp', {{ $usuario->id }})" 
                 class="btn-action btn-ban" 
                 style="margin-top: 12px;">
-            🚫 Ban Temporário
+             Ban Temporário
         </button>
 
         <!-- Ban Permanente -->
@@ -725,7 +755,7 @@
                 onclick="openPunishmentModal('perma-ban', {{ $usuario->id }})" 
                 class="btn-action btn-ban" 
                 style="margin-top: 12px;">
-            ⛔ Ban Permanente
+             Ban Permanente
         </button>
 
         @if(auth()->user()->isAdmin())
@@ -734,7 +764,7 @@
                     onclick="openPunishmentModal('ip-ban', {{ $usuario->id }})" 
                     class="btn-action btn-ip-ban" 
                     style="margin-top: 12px;">
-                🛡️ IP Ban
+                 IP Ban
             </button>
         @endif
     @else
@@ -754,7 +784,7 @@
                         <strong style="color: #991b1b; font-size: 13px;">⚠️ IP BAN ATIVO</strong>
                     </div>
                     <button type="submit" class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
-                        🔓 Remover IP Ban
+                         Remover IP Ban
                     </button>
                 </form>
             @endif
@@ -891,7 +921,7 @@
 
             case 'ip-ban':
                 form.action = `/moderacao/usuarios/${userId}/ip-ban`;
-                title.textContent = '🛡️ Aplicar IP Ban';
+                title.textContent = '📡 Aplicar IP Ban';
                 submitBtn.textContent = 'Aplicar IP Ban';
                 submitBtn.style.background = 'linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%)';
                 break;

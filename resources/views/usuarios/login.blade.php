@@ -100,8 +100,9 @@ body{
   animation:portalClose 0.6s cubic-bezier(0.6,-0.28,0.735,0.045) forwards;
 }
 
+/* ========== CARD DE LOGIN (mesmo estilo do register-card) ========== */
 .login-card{
-  background:rgba(17,24,39,0.95);
+  background:rgba(17, 24, 39, 0);                /* igual ao register-card */
   backdrop-filter:blur(20px);
   border-radius:24px;
   padding:3rem 2.5rem;
@@ -109,6 +110,7 @@ body{
   border:1px solid rgba(34,197,94,0.1);
   position:relative;
   overflow:hidden;
+  z-index:0;
 }
 
 .login-card::before{
@@ -118,9 +120,10 @@ body{
   left:-50%;
   width:200%;
   height:200%;
-  background:radial-gradient(circle,rgba(34,197,94,0.1) 0%,transparent 70%);
+  background: linear-gradient(145deg, #0a0f14bf, #141c23f2); /* mesmo gradient */
   animation:glowPulse 4s ease-in-out infinite;
   pointer-events:none;
+  z-index:-1;
 }
 
 /* ========== LOGO E TÍTULO ========== */
@@ -204,7 +207,7 @@ body{
 .form-input{
   width:100%;
   padding:1rem 1rem 1rem 3rem;
-  background:#1f2937;
+  background:#0e1422ff;                /* harmoniza com register inputs */
   border:2px solid #374151;
   border-radius:12px;
   font-size:1rem;
@@ -276,6 +279,7 @@ body{
   color:var(--accent-light);
   transform:translateX(4px);
 }
+
 
 /* ========== BOTÃO DE LOGIN ========== */
 .login-button{

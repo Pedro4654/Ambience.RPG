@@ -34,6 +34,12 @@ Broadcast::routes(['middleware' => ['web', 'auth']]);
 Route::get('/ban-ip', [App\Http\Controllers\ModeracaoUsuarioController::class, 'mostrarIpBan'])
     ->name('public.ip_ban'); // rota pública para mostrar IP ban para visitantes/guests
 
+    // ==================== ROTA FAQ SUPORTE ====================
+Route::get('/suporte/faq', function () {
+    return view('suporte.faq');
+})->name('suporte.faq');
+
+
 // Rotas de Chat (dentro do grupo middleware 'auth')
 Route::middleware(['auth'])->prefix('salas/{id}/chat')->name('chat.')->group(function () {
     
@@ -798,4 +804,4 @@ Route::prefix('api/comunidade')->name('api.comunidade.')->middleware('auth')->gr
     Route::post('/saved', [\App\Http\Controllers\SavedPostController::class, 'store']);
     Route::delete('/saved/{post_id}', [\App\Http\Controllers\SavedPostController::class, 'destroy']);
     Route::get('/saved', [\App\Http\Controllers\SavedPostController::class, 'index']);
-});
+}); 

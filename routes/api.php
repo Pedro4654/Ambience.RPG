@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\OwlbearGameController;
 use App\Http\Controllers\Api\OwlbearMapController;
@@ -96,6 +95,28 @@ Route::post('/sessoes/{sessao_id}/finalizar', function($sessao_id) {
         ]);
     }
     return response()->json(['success' => true]);
+})->middleware('web');
+
+
+Route::get('/salas/{sala_id}/info-chat', function($sala_id) {
+    $sala = \App\Models\Sala::with('criador')->find($sala_id);
+    
+    if (!$sala) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Sala não encontrada'
+        ], 404);
+    }
+    
+    return response()->json([
+        'success' => true,
+        'sala' => [
+            'id' => $sala->id,
+            'nome' => $sala->nome,
+            'criador_id' => $sala->criador_id,
+            'sessao_id' => $sala->sessao_id
+        ]
+    ]);
 })->middleware('web');
 
 }); 

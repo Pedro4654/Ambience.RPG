@@ -2556,4 +2556,29 @@ public function getMinhasSalasDesativadas(Request $request)
         'total' => $salas->count()
     ]);
 }
+
+/**
+ * Buscar dados da sala para chat na grid
+ * GET /api/salas/{id}/info-chat
+ */
+public function infoChat($id)
+{
+    try {
+        $sala = Sala::with('criador')->findOrFail($id);
+        
+        return response()->json([
+            'success' => true,
+            'sala' => [
+                'id' => $sala->id,
+                'nome' => $sala->nome,
+                'criador_id' => $sala->criador_id
+            ]
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Sala não encontrada'
+        ], 404);
+    }
+}
 }

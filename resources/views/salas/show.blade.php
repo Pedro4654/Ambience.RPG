@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $sala->nome }} - Ambience RPG</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
+<!--show.blade.php -->
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     
@@ -2849,59 +2849,67 @@
     @endif
 
     <!-- Sessão Ativa -->
-    @if($sessao_ativa)
-        <div class="session-alert fade-in">
-            <div class="session-alert-content">
-                <div class="session-info">
-                    <h3>
-    <svg style="width:20px;height:20px;margin-right:8px;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="2" y="7" width="20" height="15" rx="2" ry="2"/>
-        <polyline points="17 2 12 7 7 2"/>
-    </svg>
-    Sessão em Andamento
-</h3>
-                    <p>{{ $sessao_ativa->nome_sessao }}</p>
-                    <p style="font-size: 0.75rem; color: var(--text-muted);">Status: {{ ucfirst($sessao_ativa->status) }}</p>
-                </div>
-                <div>
-                    @if($participa_na_sessao)
-                        <a href="{{ route('sessoes.show', ['id' => $sessao_ativa->id]) }}" class="btn-action btn-primary">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="1" y="3" width="15" height="13"/>
-        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
-        <circle cx="5.5" cy="18.5" r="2.5"/>
-        <circle cx="18.5" cy="18.5" r="2.5"/>
-    </svg>
-    Ir para Sessão
-</a>
+    <!-- Sessão Ativa -->
+@if($sessao_ativa)
+    <div class="session-alert fade-in">
+        <div class="session-alert-content">
+            <div class="session-info">
+                <h3>
+                    <svg style="width:20px;height:20px;margin-right:8px;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="7" width="20" height="15" rx="2" ry="2"/>
+                        <polyline points="17 2 12 7 7 2"/>
+                    </svg>
+                    Sessão em Andamento
+                </h3>
+                <p>{{ $sessao_ativa->nome_sessao }}</p>
+                <p style="font-size: 0.75rem; color: var(--text-muted);">
+                    Status: 
+                    @if($sessao_ativa->status === 'pausada')
+                        <span style="color: #fbbf24;">⏸️ Pausada</span>
                     @else
-                        <form action="{{ route('sessoes.entrar', ['id' => $sessao_ativa->id]) }}" method="POST" style="display: inline;">
-                            @csrf
-                            <button type="submit" class="btn-action btn-primary">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-        <polyline points="10 17 15 12 10 7"/>
-        <line x1="15" y1="12" x2="3" y2="12"/>
-    </svg>
-    Entrar na Sessão
-</button>
-                        </form>
+                        <span style="color: var(--accent);">▶️ Ativa</span>
                     @endif
-                </div>
+                </p>
+            </div>
+            <div>
+                @if($participa_na_sessao && $sessao_ativa->status === 'ativa')
+                    {{-- Quem JÁ participa sempre pode voltar --}}
+                    <a href="{{ route('sessoes.show', ['id' => $sessao_ativa->id]) }}" class="btn-action btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="1" y="3" width="15" height="13"/>
+                            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                            <circle cx="5.5" cy="18.5" r="2.5"/>
+                            <circle cx="18.5" cy="18.5" r="2.5"/>
+                        </svg>
+Entrar na Sessão
+                    </a>
+                
+                @elseif($sessao_ativa->status === 'ativa')
+                    {{-- Sessão pausada - não pode entrar --}}
+                    <div style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 1rem;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; margin-bottom: 0.5rem; stroke: #fbbf24;">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        <p>Sessão pausada pelo mestre.<br>Aguarde a retomada.</p>
+                    </div>
+                @endif
             </div>
         </div>
-    @else
-        @if($minhas_permissoes && $minhas_permissoes->pode_iniciar_sessao)
-    <div style="text-align: right; margin-bottom: 2rem; margin-top: 1.5rem;">
-        <button id="btnIniciarSessao" class="btn-action btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="5 3 19 12 5 21 5 3"/>
-            </svg>
-            Iniciar Sessão
-        </button>
     </div>
-@endif
+@else
+    @if($minhas_permissoes && $minhas_permissoes->pode_iniciar_sessao)
+        <div style="text-align: right; margin-bottom: 2rem; margin-top: 1.5rem;">
+            <button id="btnIniciarSessao" class="btn-action btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Iniciar Sessão
+            </button>
+        </div>
     @endif
+@endif
 
     <!-- Grid Principal -->
     <div class="sala-grid">

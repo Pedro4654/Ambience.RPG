@@ -1274,6 +1274,33 @@
 .ambience-action-menu-btn {
     display: none !important;
 }
+
+.chat-in-grid .ambience-chat-mockup {
+    height: 100% !important; /* ✅ Altura flexível APENAS na grid */
+    min-height: 100% !important;
+    max-height: 100% !important;
+}
+
+.chat-in-grid .ambience-chat-card {
+    height: 100% !important;
+    max-height: 100% !important;
+}
+
+.chat-in-grid .ambience-chat-wrapper {
+    height: 100% !important;
+    max-height: 100% !important;
+}
+
+/* ✅ IMPORTANTE: Resetar transições durante resize/drag na grid */
+.chat-in-grid.is-resizing,
+.chat-in-grid.is-resizing * {
+    transition: none !important;
+}
+
+.chat-in-grid.is-dragging,
+.chat-in-grid.is-dragging * {
+    transition: none !important;
+}
 </style>
 
 <script>

@@ -1,0 +1,371 @@
+/* ========================================
+   CHAT FLUTUANTE - AMBIENCE RPG
+   Posicionamento sobre a grid sem interferir
+   ======================================== */
+
+/* ==================== CONTAINER FLUTUANTE ==================== */
+#chatContainer {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    width: 380px !important;
+    max-width: calc(100vw - 40px) !important;
+    height: 600px !important;
+    max-height: calc(100vh - 40px) !important;
+    z-index: 9997 !important;
+    pointer-events: auto !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+    border-radius: 20px !important;
+    overflow: hidden !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* ==================== ESTADO MINIMIZADO ==================== */
+#chatContainer.collapsed {
+    height: 60px !important;
+    width: 300px !important;
+}
+
+#chatContainer.collapsed .ambience-chat-card {
+    padding: 0 !important;
+    height: 60px !important;
+}
+
+#chatContainer.collapsed .ambience-chat-mockup {
+    min-height: 60px !important;
+    height: 60px !important;
+    max-height: 60px !important;
+    padding: 12px 20px !important;
+}
+
+#chatContainer.collapsed .ambience-chat-messages,
+#chatContainer.collapsed .ambience-chat-input-area,
+#chatContainer.collapsed .ambience-typing-indicator {
+    display: none !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* ==================== AJUSTES DO CARD ==================== */
+.ambience-chat-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: 100% !important;
+}
+
+.ambience-chat-card {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 16px !important;
+    max-height: 100% !important;
+}
+
+.ambience-chat-mockup {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* ==================== ÁREA DE MENSAGENS ==================== */
+.ambience-chat-messages {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* ==================== BOTÃO TOGGLE ==================== */
+.ambience-toggle-btn {
+    cursor: pointer !important;
+    user-select: none !important;
+}
+
+.ambience-toggle-btn svg {
+    transition: transform 0.3s ease !important;
+}
+
+#chatContainer.collapsed .ambience-toggle-btn svg {
+    transform: rotate(180deg) !important;
+}
+
+/* ==================== RESPONSIVO ==================== */
+@media (max-width: 768px) {
+    #chatContainer {
+        bottom: 10px !important;
+        right: 10px !important;
+        width: calc(100vw - 20px) !important;
+        height: 400px !important;
+    }
+    
+    #chatContainer.collapsed {
+        width: 250px !important;
+        height: 50px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    #chatContainer {
+        bottom: 0 !important;
+        right: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 50vh !important;
+        border-radius: 20px 20px 0 0 !important;
+    }
+    
+    #chatContainer.collapsed {
+        height: 50px !important;
+        width: 100% !important;
+    }
+}
+
+/* ==================== AJUSTES PARA NÃO INTERFERIR NO IFRAME ==================== */
+#owlbear-frame {
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* ==================== SCROLL CUSTOMIZADO ==================== */
+.ambience-chat-messages::-webkit-scrollbar {
+    width: 6px !important;
+}
+
+.ambience-chat-messages::-webkit-scrollbar-track {
+    background: rgba(17, 24, 39, 0.5) !important;
+    border-radius: 3px !important;
+}
+
+.ambience-chat-messages::-webkit-scrollbar-thumb {
+    background: rgba(34, 197, 94, 0.3) !important;
+    border-radius: 3px !important;
+}
+
+.ambience-chat-messages::-webkit-scrollbar-thumb:hover {
+    background: rgba(34, 197, 94, 0.5) !important;
+}
+
+/* ==================== ANIMAÇÕES ==================== */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+#chatContainer {
+    animation: slideInRight 0.3s ease-out !important;
+}
+
+/* ==================== HOVER EFFECTS ==================== */
+#chatContainer:hover {
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* ==================== DARK OVERLAY (OPCIONAL) ==================== */
+.ambience-chat-card {
+    background: linear-gradient(145deg, rgba(31, 42, 51, 0.98), rgba(20, 28, 35, 0.95)) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+}
+#chatContainer.chat-in-grid {
+    position: fixed !important;
+    resize: none !important;
+    overflow: visible !important;
+    min-width: 320px !important;
+    min-height: 400px !important;
+    max-width: calc(100vw - 40px) !important;
+    max-height: calc(100vh - 40px) !important;
+}
+
+/* ✅ Handles SEMPRE visíveis (mudar opacity para 1) */
+.chat-resize-handle {
+    position: absolute;
+    z-index: 10;
+    opacity: 0; /* ✅ Volta a 0, mas aumenta área de clique */
+    transition: opacity 0.2s ease;
+    pointer-events: auto !important; /* ✅ CRÍTICO */
+}
+
+#chatContainer:hover .chat-resize-handle {
+    opacity: 1;
+}
+
+/* Handles das Bordas */
+.chat-resize-handle-top {
+    top: -8px; /* ✅ Aumentado de -4px */
+    left: 20px; /* ✅ Afastado dos cantos */
+    right: 20px;
+    height: 16px; /* ✅ Aumentado de 8px */
+    cursor: ns-resize;
+    background: linear-gradient(to bottom, rgba(34, 197, 94, 0.3), transparent);
+    border-radius: 4px 4px 0 0;
+}
+
+.chat-resize-handle-bottom {
+    bottom: -8px;
+    left: 20px;
+    right: 20px;
+    height: 16px;
+    cursor: ns-resize;
+    background: linear-gradient(to top, rgba(34, 197, 94, 0.3), transparent);
+    border-radius: 0 0 4px 4px;
+}
+
+.chat-resize-handle-left {
+    left: -8px;
+    top: 20px;
+    bottom: 20px;
+    width: 16px;
+    cursor: ew-resize;
+    background: linear-gradient(to right, rgba(34, 197, 94, 0.3), transparent);
+    border-radius: 4px 0 0 4px;
+}
+
+.chat-resize-handle-right {
+    right: -8px;
+    top: 20px;
+    bottom: 20px;
+    width: 16px;
+    cursor: ew-resize;
+    background: linear-gradient(to left, rgba(34, 197, 94, 0.3), transparent);
+    border-radius: 0 4px 4px 0;
+}
+
+/* Handles dos Cantos */
+.chat-resize-handle-corner {
+    width: 20px !important; /* ✅ Aumentado de 16px */
+    height: 20px !important;
+    background: rgba(34, 197, 94, 0.5) !important; /* ✅ Mais opaco */
+    border: 2px solid rgba(34, 197, 94, 0.8) !important;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    z-index: 11 !important; /* ✅ Acima das bordas */
+}
+
+.chat-resize-handle-corner:hover {
+    background: rgba(34, 197, 94, 0.8) !important;
+    border-color: #22c55e !important;
+    transform: scale(1.3) !important; /* ✅ Aumentado de 1.2 */
+    box-shadow: 0 0 16px rgba(34, 197, 94, 0.6) !important;
+}
+
+.chat-resize-handle-nw {
+    top: -10px;
+    left: -10px;
+    cursor: nw-resize;
+}
+
+.chat-resize-handle-ne {
+    top: -10px;
+    right: -10px;
+    cursor: ne-resize;
+}
+
+.chat-resize-handle-sw {
+    bottom: -10px;
+    left: -10px;
+    cursor: sw-resize;
+}
+
+.chat-resize-handle-se {
+    bottom: -10px;
+    right: -10px;
+    cursor: se-resize;
+}
+
+#chatContainer.is-resizing {
+    transition: none !important;
+    user-select: none !important;
+}
+
+#chatContainer.is-resizing * {
+    pointer-events: none !important;
+    user-select: none !important;
+}
+
+/* ✅ Estado de Drag Ativo */
+#chatContainer.is-dragging {
+    transition: none !important;
+    user-select: none !important;
+    cursor: grabbing !important;
+}
+
+#chatContainer.is-dragging * {
+    pointer-events: none !important;
+    cursor: grabbing !important;
+}
+
+/* ✅ Header drag indicator */
+.ambience-chat-top {
+    transition: background 0.2s ease;
+}
+
+#chatContainer.is-dragging .ambience-chat-top {
+    background: rgba(34, 197, 94, 0.1);
+    cursor: grabbing !important;
+}
+
+/* Ajustes para conteúdo interno responsivo */
+#chatContainer.chat-in-grid .ambience-chat-mockup {
+    height: 100% !important;
+    min-height: 100% !important;
+    max-height: 100% !important;
+}
+
+#chatContainer.chat-in-grid .ambience-chat-card {
+    height: 100% !important;
+}
+
+#chatContainer.chat-in-grid .ambience-chat-wrapper {
+    height: 100% !important;
+}
+
+/* Badge de dimensões (mostra ao redimensionar) */
+.chat-dimensions-badge {
+    position: absolute;
+    top: -32px;
+    right: 0;
+    padding: 4px 12px;
+    background: rgba(34, 197, 94, 0.95);
+    color: #052e16;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 6px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+    white-space: nowrap;
+}
+
+#chatContainer.is-resizing .chat-dimensions-badge {
+    opacity: 1;
+}
+
+/* Animação de mount */
+@keyframes chatMount {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+#chatContainer.chat-in-grid {
+    animation: chatMount 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}

@@ -20,7 +20,7 @@
   --transition-speed: 600ms;
   
   /* Variáveis para transição suave de temas */
-  --header-bg: rgba(10, 15, 20, 0.75);
+  --header-bg: #0a0f14bf;
   --gradient-start: #052e16;
   --gradient-mid: #064e3b;
   --gradient-end: #065f46;
@@ -31,7 +31,6 @@
 
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Inter,system-ui,-apple-system,sans-serif;background:#0a0f14;color:var(--text-on-primary);-webkit-font-smoothing:antialiased;line-height:1.5}
-
 /* Dropdown do Menu de Usuário */
 .user-dropdown{
   position:absolute;
@@ -180,7 +179,7 @@ body{font-family:Inter,system-ui,-apple-system,sans-serif;background:#0a0f14;col
 .container{max-width:1280px;margin:0 auto;padding:0 32px}
 .nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0;height:70px}
 .logo{display:flex;align-items:center;gap:12px;font-weight:800;font-size:19px;color:#fff;text-decoration:none}
-.logo-img{height:50px;width:auto;display:block}
+.logo-img{height:53px;width:auto;display:block}
 .nav-links{display:flex;gap:32px;align-items:center}
 .nav-links a{
   color:rgba(255,255,255,0.9);
@@ -679,17 +678,17 @@ body{font-family:Inter,system-ui,-apple-system,sans-serif;background:#0a0f14;col
 .cta-note{color:var(--muted);font-size:14px;margin-top:16px}
 
 /* Footer */
-.footer{border-top:1px solid rgba(34,197,94,0.1);padding:48px 0 24px;background:#0d1419}
+.footer{border-top:1px solid rgba(34,197,94,0.1);padding:38px 0 24px;background:#0d1419}
 .footer-columns{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1200px;margin:0 auto 32px;padding:0 32px}
 .footer-brand{display:flex;align-items:center;gap:12px;margin-bottom:14px;font-weight:800;font-size:18px}
-.footer-brand .logo-img{height:40px;width:auto}
+.footer-brand .logo-img{height:110px;width:auto}
 .footer h4{font-size:15px;font-weight:700;margin-bottom:14px;color:var(--accent);transition:color var(--transition-speed) ease}
 .footer ul{list-style:none}
 .footer ul li{margin:8px 0;color:var(--muted);font-size:14px;cursor:pointer;transition:color .2s}
 .footer ul li:hover{color:var(--accent)}
 .footer-text{color:var(--muted);font-size:14px;line-height:1.6;max-width:320px}
 .social-links{display:flex;gap:16px;margin-top:12px}
-.social-links svg{width:20px;height:20px;fill:var(--muted);cursor:pointer;transition:fill .2s}
+.social-links svg{width:25px;height:25px;fill:var(--muted);cursor:pointer;transition:fill .2s}
 .social-links svg:hover{fill:var(--accent)}
 .footer-bottom{text-align:center;color:var(--muted);font-size:13px;padding-top:24px;border-top:1px solid rgba(34,197,94,0.1);max-width:1200px;margin:0 auto;padding:24px 32px 0}
 
@@ -1028,7 +1027,7 @@ body{font-family:Inter,system-ui,-apple-system,sans-serif;background:#0a0f14;col
     <div class="dots" role="tablist" aria-hidden="false"></div>
     <div class="carousel-copy" id="carousel-title">
       <h3>Aqui na Ambience, nos adaptamos à sua aventura</h3>
-      <p>Toque as setas para mudar a paleta do site conforme o tema – medieval, cyberpunk ou floresta.</p>
+      <p>Envolva sua imaginação e mergulhe totalmente na história, onde cada decisão e personagem ganham vida na sua mente, criando uma experiência única e inesquecível.</p>
     </div>
   </div>
 </section>
@@ -1041,14 +1040,12 @@ body{font-family:Inter,system-ui,-apple-system,sans-serif;background:#0a0f14;col
     <div class="features-grid">
       <div class="card">
         <div class="icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M9 18V5l12-2v13"/>
-            <circle cx="6" cy="18" r="3"/>
-            <circle cx="18" cy="16" r="3"/>
-          </svg>
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
         </div>
-        <h3>Ambientes Sonoros</h3>
-        <p>Sons ambientes e músicas dinâmicas que se adaptam ao clima e cenário da sua campanha</p>
+        <h3>100% Gratuito</h3>
+        <p>Plataforma totalmente gratuita, sem custos ou limitações para todos os usuários.</p>
       </div>
 
       <div class="card">
@@ -1095,8 +1092,8 @@ body{font-family:Inter,system-ui,-apple-system,sans-serif;background:#0a0f14;col
             <circle cx="15.5" cy="15.5" r="1.5"/>
           </svg>
         </div>
-        <h3>Rolador de Dados</h3>
-        <p>Sistema avançado de rolagem com modificadores personalizados e cálculos automáticos</p>
+        <h3>Dados 3D</h3>
+        <p>Rolagem de dados 3D realista para suas campanhas de RPG.</p>
       </div>
 
       <div class="card">
@@ -1173,13 +1170,13 @@ body{font-family:Inter,system-ui,-apple-system,sans-serif;background:#0a0f14;col
   <p>Junte-se a milhares de jogadores e mestres que já usam o Ambience RPG para criar aventuras inesquecíveis.</p>
   <div class="cta-actions">
     @guest
-      <button class="btn primary" onclick="window.location.href='{{ route('usuarios.create') }}'">🚀 Criar Conta Grátis</button>
+      <button class="btn primary" onclick="window.location.href='{{ route('usuarios.create') }}'"> Criar Conta Grátis</button>
     @else
-      <button class="btn primary" onclick="window.location.href='{{ route('salas.index') }}'">🚀 Ir Para Minhas Salas</button>
+      <button class="btn primary" onclick="window.location.href='{{ route('salas.index') }}'"> Ir Para Minhas Salas</button>
     @endguest
     <button class="btn ghost" onclick="window.location.href='{{ route('salas.index') }}'">▶ Explorar Salas</button>
   </div>
-  <p class="cta-note">Sem necessidade de cartão de crédito • Totalmente gratuito</p>
+  <p class="cta-note">• Totalmente gratuito</p>
 </section>
 
 <footer class="footer">
@@ -1188,7 +1185,7 @@ body{font-family:Inter,system-ui,-apple-system,sans-serif;background:#0a0f14;col
       <div class="footer-brand">
         <img src="{{ asset('images/logo.png') }}" alt="Ambience RPG" class="logo-img">
       </div>
-      <p class="footer-text">Capacitando mestres e aventureiros em todo o mundo com a plataforma definitiva para RPG.</p>
+      <p class="footer-text"></p>
     </div>
     <div>
       <h4>Recursos</h4>
@@ -1203,24 +1200,24 @@ body{font-family:Inter,system-ui,-apple-system,sans-serif;background:#0a0f14;col
       <ul>
         <li onclick="window.location.href='{{ route('suporte.create') }}'">Criar Ticket</li>
         <li onclick="window.location.href='{{ route('suporte.index') }}'">Meus Tickets</li>
-        <li>Tutoriais</li>
-        <li>FAQ</li>
+        <li onclick="window.location.href='{{ route('suporte.faq') }}'">FAQ</li>
       </ul>
     </div>
     <div>
       <h4>Conecte-se</h4>
       <div class="social-links" aria-hidden="true">
+     
+<a href="https://www.youtube.com/@AmbienceRPG" target="_blank" aria-label="Youtube">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
-        </svg>
+  <path d="M10 15.5v-7l6 3.5-6 3.5ZM21.8 7.2a3 3 0 0 0-2.1-2.1C17.5 4.5 12 4.5 12 4.5s-5.5 0-7.7.6a3 3 0 0 0-2.1 2.1A31 31 0 0 0 1.5 12a31 31 0 0 0 .7 4.8 3 3 0 0 0 2.1 2.1c2.2.6 7.7.6 7.7.6s5.5 0 7.7-.6a3 3 0 0 0 2.1-2.1c.5-1.5.7-3.2.7-4.8s-.2-3.3-.7-4.8Z"/>
+</svg>
+
+<a href="https://instagram.com/ambience.rpg" target="_blank" aria-label="Instagram">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53a4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
-        </svg>
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"/>
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M12 5c3.87 0 7 3.13 7 7"/>
-        </svg>
+  <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm10 2H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3Zm-5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm4.75-3.25a1 1 0 1 1 0 2 1 1 0 0 1 0-2Z"/>
+</svg>
+</a>
+
       </div>
     </div>
   </div>
@@ -1707,6 +1704,8 @@ body{font-family:Inter,system-ui,-apple-system,sans-serif;background:#0a0f14;col
     }
   });
 })();
+
+
 </script>
 </body>
 </html>

@@ -1,12 +1,31 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Criar Ticket - Ambience RPG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-dark: #0a0f14;
+            --card: #1f2a33;
+            --muted: #8b9ba8;
+            --accent: #22c55e;
+            --accent-light: #16a34a;
+            --accent-dark: #15803d;
+            --hero-green: #052e16;
+            --text-on-primary: #e6eef6;
+            --transition-speed: 600ms;
+            --header-bg: rgba(10, 15, 20, 0.75);
+                --gradient-start: #022c22;  
+    --gradient-mid:   #034935ff;  
+    --gradient-end:   #1a422fff; 
+            --btn-gradient-start: #22c55e;
+            --btn-gradient-end: #16a34a;
+            --accent-border: rgba(34, 197, 94, 0.4);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,8 +33,11 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Inter, system-ui, -apple-system, sans-serif;
+           background: linear-gradient(145deg, #0a0f14f4, #141c23f2);
+            color: var(--text-on-primary);
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
             min-height: 100vh;
             padding: 40px 20px;
         }
@@ -25,23 +47,45 @@
             margin: 0 auto;
         }
 
+         .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 15px;
+        margin-bottom: 24px;
+        transition: all 0.2s;
+    }
+
+    .back-link:hover {
+        color: var(--accent);
+        transform: translateX(-5px);
+    }
+
         .header {
-            background: white;
-            padding: 30px;
+            background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
+            padding: 40px;
             border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
             margin-bottom: 30px;
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         .header h1 {
-            font-size: 32px;
-            color: #1a202c;
-            margin-bottom: 10px;
+            font-family: Montserrat, sans-serif;
+            font-size: 36px;
+            color: #fff;
+            margin-bottom: 12px;
+            font-weight: 900;
         }
 
         .header p {
-            color: #718096;
+            color: var(--muted);
             font-size: 16px;
+            line-height: 1.6;
         }
 
         .alert {
@@ -52,6 +96,8 @@
             align-items: flex-start;
             gap: 15px;
             animation: slideIn 0.3s ease-out;
+            background: linear-gradient(145deg, rgba(31, 42, 51, 0.6), rgba(20, 28, 35, 0.4));
+            border-left: 4px solid;
         }
 
         @keyframes slideIn {
@@ -66,33 +112,43 @@
         }
 
         .alert-error {
-            background: #fee;
-            border-left: 4px solid #f56565;
-            color: #742a2a;
+            border-left-color: #ef4444;
+            background: linear-gradient(145deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
         }
 
         .alert-icon {
             width: 24px;
             height: 24px;
             flex-shrink: 0;
+            color: #ef4444;
         }
 
         .form-card {
-            background: white;
+            background: linear-gradient(145deg, #0a0f14bf, #141c23f2);
             border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
             padding: 40px;
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
         .form-section {
             margin-bottom: 30px;
             padding-bottom: 30px;
-            border-bottom: 2px solid #f7fafc;
+            border-bottom: 2px solid rgba(34, 197, 94, 0.1);
         }
 
         .form-section:last-of-type {
             border-bottom: none;
             padding-bottom: 0;
+        }
+
+        .form-section h2 {
+            font-family: Montserrat, sans-serif;
+            font-size: 20px;
+            color: var(--accent);
+            margin-bottom: 20px;
+            font-weight: 700;
         }
 
         .form-group {
@@ -102,13 +158,13 @@
         .form-label {
             display: block;
             font-weight: 600;
-            color: #2d3748;
+            color: #fff;
             margin-bottom: 10px;
             font-size: 15px;
         }
 
         .required {
-            color: #f56565;
+            color: var(--accent);
             margin-left: 4px;
         }
 
@@ -117,20 +173,28 @@
         .form-textarea {
             width: 100%;
             padding: 14px 18px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid rgba(34, 197, 94, 0.2);
             border-radius: 10px;
             font-size: 15px;
             transition: all 0.3s ease;
             font-family: inherit;
+            background: #1f2a3380;
+            color: var(--text-on-primary);
         }
 
         .form-input:focus,
         .form-select:focus,
         .form-textarea:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+            background: rgba(31, 42, 51, 0.7);
         }
+
+        .form-select option {
+            background: var(--card);
+            color: var(--text-on-primary);
+}
 
         .form-textarea {
             resize: vertical;
@@ -139,7 +203,7 @@
         }
 
         .form-hint {
-            color: #718096;
+            color: var(--muted);
             font-size: 13px;
             margin-top: 8px;
             display: block;
@@ -158,14 +222,14 @@
             top: 100%;
             left: 0;
             right: 0;
-            background: white;
-            border: 2px solid #e2e8f0;
+            background: linear-gradient(145deg, rgba(31, 42, 51, 0.98), rgba(20, 28, 35, 0.98));
+            border: 2px solid rgba(34, 197, 94, 0.3);
             border-top: none;
             border-radius: 0 0 10px 10px;
             max-height: 300px;
             overflow-y: auto;
             z-index: 1000;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
         }
 
         .autocomplete-item {
@@ -174,12 +238,12 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            border-bottom: 1px solid #f7fafc;
+            border-bottom: 1px solid rgba(34, 197, 94, 0.1);
             transition: background 0.2s ease;
         }
 
         .autocomplete-item:hover {
-            background: #f7fafc;
+            background: rgba(34, 197, 94, 0.1);
         }
 
         .autocomplete-item img {
@@ -195,25 +259,24 @@
 
         .autocomplete-item-username {
             font-weight: 600;
-            color: #2d3748;
+            color: #fff;
         }
 
         .autocomplete-item-nickname {
             font-size: 13px;
-            color: #718096;
+            color: var(--muted);
         }
 
         .autocomplete-empty {
             padding: 20px;
             text-align: center;
-            color: #718096;
+            color: var(--muted);
         }
 
-        /* USUÁRIO SELECIONADO */
         .selected-user-card {
             display: none;
-            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
-            border: 2px solid #0284c7;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(22, 163, 74, 0.1));
+            border: 2px solid var(--accent);
             border-radius: 10px;
             padding: 16px;
             margin-top: 12px;
@@ -230,7 +293,7 @@
             height: 48px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #0284c7;
+            border: 2px solid var(--accent);
         }
 
         .selected-user-info {
@@ -239,13 +302,13 @@
 
         .selected-user-username {
             font-weight: 700;
-            color: #075985;
+            color: #fff;
             font-size: 16px;
         }
 
         .selected-user-nickname {
             font-size: 13px;
-            color: #0369a1;
+            color: var(--muted);
         }
 
         .remove-user-btn {
@@ -268,7 +331,6 @@
             transform: rotate(90deg);
         }
 
-        /* PREVIEW DE ARQUIVOS */
         .file-preview-container {
             margin-top: 16px;
             display: none;
@@ -285,8 +347,8 @@
         }
 
         .file-preview-item {
-            background: #f9fafb;
-            border: 2px solid #e5e7eb;
+            background: rgba(31, 42, 51, 0.6);
+            border: 2px solid rgba(34, 197, 94, 0.2);
             border-radius: 10px;
             padding: 12px;
             position: relative;
@@ -294,7 +356,8 @@
         }
 
         .file-preview-item:hover {
-            border-color: #667eea;
+            border-color: var(--accent);
+            transform: translateY(-2px);
         }
 
         .file-preview-image {
@@ -319,7 +382,7 @@
             align-items: center;
             justify-content: center;
             font-size: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
             border-radius: 6px;
             color: white;
             margin-bottom: 8px;
@@ -328,7 +391,7 @@
         .file-preview-name {
             font-size: 12px;
             font-weight: 600;
-            color: #1a202c;
+            color: #fff;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -336,7 +399,7 @@
 
         .file-preview-size {
             font-size: 11px;
-            color: #6b7280;
+            color: var(--muted);
         }
 
         .file-preview-remove {
@@ -368,30 +431,33 @@
             justify-content: flex-end;
             margin-top: 40px;
             padding-top: 30px;
-            border-top: 2px solid #f7fafc;
+            border-top: 2px solid rgba(34, 197, 94, 0.1);
         }
 
         .btn {
-            padding: 14px 32px;
+            padding: 14px 28px;
             border-radius: 10px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 15px;
             cursor: pointer;
             transition: all 0.3s ease;
             border: none;
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: Inter, sans-serif;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(to right, var(--btn-gradient-start), var(--btn-gradient-end));
+            color: var(--hero-green);
+            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
         }
 
         .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
         }
 
         .btn-primary:disabled {
@@ -401,12 +467,14 @@
         }
 
         .btn-secondary {
-            background: #e2e8f0;
-            color: #4a5568;
+            background: transparent;
+            border: 1px solid var(--accent-border);
+            color: var(--accent);
         }
 
         .btn-secondary:hover {
-            background: #cbd5e0;
+            background: rgba(34, 197, 94, 0.1);
+            border-color: var(--accent);
         }
 
         .file-input-wrapper {
@@ -422,22 +490,22 @@
             justify-content: center;
             gap: 10px;
             padding: 20px;
-            border: 2px dashed #cbd5e0;
+            border: 2px dashed rgba(34, 197, 94, 0.3);
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: #f7fafc;
+            background: rgba(31, 42, 51, 0.5);
         }
 
         .file-input-label:hover {
-            border-color: #667eea;
-            background: #edf2f7;
+            border-color: var(--accent);
+            background: rgba(34, 197, 94, 0.1);
         }
 
         .file-input-label svg {
             width: 24px;
             height: 24px;
-            color: #718096;
+            color: var(--accent);
         }
 
         input[type="file"] {
@@ -445,15 +513,14 @@
             left: -9999px;
         }
 
-        /* Alerta de moderação de imagem */
         .nsfw-warning {
             display: none;
-            background: #fee;
-            border-left: 4px solid #f56565;
+            background: linear-gradient(145deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+            border-left: 4px solid #ef4444;
             padding: 15px;
             border-radius: 8px;
             margin-top: 10px;
-            color: #742a2a;
+            color: #fee;
             font-size: 14px;
         }
 
@@ -462,15 +529,14 @@
             animation: slideIn 0.3s ease-out;
         }
 
-        /* Estilos para moderação de conteúdo */
         .input-warn {
             border: 2px solid #e0556b !important;
-            background: #fff6f7 !important;
+            background: rgba(224, 85, 107, 0.1) !important;
         }
 
         .moderation-warning {
             display: none;
-            color: #e0556b;
+            color: #ef4444;
             font-size: 0.85rem;
             margin-top: 4px;
             font-weight: 600;
@@ -503,7 +569,7 @@
             }
 
             .header h1 {
-                font-size: 24px;
+                font-size: 28px;
             }
 
             .form-actions {
@@ -513,6 +579,7 @@
             .btn {
                 width: 100%;
                 text-align: center;
+                justify-content: center;
             }
 
             .file-preview-grid {
@@ -524,9 +591,17 @@
 
 <body>
     <div class="container">
+        <!-- Back Link -->
+        <a href="{{ route('suporte.index') }}" class="back-link">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Voltar
+        </a>
+
         <!-- Header -->
         <div class="header">
-            <h1>✨ Criar Ticket de Suporte</h1>
+            <h1> Criar Ticket de Suporte</h1>
             <p>Descreva seu problema ou dúvida com o máximo de detalhes possível para que possamos ajudá-lo melhor.</p>
         </div>
 
@@ -563,27 +638,28 @@
 
                 <!-- Seção: Informações Básicas -->
                 <div class="form-section">
-                    <h2 style="font-size: 20px; color: #2d3748; margin-bottom: 20px;">📋 Informações Básicas</h2>
+                    <h2><img src="/images/ICONS/prancheta.png" alt="Informações" style="width:24px; height:24px; margin-right:6px;"> Informações Básicas</h2>
 
                     <!-- Categoria -->
-                    <div class="form-group">
-                        <label for="categoria" class="form-label">
-                            Categoria do Ticket <span class="required">*</span>
-                        </label>
-                        <select name="categoria" id="categoria" required class="form-select">
-                            <option value="">Selecione uma categoria</option>
-                            <option value="duvida" {{ old('categoria') == 'duvida' ? 'selected' : '' }}>❓ Dúvida</option>
-                            <option value="problema_tecnico" {{ old('categoria') == 'problema_tecnico' ? 'selected' : '' }}>⚙️ Problema Técnico</option>
-                            <option value="denuncia" {{ old('categoria') == 'denuncia' ? 'selected' : '' }}>⚠️ Denúncia</option>
-                            <option value="sugestao" {{ old('categoria') == 'sugestao' ? 'selected' : '' }}>💡 Sugestão</option>
-                            <option value="outro" {{ old('categoria') == 'outro' ? 'selected' : '' }}>📝 Outro</option>
-                        </select>
-                    </div>
+                   <div class="form-group">
+    <label for="categoria" class="form-label">
+        Categoria do Ticket <span class="required">*</span>
+    </label>
+    <select name="categoria" id="categoria" required class="form-select">
+        <option value="">Selecione uma categoria</option>
+        <option value="duvida" {{ old('categoria') == 'duvida' ? 'selected' : '' }}>Dúvida</option>
+        <option value="problema_tecnico" {{ old('categoria') == 'problema_tecnico' ? 'selected' : '' }}>Problema Técnico</option>
+        <option value="denuncia" {{ old('categoria') == 'denuncia' ? 'selected' : '' }}>Denúncia</option>
+        <option value="sugestao" {{ old('categoria') == 'sugestao' ? 'selected' : '' }}>Sugestão</option>
+        <option value="outro" {{ old('categoria') == 'outro' ? 'selected' : '' }}>Outro</option>
+    </select>
+</div>
+
 
                     <!-- Campo de Denúncia (oculto por padrão) -->
                     <div id="campo-denuncia" class="form-group hidden">
                         <label for="usuario_denunciado_username" class="form-label">
-                            👤 Usuário Denunciado <span class="required">*</span>
+                             Usuário Denunciado <span class="required">*</span>
                         </label>
                         <div class="autocomplete-container">
                             <input type="text"
@@ -612,7 +688,7 @@
 
                 <!-- Seção: Detalhes do Problema -->
                 <div class="form-section">
-                    <h2 style="font-size: 20px; color: #2d3748; margin-bottom: 20px;">📝 Detalhes do Problema</h2>
+                    <h2><img src="/images/ICONS/comentarios.png" alt="Informações" style="width:24px; height:24px; margin-right:6px;"> Detalhes do Problema</h2>
 
                     <!-- Assunto -->
                     <div class="form-group">
@@ -647,7 +723,7 @@
 
                 <!-- Seção: Anexos -->
                 <div class="form-section">
-                    <h2 style="font-size: 20px; color: #2d3748; margin-bottom: 20px;">📎 Anexos (Opcional)</h2>
+                    <h2><img src="/images/ICONS/anexos.png" alt="Informações" style="width:34px; height:34px; margin-right:6px;"> Anexos (Opcional)</h2>
 
                     <div class="form-group">
                         <div class="file-input-wrapper">
@@ -670,7 +746,7 @@
 
                         <!-- Preview de arquivos -->
                         <div id="file-preview-container" class="file-preview-container">
-                            <h4 style="font-size: 14px; font-weight: 600; color: #2d3748; margin-bottom: 12px;">📂 Arquivos Selecionados:</h4>
+                            <h4 style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 12px;"><img src="/images/ICONS/pasta.png" alt="Informações" style="width:20px; height:20px; margin-right:6px;"> Arquivos Selecionados:</h4>
                             <div id="file-preview-grid" class="file-preview-grid"></div>
                         </div>
 
@@ -687,7 +763,7 @@
                         Cancelar
                     </a>
                     <button type="submit" id="submitBtn" class="btn btn-primary">
-                        🚀 Criar Ticket
+                         Criar Ticket
                     </button>
                 </div>
             </form>
@@ -1025,12 +1101,12 @@
                 if (hasInappropriateImages) {
                     nsfwWarning.classList.add('show');
                     submitBtn.disabled = true;
-                    submitBtn.textContent = '🚀 Criar Ticket';
+                    submitBtn.textContent = 'Criar Ticket';
                     console.log('🚫 Submit bloqueado devido a conteúdo inapropriado');
                 } else {
                     nsfwWarning.classList.remove('show');
                     submitBtn.disabled = false;
-                    submitBtn.textContent = '🚀 Criar Ticket';
+                    submitBtn.textContent = 'Criar Ticket';
                     console.log('✅ Todas as imagens aprovadas');
                 }
 
@@ -1038,7 +1114,7 @@
                 console.error('❌ Erro ao re-analisar imagens:', error);
                 nsfwWarning.classList.remove('show');
                 submitBtn.disabled = false;
-                submitBtn.textContent = '🚀 Criar Ticket';
+                submitBtn.textContent = 'Criar Ticket';
             }
         }
 
