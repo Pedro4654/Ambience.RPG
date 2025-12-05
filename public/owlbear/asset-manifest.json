@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/owlbear/static/css/main.507b8cdc.chunk.css",
-    "main.js": "/owlbear/static/js/main.d173377c.chunk.js",
-    "main.js.map": "/owlbear/static/js/main.d173377c.chunk.js.map",
+    "main.js": "/owlbear/static/js/main.5df3d5b1.chunk.js",
+    "main.js.map": "/owlbear/static/js/main.5df3d5b1.chunk.js.map",
     "runtime-main.js": "/owlbear/static/js/runtime-main.98e9ab56.js",
     "runtime-main.js.map": "/owlbear/static/js/runtime-main.98e9ab56.js.map",
     "static/css/2.a2825889.chunk.css": "/owlbear/static/css/2.a2825889.chunk.css",
@@ -138,6 +138,6 @@
     "static/css/2.a2825889.chunk.css",
     "static/js/2.edc4b645.chunk.js",
     "static/css/main.507b8cdc.chunk.css",
-    "static/js/main.d173377c.chunk.js"
+    "static/js/main.5df3d5b1.chunk.js"
   ]
 }

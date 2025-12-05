@@ -10,6 +10,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #0a0f14;
         }
     </style>
 </head>

@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🗑️ Conta Excluída - Ambience RPG</title>
+    <title> Conta Excluída - Ambience RPG</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #0a0f14;
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-gray-100 to-gray-300 min-h-screen flex items-center justify-center p-4">
+<body class=" min-h-screen flex items-center justify-center p-4">
     <div class="max-w-2xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden">
         <!-- Header -->
         <div class="bg-gradient-to-r from-gray-700 to-gray-900 p-8 text-white">
@@ -23,7 +24,7 @@
                     </svg>
                 </div>
             </div>
-            <h1 class="text-3xl font-bold text-center mb-2">🗑️ Conta Excluída</h1>
+            <h1 class="text-3xl font-bold text-center mb-2">Conta Excluída</h1>
             <p class="text-center text-white/90 text-lg">Sua conta está em processo de exclusão permanente</p>
         </div>
 

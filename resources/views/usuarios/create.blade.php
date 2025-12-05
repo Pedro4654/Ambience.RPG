@@ -1330,46 +1330,220 @@ textarea.form-input{
             </div>
             <span id="termsProgressText" class="progress-text">0% concluído</span>
             <div id="termsBody" class="terms-modal-body">
-                <h3>1. Aceitação dos Termos</h3>
-                <p>Ao acessar e usar o Ambience RPG, você concorda em cumprir estes Termos de Serviço. Se você não concordar com alguma parte destes termos, não deverá usar nosso serviço.</p>
+            <h3>1. Aceitação dos Termos</h3>
+<p>Ao acessar e usar a plataforma Ambience RPG ("Plataforma", "nós" ou "nosso"), você ("Usuário" ou "você") concorda em cumprir estes Termos de Serviço em sua totalidade. Se você não concordar com qualquer parte destes termos, não deverá usar nosso serviço. O uso continuado da Plataforma após alterações nestes Termos constitui aceitação das modificações.</p>
 
-                <h3>2. Descrição do Serviço</h3>
-                <p>O Ambience RPG é uma plataforma online dedicada a jogos de RPG por texto, onde os usuários podem criar personagens, participar de campanhas e interagir com uma comunidade de jogadores.</p>
+<h3>2. Elegibilidade e Idade Mínima</h3>
+<p><strong>Maioridade:</strong> O acesso à Ambience RPG é permitido prioritariamente a usuários maiores de 18 anos. Se você tem entre 13 e 17 anos, pode utilizar a Plataforma apenas com autorização expressa de seus pais ou responsáveis legais, em conformidade com o Estatuto da Criança e do Adolescente (Lei nº 8.069/1990).</p>
+<p><strong>Menores de 13 anos:</strong> Crianças menores de 13 anos têm acesso restrito à Plataforma. Elas podem utilizar funcionalidades limitadas apenas sob supervisão direta de pais ou responsáveis, com censura automática ativada no chat e conteúdo. O uso de contas por menores depende do consentimento dos responsáveis, observando-se sempre o melhor interesse da criança.</p>
+<p><strong>Responsabilidade dos pais:</strong> Pais ou responsáveis que autorizarem o uso da Plataforma por menores são responsáveis por supervisionar as atividades e garantir o uso adequado dos serviços.</p>
 
-                <h3>3. Conta de Usuário</h3>
-                <p><strong>Responsabilidade:</strong> Você é responsável por manter a confidencialidade de sua conta e senha.</p>
-                <p><strong>Informações Precisas:</strong> Você concorda em fornecer informações precisas e atualizadas durante o registro.</p>
+<h3>3. Descrição do Serviço</h3>
+<p>A Ambience RPG é uma plataforma online gratuita dedicada a jogos de RPG por texto, onde os usuários podem:</p>
+<ul>
+    <li>Criar e personalizar personagens com fichas detalhadas</li>
+    <li>Participar de campanhas e aventuras colaborativas</li>
+    <li>Interagir com uma comunidade de jogadores e mestres</li>
+    <li>Criar e compartilhar conteúdo original (mapas, histórias, cenários)</li>
+    <li>Utilizar ferramentas de rolagem de dados e gerenciamento de sessões</li>
+    <li>Fazer upload de arquivos relevantes (PDFs, imagens, documentos)</li>
+</ul>
+<p>A Plataforma é oferecida gratuitamente, sem anúncios ou monetização de dados de usuários. Reservamo-nos o direito de modificar, suspender ou descontinuar qualquer funcionalidade a qualquer momento, com ou sem aviso prévio.</p>
 
-                <h3>4. Conduta do Usuário</h3>
-                <p>Ao usar o Ambience RPG, você concorda em <strong>NÃO</strong>:</p>
-                <ul>
-                    <li>Usar linguagem ofensiva, discriminatória ou assediadora</li>
-                    <li>Compartilhar conteúdo ilegal, explícito ou inadequado</li>
-                    <li>Fazer spam, trolling ou qualquer comportamento disruptivo</li>
-                    <li>Tentar hackear, exploitar bugs ou comprometer a segurança da plataforma</li>
-                    <li>Falsificar identidade ou se passar por outros usuários</li>
-                    <li>Usar bots, scripts automatizados ou ferramentas de terceiros não autorizadas</li>
-                </ul>
+<h3>4. Conta de Usuário e Cadastro</h3>
+<p><strong>Criação de conta:</strong> Para utilizar a Plataforma, você deve criar uma conta fornecendo informações precisas, completas e atualizadas, incluindo nome de usuário, email válido, data de nascimento e senha segura.</p>
+<p><strong>Responsabilidade pela conta:</strong> Você é o único responsável por manter a confidencialidade de suas credenciais de acesso (nome de usuário e senha). Qualquer atividade realizada através de sua conta será considerada de sua responsabilidade.</p>
+<p><strong>Segurança:</strong> Você deve notificar imediatamente a Ambience RPG caso suspeite de uso não autorizado de sua conta ou qualquer violação de segurança.</p>
+<p><strong>Unicidade:</strong> Cada usuário pode manter apenas uma conta ativa. Contas duplicadas ou falsas serão removidas.</p>
+<p><strong>Veracidade:</strong> É proibido fornecer informações falsas, usar identidade de terceiros ou criar perfis que violem os direitos de outras pessoas.</p>
 
-                <h3>5. Conteúdo do Usuário</h3>
-                <p><strong>Propriedade:</strong> Você mantém os direitos sobre o conteúdo que cria (personagens, histórias, etc.).</p>
-                <p><strong>Licença:</strong> Ao postar conteúdo, você nos concede uma licença não exclusiva para exibir, armazenar e distribuir esse conteúdo na plataforma.</p>
-                <p><strong>Moderação:</strong> Reservamos o direito de remover conteúdo que viole estes termos ou nossas diretrizes da comunidade.</p>
+<h3>5. Uso Aceitável e Conduta do Usuário</h3>
+<p>Ao usar a Ambience RPG, você concorda em utilizar a Plataforma de forma lícita, ética e em conformidade com a legislação brasileira. Você concorda expressamente em <strong>NÃO</strong>:</p>
 
-                <h3>6. Suspensão e Banimento</h3>
-                <p>Podemos suspender ou encerrar sua conta se você violar estes Termos de Serviço, sem aviso prévio.</p>
+<p><strong>Conteúdo Proibido:</strong></p>
+<ul>
+    <li>Publicar, transmitir ou compartilhar conteúdo ilegal, ofensivo, difamatório, obsceno, pornográfico, violento ou que viole direitos de terceiros</li>
+    <li>Divulgar material que promova discriminação, racismo, xenofobia, homofobia, intolerância religiosa ou qualquer forma de preconceito</li>
+    <li>Compartilhar conteúdo que incite violência, ódio, automutilação ou atividades ilegais</li>
+    <li>Publicar informações privadas de terceiros sem autorização (doxxing)</li>
+    <li>Distribuir spam, propaganda não solicitada ou correntes</li>
+</ul>
 
-                <h3>7. Limitação de Responsabilidade</h3>
-                <p>O Ambience RPG é fornecido "como está". Não garantimos que o serviço estará sempre disponível, livre de erros ou seguro contra ataques.</p>
+<p><strong>Comportamento Proibido:</strong></p>
+<ul>
+    <li>Assediar, intimidar, ameaçar ou perseguir outros usuários</li>
+    <li>Praticar trolling, provocações maliciosas ou comportamento disruptivo</li>
+    <li>Falsificar identidade ou se passar por outros usuários, moderadores ou membros da equipe</li>
+    <li>Manipular sistemas de votação, curtidas ou qualquer métrica da Plataforma</li>
+    <li>Criar ou participar de esquemas para explorar vulnerabilidades do sistema</li>
+</ul>
 
-                <h3>8. Modificações nos Termos</h3>
-                <p>Podemos atualizar estes Termos de Serviço a qualquer momento. Você será notificado sobre mudanças significativas.</p>
+<p><strong>Segurança e Integridade:</strong></p>
+<ul>
+    <li>Tentar hackear, invadir ou comprometer a segurança da Plataforma</li>
+    <li>Usar exploits, bugs ou falhas do sistema para obter vantagens indevidas</li>
+    <li>Realizar engenharia reversa, descompilar ou desmontar o software da Plataforma</li>
+    <li>Usar bots, scrapers, crawlers ou ferramentas automatizadas sem autorização prévia por escrito</li>
+    <li>Sobrecarregar propositalmente os servidores ou infraestrutura da Plataforma (ataques DDoS)</li>
+    <li>Coletar dados de outros usuários sem consentimento explícito</li>
+</ul>
 
-                <h3>9. Lei Aplicável</h3>
-                <p>Estes termos são regidos pelas leis do Brasil.</p>
+<p><strong>Atividades Comerciais:</strong></p>
+<ul>
+    <li>Usar a Plataforma para fins comerciais sem autorização expressa</li>
+    <li>Vender, revender ou explorar comercialmente qualquer parte do serviço</li>
+    <li>Solicitar ou coletar informações financeiras de outros usuários</li>
+</ul>
 
-                <h3>10. Contato</h3>
-                <p>Se você tiver dúvidas sobre estes Termos de Serviço, entre em contato conosco através do email: <strong>suporte@ambiencerpg.com</strong></p>
+<h3>6. Conteúdo do Usuário e Propriedade Intelectual</h3>
+<p><strong>Seus direitos:</strong> Você mantém todos os direitos de propriedade intelectual sobre o conteúdo original que criar na Plataforma (personagens, histórias, aventuras, mapas, imagens, textos, etc.).</p>
+
+<p><strong>Licença concedida:</strong> Ao publicar conteúdo na Ambience RPG, você nos concede uma licença mundial, não exclusiva, gratuita, sublicenciável e transferível para usar, reproduzir, distribuir, preparar obras derivadas, exibir e executar esse conteúdo em conexão com a operação da Plataforma e nossos negócios relacionados.</p>
+
+<p><strong>Responsabilidade pelo conteúdo:</strong> Você é o único responsável pelo conteúdo que publica e garante que:</p>
+<ul>
+    <li>Possui todos os direitos necessários sobre o material compartilhado</li>
+    <li>O conteúdo não viola direitos autorais, marcas registradas ou outros direitos de propriedade intelectual de terceiros</li>
+    <li>O conteúdo não viola nenhuma lei ou regulamento aplicável</li>
+    <li>O conteúdo não contém vírus, malware ou código malicioso</li>
+</ul>
+
+<p><strong>Uso de material protegido:</strong> O uso de material protegido por direitos autorais de terceiros sem a devida autorização é estritamente proibido pela Lei de Direitos Autorais (Lei nº 9.610/1998) e pode resultar em sanções civis e criminais.</p>
+
+<p><strong>Moderação de conteúdo:</strong> A Ambience RPG reserva-se o direito de revisar, editar, recusar ou remover qualquer conteúdo que viole estes Termos, nossas diretrizes da comunidade ou a legislação aplicável, sem aviso prévio.</p>
+
+<p><strong>Backup de conteúdo:</strong> Recomendamos fortemente que você mantenha cópias de backup de todo conteúdo importante criado na Plataforma. Não nos responsabilizamos por perda de dados devido a falhas técnicas, exclusões acidentais ou encerramento de contas.</p>
+
+<h3>7. Sistema de Moderação e Sanções</h3>
+<p>A Ambience RPG mantém um sistema de moderação para garantir um ambiente seguro e respeitoso para todos os usuários. Violações destes Termos ou das leis aplicáveis podem resultar nas seguintes sanções, aplicadas de forma progressiva conforme a gravidade e reincidência:</p>
+
+<p><strong>Níveis de sanção:</strong></p>
+<ul>
+    <li><strong>Advertência:</strong> Notificação formal por escrito sobre a violação, com orientação para correção do comportamento</li>
+    <li><strong>Remoção de conteúdo:</strong> Exclusão de publicações, comentários ou materiais que violem os Termos</li>
+    <li><strong>Suspensão temporária:</strong> Bloqueio de acesso à conta por período determinado (de 24 horas a 30 dias)</li>
+    <li><strong>Banimento permanente:</strong> Encerramento definitivo da conta e proibição de criar novas contas</li>
+    <li><strong>Banimento de IP:</strong> Bloqueio do endereço IP em casos de violações graves ou reincidentes</li>
+    <li><strong>Reporte às autoridades:</strong> Comunicação às autoridades competentes em casos de crimes (pornografia infantil, ameaças graves, etc.)</li>
+</ul>
+
+<p><strong>Processo de recurso:</strong> Se você discordar de uma sanção aplicada, pode apresentar recurso formal enviando email para o suporte da Plataforma dentro de 15 dias corridos após a notificação. Seu recurso será analisado pela equipe de moderação, e você receberá resposta em até 15 dias úteis.</p>
+
+<p><strong>Violações graves:</strong> Determinados comportamentos podem resultar em banimento imediato sem advertência prévia, incluindo mas não limitado a: compartilhamento de pornografia infantil, ameaças de morte, doxxing, ataques coordenados à Plataforma, ou qualquer atividade criminosa.</p>
+
+<h3>8. Proteção de Dados Pessoais (LGPD)</h3>
+<p>A Ambience RPG trata dados pessoais em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 - LGPD), aplicando os princípios de finalidade, necessidade, adequação, transparência, segurança, prevenção e não discriminação.</p>
+
+<p><strong>Dados coletados:</strong> Coletamos apenas os dados estritamente necessários para fornecer nossos serviços, incluindo informações de cadastro, perfil, conteúdo criado e logs de uso.</p>
+
+<p><strong>Finalidade:</strong> Seus dados são utilizados exclusivamente para operar a Plataforma, melhorar a experiência do usuário, garantir segurança e cumprir obrigações legais. Não vendemos, alugamos ou compartilhamos seus dados para fins comerciais ou de marketing.</p>
+
+<p><strong>Armazenamento:</strong> Todos os dados são armazenados em servidores localizados no Brasil, sem transferência internacional.</p>
+
+<p><strong>Seus direitos:</strong> Você tem direito de acessar, corrigir, atualizar, portar e solicitar a exclusão de seus dados pessoais a qualquer momento. Para detalhes completos sobre tratamento de dados, consulte nossa Política de Privacidade.</p>
+
+<h3>9. Exclusão de Conta e Cancelamento</h3>
+<p><strong>Solicitação de exclusão:</strong> Você pode solicitar a exclusão de sua conta a qualquer momento através das configurações de perfil ou entrando em contato com o suporte.</p>
+
+<p><strong>Processo:</strong> Após a solicitação de exclusão:</p>
+<ul>
+    <li>Sua conta será desativada imediatamente</li>
+    <li>Seus dados pessoais serão permanentemente removidos em até 30 dias</li>
+    <li>Conteúdo público que você criou pode permanecer na Plataforma de forma anônima, caso outros usuários tenham interagido com ele</li>
+    <li>Logs de sistema essenciais para segurança e auditoria serão mantidos pelo período legal exigido</li>
+</ul>
+
+<p><strong>Exclusão por violação:</strong> A Ambience RPG pode encerrar sua conta imediatamente, sem aviso prévio, em caso de violação grave destes Termos.</p>
+
+<p><strong>Efeitos da exclusão:</strong> Após a exclusão, você perderá acesso a todo conteúdo, progressos e dados associados à conta. Esta ação é irreversível.</p>
+
+<h3>10. Segurança da Plataforma</h3>
+<p>Implementamos medidas técnicas e organizacionais razoáveis para proteger a Plataforma e os dados dos usuários, incluindo:</p>
+<ul>
+    <li>Criptografia de senhas usando algoritmos seguros (bcrypt ou superior)</li>
+    <li>Proteção contra ataques comuns (SQL injection, XSS, CSRF)</li>
+    <li>Monitoramento de atividades suspeitas através de logs de sistema</li>
+    <li>Controles de acesso interno restritivo</li>
+    <li>Backups regulares para recuperação de desastres</li>
+</ul>
+
+<p><strong>Limitações:</strong> Apesar de nossos esforços, nenhum sistema é 100% seguro. Você reconhece que não podemos garantir a segurança absoluta contra acessos não autorizados, falhas técnicas, vírus ou ataques de terceiros.</p>
+
+<p><strong>Responsabilidade do usuário:</strong> Você deve manter seus dispositivos, navegadores e softwares atualizados, usar senhas fortes e únicas, e reportar imediatamente qualquer atividade suspeita.</p>
+
+<h3>11. Limitação de Responsabilidade</h3>
+<p><strong>Serviço "como está":</strong> A Ambience RPG é fornecida gratuitamente, "como está" e "conforme disponível", sem garantias de qualquer tipo, expressas ou implícitas.</p>
+
+<p><strong>Exclusões:</strong> Na máxima extensão permitida por lei, a Ambience RPG não será responsável por:</p>
+<ul>
+    <li>Danos indiretos, incidentais, especiais, consequenciais ou punitivos</li>
+    <li>Perda de lucros, receitas, dados, uso, reputação ou outras perdas intangíveis</li>
+    <li>Interrupções, erros, bugs ou indisponibilidade do serviço</li>
+    <li>Perda ou corrupção de conteúdo criado por usuários</li>
+    <li>Ações, conteúdo ou conduta de terceiros na Plataforma</li>
+    <li>Acesso não autorizado, alteração ou uso de suas transmissões ou conteúdo</li>
+    <li>Falhas de terceiros (provedores de hospedagem, internet, etc.)</li>
+</ul>
+
+<p><strong>Conteúdo de terceiros:</strong> Não nos responsabilizamos pelo conteúdo gerado ou compartilhado por usuários. Cada usuário é individualmente responsável por seu material.</p>
+
+<p><strong>Indenização:</strong> Você concorda em indenizar, defender e isentar a Ambience RPG, seus diretores, funcionários e parceiros de quaisquer reivindicações, danos, obrigações, perdas, responsabilidades, custos ou dívidas resultantes de: (a) seu uso da Plataforma; (b) violação destes Termos; (c) violação de direitos de terceiros.</p>
+
+<h3>12. Propriedade Intelectual da Plataforma</h3>
+<p>Todos os direitos de propriedade intelectual sobre a Plataforma, incluindo mas não limitado a software, código-fonte, design, marca "Ambience RPG", logotipos, gráficos, ícones, textos e layout, pertencem exclusivamente à Ambience RPG ou aos seus licenciadores.</p>
+
+<p><strong>Uso proibido:</strong> É expressamente proibido copiar, modificar, distribuir, vender, alugar, licenciar ou criar obras derivadas de qualquer parte da Plataforma sem autorização prévia por escrito.</p>
+
+<p><strong>Marcas registradas:</strong> "Ambience RPG" e outros nomes, logotipos e marcas associadas são propriedade exclusiva da Plataforma e não podem ser usados sem permissão.</p>
+
+<h3>13. Modificações nos Termos</h3>
+<p>Reservamo-nos o direito de modificar estes Termos de Serviço a qualquer momento. Quando fizermos alterações significativas, notificaremos você através de:</p>
+<ul>
+    <li>Aviso destacado na Plataforma</li>
+    <li>Email para o endereço cadastrado</li>
+    <li>Notificação no painel do usuário</li>
+</ul>
+
+<p><strong>Aceitação de mudanças:</strong> Seu uso continuado da Plataforma após a publicação de alterações constitui aceitação dos novos Termos. Se você não concordar com as modificações, deve descontinuar o uso da Plataforma e excluir sua conta.</p>
+
+<p><strong>Versão vigente:</strong> A versão mais recente destes Termos sempre estará disponível na Plataforma, com data da última atualização claramente indicada.</p>
+
+<h3>14. Links para Sites de Terceiros</h3>
+<p>A Plataforma pode conter links para sites ou serviços de terceiros que não são de propriedade ou controlados pela Ambience RPG. Não temos controle sobre e não assumimos responsabilidade pelo conteúdo, políticas de privacidade ou práticas de sites ou serviços de terceiros. Você reconhece e concorda que não seremos responsáveis, direta ou indiretamente, por quaisquer danos causados pelo uso de tais sites ou serviços.</p>
+
+<h3>15. Rescisão e Suspensão</h3>
+<p>Podemos suspender ou encerrar seu acesso à Plataforma imediatamente, sem aviso prévio ou responsabilidade, por qualquer motivo, incluindo violação destes Termos. Todas as disposições destes Termos que, por sua natureza, devam sobreviver à rescisão, sobreviverão, incluindo disposições sobre propriedade, isenções de garantia, indenização e limitações de responsabilidade.</p>
+
+<h3>16. Disposições Gerais</h3>
+<p><strong>Acordo completo:</strong> Estes Termos constituem o acordo completo entre você e a Ambience RPG sobre o uso da Plataforma, substituindo quaisquer acordos anteriores.</p>
+
+<p><strong>Divisibilidade:</strong> Se qualquer disposição destes Termos for considerada inválida ou inexequível, as disposições restantes permanecerão em pleno vigor e efeito.</p>
+
+<p><strong>Renúncia:</strong> A falha em exercer ou fazer cumprir qualquer direito ou disposição destes Termos não constituirá renúncia a tal direito ou disposição.</p>
+
+<p><strong>Cessão:</strong> Você não pode transferir ou ceder seus direitos ou obrigações sob estes Termos sem nosso consentimento prévio por escrito. Podemos livremente ceder nossos direitos sob estes Termos.</p>
+
+<p><strong>Comunicações:</strong> Você concorda em receber comunicações eletrônicas da Ambience RPG relacionadas ao uso da Plataforma.</p>
+
+<h3>17. Legislação Aplicável e Foro</h3>
+<p>Estes Termos de Serviço são regidos e interpretados de acordo com as leis da República Federativa do Brasil, especialmente:</p>
+<ul>
+    <li>Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 - LGPD)</li>
+    <li>Marco Civil da Internet (Lei nº 12.965/2014)</li>
+    <li>Código de Defesa do Consumidor (Lei nº 8.078/1990)</li>
+    <li>Estatuto da Criança e do Adolescente (Lei nº 8.069/1990)</li>
+    <li>Lei de Direitos Autorais (Lei nº 9.610/1998)</li>
+</ul>
+
+<p><strong>Resolução de disputas:</strong> Quaisquer disputas, controvérsias ou reivindicações decorrentes destes Termos serão resolvidas amigavelmente sempre que possível. Caso não seja possível resolução amigável, as partes elegem o foro da comarca de São Paulo, Estado de São Paulo, Brasil, para dirimir quaisquer controvérsias, renunciando a qualquer outro, por mais privilegiado que seja.</p>
+
+<h3>18. Contato</h3>
+<p>Se você tiver dúvidas, comentários ou preocupações sobre estes Termos de Serviço, entre em contato conosco através de:</p>
+<ul>
+    <li><strong>Email:</strong> coralinecompany@gmai.com</li>
+</ul>
+
+<p><strong>Última atualização:</strong> Dezembro de 2025</p>
             </div>
             <div class="terms-modal-footer">
                 <button id="termsConfirmBtn" class="terms-btn-confirm" disabled>✓ Li e Aceito</button>
@@ -1382,69 +1556,321 @@ textarea.form-input{
         <div class="terms-modal-content">
             <div class="terms-modal-header">
                 <h2> Política de Privacidade</h2>
-                <button class="terms-close" data-modal="termsModal" onclick="closeModal('privacyModal')">&times;</button>
+                <button class="terms-close" data-modal="privacyModal">&times;</button>
             </div>
             <div class="progress-container">
                 <div id="privacyProgress" class="progress-bar"></div>
             </div>
             <span id="privacyProgressText" class="progress-text">0% concluído</span>
             <div id="privacyBody" class="terms-modal-body">
-                <h3>1. Informações que Coletamos</h3>
-                <p><strong>Informações de Registro:</strong></p>
-                <ul>
-                    <li>Nome de usuário</li>
-                    <li>Endereço de email</li>
-                    <li>Data de nascimento</li>
-                    <li>Avatar/foto de perfil (opcional)</li>
-                </ul>
-                <p><strong>Informações de Uso:</strong></p>
-                <ul>
-                    <li>Endereço IP</li>
-                    <li>Tipo de navegador</li>
-                    <li>Páginas visitadas</li>
-                    <li>Tempo de uso da plataforma</li>
-                </ul>
+            <h3>1. Introdução e Compromisso com a Privacidade</h3>
+<p>A Ambience RPG ("nós", "nosso" ou "Plataforma") está comprometida com a proteção da privacidade e dos dados pessoais de todos os seus usuários ("você" ou "usuário"). Esta Política de Privacidade explica como coletamos, usamos, armazenamos, compartilhamos e protegemos suas informações pessoais, em total conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 - LGPD).</p>
 
-                <h3>2. Como Usamos Suas Informações</h3>
-                <p>Usamos suas informações para:</p>
-                <ul>
-                    <li>Fornecer e melhorar nossos serviços</li>
-                    <li>Personalizar sua experiência</li>
-                    <li>Comunicar atualizações e notificações importantes</li>
-                    <li>Garantir a segurança da plataforma</li>
-                    <li>Cumprir obrigações legais</li>
-                </ul>
+<p>Segundo a LGPD, empresas devem fornecer transparência completa sobre o tratamento de dados pessoais. Por isso, esta política detalha de forma clara e objetiva todas as práticas de tratamento de dados da Plataforma.</p>
 
-                <h3>3. Compartilhamento de Informações</h3>
-                <p><strong>NÃO vendemos</strong> suas informações pessoais a terceiros.</p>
-                <p>Podemos compartilhar informações com:</p>
-                <ul>
-                    <li>Provedores de serviços (hospedagem, email)</li>
-                    <li>Autoridades legais, quando exigido por lei</li>
-                </ul>
+<p><strong>Controlador de dados:</strong> A Ambience RPG é o controlador responsável pelo tratamento de seus dados pessoais. Para questões sobre privacidade e proteção de dados, entre em contato com nosso Encarregado de Proteção de Dados (DPO) através do email: coralinecompany@gmail.com</p>
 
-                <h3>4. Cookies</h3>
-                <p>Usamos cookies para melhorar sua experiência, manter sua sessão ativa e analisar o uso da plataforma.</p>
+<h3>2. Dados Pessoais Coletados</h3>
+<p>Coletamos apenas os dados estritamente necessários para fornecer e melhorar nossos serviços, seguindo o princípio da necessidade e adequação da LGPD. Os dados são categorizados da seguinte forma:</p>
 
-                <h3>5. Segurança</h3>
-                <p>Implementamos medidas de segurança para proteger suas informações, incluindo criptografia de senhas e proteção contra acesso não autorizado.</p>
+<p><strong>2.1. Dados de Cadastro (obrigatórios):</strong></p>
+<ul>
+    <li><strong>Nome de usuário:</strong> Identificador único escolhido por você</li>
+    <li><strong>Email:</strong> Para comunicações importantes, recuperação de conta e notificações</li>
+    <li><strong>Senha:</strong> Armazenada exclusivamente em formato criptografado (hash bcrypt), nunca em texto puro</li>
+    <li><strong>Data de nascimento:</strong> Para verificação de idade e conformidade com proteção de menores</li>
+</ul>
 
-                <h3>6. Seus Direitos</h3>
-                <p>Você tem o direito de:</p>
-                <ul>
-                    <li><strong>Acessar</strong> suas informações pessoais</li>
-                    <li><strong>Corrigir</strong> dados incorretos</li>
-                    <li><strong>Excluir</strong> sua conta e dados associados</li>
-                    <li><strong>Exportar</strong> seus dados</li>
-                </ul>
+<p><strong>2.2. Dados de Perfil (opcionais):</strong></p>
+<ul>
+    <li><strong>Nome completo:</strong> Se você optar por fornecer</li>
+    <li><strong>Foto de perfil (avatar):</strong> Imagem opcional para personalização</li>
+    <li><strong>Bio/descrição:</strong> Texto livre sobre você</li>
+    <li><strong>Gênero:</strong> Informação opcional para personalização de experiência</li>
+    <li><strong>Preferências de jogo:</strong> Classes favoritas, estilos de RPG, disponibilidade</li>
+</ul>
 
-                <h3>7. Alterações nesta Política</h3>
-                <p>Podemos atualizar esta Política de Privacidade periodicamente. Notificaremos você sobre mudanças significativas.</p>
+<p><strong>2.3. Conteúdo e Interações:</strong></p>
+<ul>
+    <li><strong>Conteúdo criado:</strong> Personagens, fichas, histórias, aventuras, mapas, cenários</li>
+    <li><strong>Arquivos enviados:</strong> PDFs, imagens, documentos relevantes para campanhas</li>
+    <li><strong>Mensagens:</strong> Conversas em chats de campanha, mensagens privadas, comentários</li>
+    <li><strong>Interações sociais:</strong> Curtidas, favoritos, seguidores, avaliações</li>
+    <li><strong>Participações:</strong> Sessões de jogo, campanhas mestradas ou participadas, rolagens de dados</li>
+</ul>
 
-                <h3>8. Contato</h3>
-                <p>Para questões sobre esta Política de Privacidade ou para exercer seus direitos, entre em contato: <strong>privacidade@ambiencerpg.com</strong></p>
+<p><strong>2.4. Dados de Uso e Técnicos (coletados automaticamente):</strong></p>
+<ul>
+    <li><strong>Logs de acesso:</strong> Data e hora de acessos, páginas visitadas, ações realizadas</li>
+    <li><strong>Endereço IP:</strong> Para segurança, prevenção de fraudes e conformidade legal</li>
+    <li><strong>User Agent:</strong> Informações sobre navegador, sistema operacional e dispositivo</li>
+    <li><strong>Cookies e tecnologias similares:</strong> Para manter sessões ativas e preferências (veja seção 9)</li>
+    <li><strong>Geolocalização aproximada:</strong> Baseada em IP, para estatísticas agregadas (não rastreamento preciso)</li>
+</ul>
 
-                <p><strong>Última atualização:</strong> Novembro de 2025</p>
+<p><strong>2.5. Dados Sensíveis:</strong></p>
+<p>A Ambience RPG não coleta intencionalmente dados pessoais sensíveis (origem racial ou étnica, convicção religiosa, opinião política, filiação sindical, dados genéticos, biométricos ou de saúde). Caso você voluntariamente inclua tais informações em campos de texto livre (bio, descrições de personagem), recomendamos evitar compartilhar dados sensíveis desnecessários.</p>
+
+<h3>3. Base Legal e Finalidades do Tratamento</h3>
+<p>Tratamos seus dados pessoais com base nas seguintes bases legais previstas na LGPD (Art. 7º):</p>
+
+<p><strong>3.1. Execução de contrato (Art. 7º, V):</strong></p>
+<ul>
+    <li>Fornecer acesso e funcionalidades da Plataforma</li>
+    <li>Gerenciar sua conta de usuário</li>
+    <li>Processar suas solicitações e comandos</li>
+    <li>Permitir interações com outros usuários</li>
+</ul>
+
+<p><strong>3.2. Legítimo interesse (Art. 7º, IX):</strong></p>
+<ul>
+    <li>Melhorar e personalizar a experiência do usuário</li>
+    <li>Desenvolver novos recursos e funcionalidades</li>
+    <li>Realizar análises estatísticas agregadas sobre uso da Plataforma</li>
+    <li>Prevenir fraudes e garantir segurança</li>
+    <li>Enviar comunicações relacionadas ao serviço (não marketing)</li>
+</ul>
+
+<p><strong>3.3. Cumprimento de obrigação legal (Art. 7º, II):</strong></p>
+<ul>
+    <li>Atender requisições de autoridades competentes</li>
+    <li>Cumprir ordens judiciais</li>
+    <li>Manter registros para fins de auditoria e fiscalização</li>
+    <li>Proteger direitos em processos judiciais ou administrativos</li>
+</ul>
+
+<p><strong>3.4. Consentimento (Art. 7º, I):</strong></p>
+<ul>
+    <li>Quando solicitamos explicitamente sua autorização para tratamentos específicos</li>
+    <li>Para envio de comunicações promocionais (quando implementado)</li>
+</ul>
+
+<p><strong>3.5. Exercício regular de direitos (Art. 7º, VI):</strong></p>
+<ul>
+    <li>Defender-nos em processos judiciais, administrativos ou arbitrais</li>
+    <li>Proteger direitos da Plataforma e de terceiros</li>
+</ul>
+
+<h3>4. Como Usamos Suas Informações</h3>
+<p>Seus dados pessoais são utilizados exclusivamente para as seguintes finalidades legítimas:</p>
+
+<p><strong>Operação da Plataforma:</strong></p>
+<ul>
+    <li>Autenticar seu acesso e manter sua sessão ativa</li>
+    <li>Exibir seu perfil e conteúdo para outrosusuários conforme suas configurações</li>
+<li>Facilitar interações sociais (mensagens, comentários, participação em campanhas)</li>
+<li>Processar uploads de arquivos e criação de conteúdo</li>
+<li>Gerenciar permissões e configurações de privacidade</li>
+</ul><p><strong>Comunicações:</strong></p>
+<ul>
+    <li>Enviar notificações importantes sobre sua conta</li>
+    <li>Informar sobre mudanças nos Termos de Serviço ou Política de Privacidade</li>
+    <li>Responder suas dúvidas e solicitações de suporte</li>
+    <li>Alertas de segurança (tentativas de acesso suspeitas, mudanças de senha)</li>
+</ul><p><strong>Segurança e Conformidade:</strong></p>
+<ul>
+    <li>Detectar, prevenir e investigar atividades fraudulentas ou ilegais</li>
+    <li>Proteger contra spam, abuso e violações dos Termos de Serviço</li>
+    <li>Manter logs de auditoria para rastreabilidade de incidentes</li>
+    <li>Cumprir obrigações legais e requisições de autoridades</li>
+</ul><p><strong>Melhoria do Serviço:</strong></p>
+<ul>
+    <li>Analisar padrões de uso para identificar problemas e oportunidades de melhoria</li>
+    <li>Realizar testes A/B de novos recursos (com dados anonimizados quando possível)</li>
+    <li>Personalizar sua experiência baseando-se em suas preferências</li>
+    <li>Gerar estatísticas agregadas e anonimizadas sobre a comunidade</li>
+</ul><p><strong>O que NÃO fazemos com seus dados:</strong></p>
+<ul>
+    <li><strong>Não vendemos</strong> seus dados pessoais a terceiros sob nenhuma circunstância</li>
+    <li><strong>Não alugamos</strong> suas informações para fins comerciais</li>
+    <li><strong>Não compartilhamos</strong> dados para publicidade direcionada</li>
+    <li><strong>Não usamos</strong> seus dados para criar perfis comportamentais para venda</li>
+    <li><strong>Não coletamos</strong> dados além do necessário para operar a Plataforma</li>
+</ul><h3>5. Compartilhamento de Dados</h3>
+<p>Seus dados pessoais NÃO são compartilhados com terceiros para finalidades comerciais ou de marketing. O compartilhamento ocorre apenas nas seguintes situações limitadas:</p><p><strong>5.1. Prestadores de Serviços (Processadores):</strong></p>
+<p>Podemos compartilhar dados com fornecedores que nos auxiliam a operar a Plataforma, mediante contratos que garantem proteção adequada:</p>
+<ul>
+    <li><strong>Hospedagem:</strong> Servidores e infraestrutura em nuvem (localizados no Brasil)</li>
+    <li><strong>Email:</strong> Provedores de serviço de email transacional (notificações, recuperação de conta)</li>
+    <li><strong>CDN:</strong> Redes de distribuição de conteúdo para melhor performance</li>
+    <li><strong>Backup:</strong> Serviços de backup e recuperação de desastres</li>
+    <li><strong>Monitoramento:</strong> Ferramentas de monitoramento de performance e erros</li>
+</ul>
+<p>Todos os processadores são cuidadosamente selecionados e contratualmente obrigados a proteger seus dados conforme a LGPD.</p><p><strong>5.2. Exigências Legais:</strong></p>
+<p>Podemos divulgar dados pessoais quando legalmente obrigados, incluindo:</p>
+<ul>
+    <li>Ordens judiciais ou mandados de busca</li>
+    <li>Requisições de autoridades governamentais competentes</li>
+    <li>Cumprimento de leis, regulamentos ou processos legais</li>
+    <li>Proteção contra fraudes ou atividades ilegais</li>
+    <li>Defesa de direitos legais da Plataforma ou de terceiros</li>
+</ul>
+<p>Sempre que possível e legalmente permitido, notificaremos você sobre tais solicitações.</p><p><strong>5.3. Conteúdo Público:</strong></p>
+<p>Informações que você escolhe tornar públicas na Plataforma (perfil público, personagens compartilhados, comentários públicos, participação em campanhas abertas) estarão visíveis para outros usuários conforme suas configurações de privacidade.</p><p><strong>5.4. Transferência de Propriedade:</strong></p>
+<p>Em caso de fusão, aquisição, venda de ativos ou falência, seus dados pessoais podem ser transferidos para a entidade sucessora, sempre com proteções adequadas e notificação prévia aos usuários.</p><p><strong>5.5. Sem Transferência Internacional:</strong></p>
+<p>Todos os seus dados são armazenados exclusivamente em servidores localizados no Brasil. Não realizamos transferência internacional de dados pessoais.</p><h3>6. Armazenamento e Segurança dos Dados</h3>
+<p>Implementamos medidas técnicas e organizacionais robustas para proteger seus dados pessoais contra acessos não autorizados, perda, destruição, alteração ou divulgação indevida:</p><p><strong>Medidas de Segurança Técnica:</strong></p>
+<ul>
+    <li><strong>Criptografia:</strong> Senhas armazenadas com hash bcrypt (nunca em texto puro); conexões HTTPS/TLS para transmissão de dados</li>
+    <li><strong>Controle de acesso:</strong> Autenticação forte, separação de privilégios, acesso baseado em funções (RBAC)</li>
+    <li><strong>Firewall e proteção de rede:</strong> Firewalls configurados, detecção de intrusão, proteção DDoS</li>
+    <li><strong>Monitoramento:</strong> Logs de segurança, alertas de atividades suspeitas, análise de comportamento</li>
+    <li><strong>Backups:</strong> Backups regulares criptografados, armazenados em locais seguros e separados</li>
+    <li><strong>Atualização:</strong> Sistemas e bibliotecas mantidos atualizados com patches de segurança</li>
+    <li><strong>Testes:</strong> Testes regulares de segurança, revisão de código, análise de vulnerabilidades</li>
+</ul><p><strong>Medidas Organizacionais:</strong></p>
+<ul>
+    <li><strong>Acesso restrito:</strong> Apenas funcionários autorizados acessam dados pessoais, com base em necessidade profissional</li>
+    <li><strong>Treinamento:</strong> Equipe treinada em segurança da informação e proteção de dados</li>
+    <li><strong>Políticas internas:</strong> Procedimentos documentados de segurança e resposta a incidentes</li>
+    <li><strong>Contratos:</strong> Cláusulas de confidencialidade com funcionários e fornecedores</li>
+    <li><strong>Auditoria:</strong> Revisões periódicas de práticas de segurança</li>
+</ul><p><strong>Localização dos Dados:</strong></p>
+<p>Todos os dados pessoais são armazenados em data centers localizados em território brasileiro, em conformidade com a LGPD e o Marco Civil da Internet.</p><p><strong>Limitações:</strong></p>
+<p>Apesar de todos os esforços, nenhum sistema é 100% seguro. Não podemos garantir segurança absoluta contra ataques sofisticados, falhas de hardware, desastres naturais ou ações de terceiros fora de nosso controle. Em caso de incidente de segurança que afete seus dados, você será notificado conforme exigido pela LGPD.</p><h3>7. Retenção e Exclusão de Dados</h3>
+<p>Mantemos seus dados pessoais apenas pelo tempo necessário para cumprir as finalidades informadas, seguindo o princípio da necessidade da LGPD:</p><p><strong>7.1. Durante o Uso Ativo:</strong></p>
+<p>Enquanto sua conta estiver ativa, manteremos seus dados para fornecer o serviço completo.</p><p><strong>7.2. Após Exclusão de Conta:</strong></p>
+<p>Quando você solicitar a exclusão de sua conta:</p>
+<ul>
+    <li><strong>Imediato:</strong> Conta desativada e inacessível para login</li>
+    <li><strong>Até 30 dias:</strong> Dados pessoais identificáveis (nome, email, perfil) permanentemente removidos do banco de dados principal</li>
+    <li><strong>Conteúdo público:</strong> Conteúdo que você criou e foi compartilhado publicamente (personagens em campanhas abertas, comentários públicos) pode ser mantido de forma anonimizada para preservar a integridade de campanhas ativas</li>
+</ul><p><strong>7.3. Logs de Sistema e Segurança:</strong></p>
+<p>Logs técnicos essenciais para segurança, auditoria e conformidade legal são mantidos por período limitado:</p>
+<ul>
+    <li><strong>Logs de acesso:</strong> Até 6 meses (conforme Marco Civil da Internet - Art. 13)</li>
+    <li><strong>Logs de incidentes de segurança:</strong> Até 1 ano para investigação e defesa legal</li>
+    <li><strong>Dados para cumprimento de obrigações legais:</strong> Pelo prazo exigido por lei (ex: 5 anos para obrigações tributárias)</li>
+</ul><p><strong>7.4. Backups:</strong></p>
+<p>Dados excluídos podem permanecer em backups de segurança por até 90 dias, após os quais são permanentemente apagados. Backups são isolados e não utilizados para operações regulares.</p><p><strong>7.5. Exclusão Definitiva:</strong></p>
+<p>Após os prazos acima, seus dados pessoais são permanentemente apagados de todos os sistemas, incluindo backups, de forma irreversível.</p><h3>8. Seus Direitos como Titular de Dados (LGPD)</h3>
+<p>A LGPD (Art. 18) garante aos titulares de dados pessoais diversos direitos, que você pode exercer gratuitamente a qualquer momento:</p><p><strong>8.1. Direito de Confirmação e Acesso (Art. 18, I e II):</strong></p>
+<ul>
+    <li>Confirmar se tratamos seus dados pessoais</li>
+    <li>Acessar todos os dados que mantemos sobre você</li>
+    <li>Receber cópia dos dados em formato legível</li>
+</ul><p><strong>8.2. Direito de Correção (Art. 18, III):</strong></p>
+<ul>
+    <li>Corrigir dados incompletos, inexatos ou desatualizados</li>
+    <li>Atualizar informações de perfil diretamente nas configurações</li>
+</ul><p><strong>8.3. Direito de Anonimização, Bloqueio ou Eliminação (Art. 18, IV):</strong></p>
+<ul>
+    <li>Solicitar anonimização de dados desnecessários ou excessivos</li>
+    <li>Bloquear temporariamente o tratamento de certos dados</li>
+    <li>Solicitar eliminação permanente de dados tratados com seu consentimento ou quando não houver base legal</li>
+</ul><p><strong>8.4. Direito de Portabilidade (Art. 18, V):</strong></p>
+<ul>
+    <li>Receber seus dados em formato estruturado, legível por máquina (JSON, CSV)</li>
+    <li>Transferir dados para outro prestador de serviço (quando tecnicamente viável)</li>
+</ul><p><strong>8.5. Direito de Informação (Art. 18, VI e VII):</strong></p>
+<ul>
+    <li>Saber com quais entidades públicas e privadas compartilhamos seus dados</li>
+    <li>Conhecer a possibilidade de negar consentimento e suas consequências</li>
+</ul><p><strong>8.6. Direito de Revogação do Consentimento (Art. 18, IX):</strong></p>
+<ul>
+    <li>Retirar consentimento previamente dado para tratamentos específicos</li>
+    <li>Entender que isso pode limitar funcionalidades que dependem daquele consentimento</li>
+</ul><p><strong>8.7. Direito de Oposição (Art. 18, § 2º):</strong></p>
+<ul>
+    <li>Opor-se a tratamentos realizados sem seu consentimento, quando aplicável</li>
+    <li>Contestar decisões automatizadas que afetem significativamente seus interesses</li>
+</ul><p><strong>8.8. Direito de Revisão de Decisões Automatizadas (Art. 20):</strong></p>
+<ul>
+    <li>Solicitar revisão de decisões tomadas exclusivamente por processamento automatizado</li>
+    <li>Receber informações sobre critérios e procedimentos usados em decisões automatizadas</li>
+</ul><p><strong>Como Exercer Seus Direitos:</strong></p>
+<p>Para exercer qualquer destes direitos, você pode:</p>
+<ul>
+    <li><strong>Configurações da conta:</strong> Muitos dados podem ser acessados, corrigidos ou excluídos diretamente nas configurações de perfil</li>
+    <li><strong>Email ao DPO:</strong> coralinecompany@gmail.com</li>
+    <li><strong>Suporte:</strong> coralinecompany@gmail.com</li>
+</ul><p><strong>Prazos de Resposta:</strong></p>
+<p>Responderemos sua solicitação em até 15 dias corridos, podendo ser prorrogado por mais 15 dias mediante justificativa (conforme Art. 18, § 3º da LGPD).</p><p><strong>Verificação de Identidade:</strong></p>
+<p>Para proteger sua privacidade, podemos solicitar verificação de identidade antes de processar certas solicitações.</p><h3>9. Cookies e Tecnologias Similares</h3>
+<p>A Ambience RPG utiliza cookies e tecnologias similares para melhorar sua experiência, manter sua sessão ativa e coletar informações sobre uso da Plataforma:</p><p><strong>O que são cookies:</strong></p>
+<p>Cookies são pequenos arquivos de texto armazenados pelo seu navegador, que permitem reconhecer você em visitas subsequentes.</p><p><strong>Tipos de cookies que usamos:</strong></p><p><strong>Cookies essenciais (necessários):</strong></p>
+<ul>
+    <li><strong>Sessão:</strong> Mantém você logado durante a navegação</li>
+    <li><strong>Autenticação:</strong> Verifica sua identidade</li>
+    <li><strong>Segurança:</strong> Previne CSRF e outras vulnerabilidades</li>
+    <li><strong>Preferências:</strong> Lembra configurações básicas (idioma, tema)</li>
+</ul>
+<p>Estes cookies são indispensáveis para o funcionamento da Plataforma e não podem ser desabilitados.</p><p><strong>Cookies de funcionalidade (opcionais):</strong></p>
+<ul>
+    <li><strong>Preferências avançadas:</strong> Lembra configurações detalhadas de interface</li>
+    <li><strong>Conteúdo personalizado:</strong> Adapta experiência baseada em seu uso</li>
+</ul><p><strong>Cookies analíticos (opcionais):</strong></p>
+<ul>
+    <li><strong>Estatísticas de uso:</strong> Contabiliza visitantes, páginas populares, tempo de sessão</li>
+    <li><strong>Performance:</strong> Identifica problemas técnicos e gargalos</li>
+</ul>
+<p>Estes dados são agregados e anonimizados sempre que possível.</p><p><strong>Cookies de terceiros:</strong></p>
+<p>Não utilizamos cookies de terceiros para publicidade ou rastreamento. Cookies de prestadores de serviços essenciais (ex: CDN) são minimizados e cobertos por acordos de proteção de dados.</p><p><strong>Gestão de cookies:</strong></p>
+<p>Você pode gerenciar preferências de cookies através das configurações do navegador. Note que bloquear cookies essenciais impedirá o uso da Plataforma. Consulte a documentação do seu navegador para instruções específicas:</p>
+<ul>
+    <li>Chrome: chrome://settings/cookies</li>
+    <li>Firefox: about:preferences#privacy</li>
+    <li>Safari: Preferências > Privacidade</li>
+    <li>Edge: edge://settings/privacy</li>
+</ul><p><strong>Armazenamento local:</strong></p>
+<p>Além de cookies, podemos usar localStorage e sessionStorage do navegador para armazenar temporariamente dados de sessão e preferências localmente no seu dispositivo.</p><h3>10. Privacidade de Crianças e Adolescentes</h3>
+<p>A proteção de dados de crianças e adolescentes é prioridade absoluta, conforme Estatuto da Criança e do Adolescente (ECA) e LGPD (Art. 14):</p><p><strong>Menores de 13 anos:</strong></p>
+<ul>
+    <li>Acesso restrito a funcionalidades limitadas</li>
+    <li>Obrigatória supervisão de pais ou responsáveis</li>
+    <li>Censura automática ativada em chats e conteúdo</li>
+    <li>Proibição de compartilhamento de dados pessoais sensíveis</li>
+    <li>Consentimento específico dos responsáveis legais</li>
+</ul><p><strong>Adolescentes (13 a 17 anos):</strong></p>
+<ul>
+    <li>Podem usar a Plataforma com autorização dos pais/responsáveis</li>
+    <li>Moderação reforçada de conteúdo</li>
+    <li>Ferramentas de controle parental disponíveis</li>
+    <li>Restrições a interações com desconhecidos</li>
+</ul><p><strong>Responsabilidade dos pais:</strong></p>
+<p>Pais e responsáveis que autorizarem o uso por menores devem supervisionar ativamente as atividades, configurar controles de privacidade e revisar conteúdos acessados.</p><p><strong>Coleta de dados de menores:</strong></p>
+<p>Coletamos apenas dados mínimos necessários de usuários menores de idade, sempre com consentimento dos responsáveis e respeito ao melhor interesse da criança.</p><p><strong>Denúncia:</strong></p>
+<p>Caso identifique uso inadequado da Plataforma por menores ou conteúdo inapropriado direcionado a eles, reporte imediatamente para: coralinecompany@gmail.com</p><h3>11. Alterações nesta Política de Privacidade</h3>
+<p>Reservamo-nos o direito de atualizar esta Política de Privacidade periodicamente para refletir mudanças em nossas práticas, tecnologias ou requisitos legais.</p><p><strong>Notificação de mudanças:</strong></p>
+<p>Mudanças significativas serão comunicadas através de:</p>
+<ul>
+    <li>Aviso destacado na Plataforma</li>
+    <li>Email para o endereço cadastrado (para mudanças que afetem seus direitos)</li>
+    <li>Notificação no painel do usuário</li>
+</ul><p><strong>Data de vigência:</strong></p>
+<p>Atualizações entram em vigor na data de publicação. Recomendamos revisar esta política regularmente.</p><p><strong>Versão anterior:</strong></p>
+<p>Você pode solicitar cópias de versões anteriores desta política através do email: coralinecompany@gmail.com</p><h3>12. Transferência de Dados em Caso de Mudança de Controle</h3>
+<p>Em caso de fusão, aquisição, venda de ativos ou reorganização da Ambience RPG, seus dados pessoais podem ser transferidos para a entidade sucessora.</p><p><strong>Proteções garantidas:</strong></p>
+<ul>
+    <li>A entidade sucessora deve continuar honrando esta Política de Privacidade</li>
+    <li>Você será notificado com antecedência razoável sobre a transferência</li>
+    <li>Terá oportunidade de excluir sua conta antes da transferência, se desejar</li>
+    <li>Todas as proteções da LGPD continuarão aplicáveis</li>
+</ul><h3>13. Jurisdição e Lei Aplicável</h3>
+<p>Esta Política de Privacidade é regida pela legislação brasileira, especialmente:</p>
+<ul>
+    <li>Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 - LGPD)</li>
+    <li>Marco Civil da Internet (Lei nº 12.965/2014)</li>
+    <li>Estatuto da Criança e do Adolescente (Lei nº 8.069/1990)</li>
+    <li>Código de Defesa do Consumidor (Lei nº 8.078/1990)</li>
+</ul><p>Quaisquer disputas relacionadas a esta política serão resolvidas no foro da comarca de São Paulo, Estado de São Paulo, Brasil.</p><h3>14. Direito de Reclamação à ANPD</h3>
+<p>Se você acredita que seus direitos de proteção de dados foram violados, tem o direito de apresentar reclamação à Autoridade Nacional de Proteção de Dados (ANPD):</p>
+<ul>
+    <li><strong>Website:</strong> www.gov.br/anpd</li>
+    <li><strong>Endereço:</strong> Esplanada dos Ministérios, Bloco T, Anexo II, Brasília/DF</li>
+</ul><p>No entanto, encorajamos você a nos contatar primeiro para que possamos resolver qualquer preocupação diretamente.</p><h3>15. Contato e Encarregado de Proteção de Dados (DPO)</h3>
+<p>Para questões, dúvidas, exercício de direitos ou reclamações sobre privacidade e proteção de dados pessoais, entre em contato:</p><p><strong>Encarregado de Proteção de Dados (DPO):</strong></p>
+<ul>
+    <li><strong>Email:</strong> coralinecompany@gmail.com</li>
+    <li><strong>Assunto:</strong> Especifique claramente o motivo do contato (ex: "Solicitação de Acesso a Dados", "Exclusão de Conta", "Dúvida sobre Privacidade")</li>
+</ul><p><strong>Suporte Geral:</strong></p>
+<ul>
+    <li><strong>Email:</strong> coralinecompany@gmail.com</li>
+</ul><p><strong>Tempo de resposta:</strong></p>
+<p>Respondemos solicitações relacionadas à LGPD em até 15 dias corridos, prorrogáveis por mais 15 dias mediante justificativa.</p><p><strong>Transparência:</strong></p>
+<p>Estamos comprometidos com a transparência total. Se você tiver qualquer dúvida sobre como tratamos seus dados, não hesite em nos contatar.</p><p><strong>Última atualização:</strong> Dezembro de 2024</p><p style="margin-top: 2rem; padding: 1.5rem; background: rgba(34, 197, 94, 0.1); border-left: 4px solid var(--accent); border-radius: 8px;">
+    <strong>Compromisso com sua privacidade:</strong> A Ambience RPG é uma plataforma gratuita, sem anúncios, criada por jogadores para jogadores. Nunca venderemos seus dados, nunca os usaremos para fins comerciais externos, e sempre priorizaremos sua privacidade acima de qualquer interesse financeiro. Esta é nossa promessa à comunidade RPG.
+</p>
             </div>
             <div class="terms-modal-footer">
                 <button id="privacyConfirmBtn" class="terms-btn-confirm" disabled>✓ Li e Aceito</button>
@@ -1452,7 +1878,6 @@ textarea.form-input{
         </div>
     </div>
 
-    <script>
 
 <!-- Scripts de moderação (carregado do seu sistema) -->
 <script src="{{ asset('js/moderation.js') }}"></script>

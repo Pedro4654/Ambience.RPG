@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚫 Conta Banida - Ambience RPG</title>
+    <title>Conta Banida - Ambience RPG</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background: #0a0f14;
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-red-50 to-pink-50 min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex items-center justify-center p-4">
     <div class="max-w-2xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden">
         <!-- Header -->
         <div class="bg-gradient-to-r from-red-600 to-pink-600 p-8 text-white">
@@ -23,7 +24,7 @@
                     </svg>
                 </div>
             </div>
-            <h1 class="text-3xl font-bold text-center mb-2">🚫 Conta Banida</h1>
+            <h1 class="text-3xl font-bold text-center mb-2">Conta Banida</h1>
             <p class="text-center text-white/90 text-lg">
                 @if($usuario->ban_tipo === 'permanente')
                     Banimento Permanente

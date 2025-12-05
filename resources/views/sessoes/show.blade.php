@@ -130,6 +130,15 @@
                 window.chatSystem.clearTypingState();
             }
         });
+
+        window.addEventListener('message', function(event) {
+        if (event.data.type === 'OWLBEAR_EXIT') {
+            const salaId = event.data.salaId;
+            const url = salaId ? `/salas/${salaId}` : '/salas';
+            console.log('🚪 Saindo do Owlbear, redirecionando para:', url);
+            window.location.href = url;
+        }
+    });
     </script>
 </body>
 </html>
