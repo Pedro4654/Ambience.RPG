@@ -1,10 +1,18 @@
 {
   "files": {
+<<<<<<< HEAD
     "main.css": "/owlbear/static/css/main.bb6b13ea.chunk.css",
     "main.js": "/owlbear/static/js/main.a08abe13.chunk.js",
     "main.js.map": "/owlbear/static/js/main.a08abe13.chunk.js.map",
     "runtime-main.js": "/owlbear/static/js/runtime-main.ea3b6ea3.js",
     "runtime-main.js.map": "/owlbear/static/js/runtime-main.ea3b6ea3.js.map",
+=======
+    "main.css": "/owlbear/static/css/main.507b8cdc.chunk.css",
+    "main.js": "/owlbear/static/js/main.5df3d5b1.chunk.js",
+    "main.js.map": "/owlbear/static/js/main.5df3d5b1.chunk.js.map",
+    "runtime-main.js": "/owlbear/static/js/runtime-main.98e9ab56.js",
+    "runtime-main.js.map": "/owlbear/static/js/runtime-main.98e9ab56.js.map",
+>>>>>>> 84a5849 (100%)
     "static/css/2.a2825889.chunk.css": "/owlbear/static/css/2.a2825889.chunk.css",
     "static/js/2.7e11500d.chunk.js": "/owlbear/static/js/2.7e11500d.chunk.js",
     "static/js/2.7e11500d.chunk.js.map": "/owlbear/static/js/2.7e11500d.chunk.js.map",
@@ -136,8 +144,14 @@
   "entrypoints": [
     "static/js/runtime-main.ea3b6ea3.js",
     "static/css/2.a2825889.chunk.css",
+<<<<<<< HEAD
     "static/js/2.7e11500d.chunk.js",
     "static/css/main.bb6b13ea.chunk.css",
     "static/js/main.a08abe13.chunk.js"
+=======
+    "static/js/2.edc4b645.chunk.js",
+    "static/css/main.507b8cdc.chunk.css",
+    "static/js/main.5df3d5b1.chunk.js"
+>>>>>>> 84a5849 (100%)
   ]
 }

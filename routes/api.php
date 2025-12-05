@@ -87,6 +87,7 @@ Route::post('/sessoes/{sessao_id}/pausar', function($sessao_id) {
     return response()->json(['success' => true]);
 })->middleware('web');
 
+
 Route::post('/sessoes/{sessao_id}/finalizar', function($sessao_id) {
     $sessao = \App\Models\SessaoJogo::find($sessao_id);
     if ($sessao) {
