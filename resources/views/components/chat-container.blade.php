@@ -1029,31 +1029,75 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ✅ MOCKUP - Reduzir altura quando colapsado */
 .ambience-chat-wrapper.collapsed .ambience-chat-mockup {
-    min-height: auto !important;
-    height: auto !important;
-    max-height: 60px !important; /* ✅ Altura apenas do header */
+    min-height: 60px !important;
+    height: 60px !important;
+    max-height: 60px !important;
     padding: 16px 20px !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ✅ CARD - Reduzir padding e altura quando colapsado */
 .ambience-chat-wrapper.collapsed .ambience-chat-card {
-    padding: 12px !important; /* ✅ Padding reduzido */
-    height: auto !important; /* ✅ Altura automática */
-    min-height: auto !important;
-    max-height: none !important;
+    padding: 12px !important;
+    height: 60px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ✅ WRAPPER - Reduzir altura total quando colapsado */
 .ambience-chat-wrapper.collapsed {
-    height: auto !important;
-    min-height: auto !important;
-    max-height: none !important;
+    height: 60px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ✅ ESCONDER HANDLES DE RESIZE QUANDO COLAPSADO */
+.ambience-chat-wrapper.collapsed .chat-resize-handle {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.ambience-chat-wrapper.collapsed .chat-dimensions-badge {
+    display: none !important;
+}
+
+/* ✅ REMOVER SOMBRAS/BORDAS EXTRAS QUANDO COLAPSADO */
+.ambience-chat-wrapper.collapsed .ambience-chat-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    overflow: hidden !important;
+}
+
+/* ✅ GARANTIR QUE APENAS O HEADER FIQUE VISÍVEL */
+.ambience-chat-wrapper.collapsed .ambience-chat-mockup {
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* ✅ FORÇAR OCULTAÇÃO DE TUDO EXCETO HEADER */
+.ambience-chat-wrapper.collapsed .ambience-chat-messages,
+.ambience-chat-wrapper.collapsed .ambience-chat-input-area,
+.ambience-chat-wrapper.collapsed .ambience-typing-indicator {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* ✅ AJUSTAR ESPAÇAMENTO DO HEADER QUANDO COLAPSADO */
+.ambience-chat-wrapper.collapsed .ambience-chat-top {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom: none !important;
 }
 
 /* ✅ Transições suaves para todos os containers */

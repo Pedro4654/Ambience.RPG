@@ -2,10 +2,9 @@
  * ========================================
  * SISTEMA DE CHAT - AMBIENCE RPG
  * ========================================
- * Chat em tempo real com moderação, censura por idade e denúncias
- * ✅ CORRIGIDO: Real-time para todos os usuários
- * ✅ NOVO: Deletar mensagens em tempo real
- * ✅ NOVO: Editar mensagens em tempo real
+ * ✅ REFATORADO: Pointer Events para drag + resize robusto
+ * ✅ NOVO: Sistema PiP-like de redimensionamento
+ * ✅ CORRIGIDO: Frozen edges, setPointerCapture, RAF
  */
 
 class ChatSystem {
@@ -19,21 +18,28 @@ class ChatSystem {
         this.salaId = this.container.dataset.salaId;
         this.userId = this.container.dataset.userId;
         this.userAge = parseInt(this.container.dataset.userAge) || 18;
-
         this.podeModerarChat = this.container.dataset.podeModerarChat === 'true';
-this.ehCriadorSala = this.container.dataset.ehCriadorSala === 'true';
+        this.ehCriadorSala = this.container.dataset.ehCriadorSala === 'true';
 
-console.log('[Chat] 🛡️ Permissões carregadas', {
-    podeModerarChat: this.podeModerarChat,
-    ehCriadorSala: this.ehCriadorSala
-});
+        console.log('[Chat] 🛡️ Permissões carregadas', {
+            podeModerarChat: this.podeModerarChat,
+            ehCriadorSala: this.ehCriadorSala
+        });
 
+<<<<<<< HEAD
+=======
+        this.isInGrid = window.location.pathname.includes('/sessoes/');
+        if (this.isInGrid) {
+            console.log('[Chat] 🎮 Chat iniciado na GRID');
+        }
+
+>>>>>>> 7dbc97f (Chat fix)
         // Elementos DOM
         this.messagesContainer = document.getElementById('chatMessages');
         this.messageInput = document.getElementById('chatMessageInput');
         this.fileInput = document.getElementById('chatFileInput');
         this.typingIndicator = document.getElementById('chatTypingIndicator');
-this.typingText = document.getElementById('chatTypingText');
+        this.typingText = document.getElementById('chatTypingText');
         this.sendBtn = document.getElementById('chatSendBtn');
         this.chatForm = document.getElementById('chatForm');
         this.attachmentsPreview = document.getElementById('chatAttachmentsPreview');
@@ -44,11 +50,30 @@ this.typingText = document.getElementById('chatTypingText');
         this.attachments = [];
         this.loading = false;
         this.selectedMessages = new Set();
+<<<<<<< HEAD
         this.channel = null; // Armazenar referência do canal
          this.usersTyping = new Map(); // Map<userId, {username, timeout}>
     this.typingTimeout = null;
     this.isTyping = false;
     this.typingDebounceMs = 2000;
+=======
+        this.channel = null;
+        this.usersTyping = new Map();
+        this.typingTimeout = null;
+        this.isTyping = false;
+        this.typingDebounceMs = 2000;
+        
+        // ✅ NOVO: Estado Pointer Events
+        this.pointerResizeState = null;
+        this.pointerDragState = null;
+        this.raf = null; // requestAnimationFrame ID
+        this.dimensionsBadge = null;
+        
+        // Edge detection constants
+        this.EDGE_SIZE = 20;
+        this.MIN_WIDTH = 320;
+        this.MIN_HEIGHT = 400;
+>>>>>>> 7dbc97f (Chat fix)
 
         this.init();
     }
@@ -65,10 +90,23 @@ this.typingText = document.getElementById('chatTypingText');
         this.setupEventListeners();
         this.setupWebSocket();
 
+<<<<<<< HEAD
         setTimeout(() => {
     this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
     console.log('[Chat] 📍 Scroll posicionado no final:', this.messagesContainer.scrollHeight);
 }, 300);
+=======
+        if (this.isInGrid) {
+            setTimeout(() => {
+                this.setupFloatingBehavior();
+            }, 100);
+        }
+        
+        setTimeout(() => {
+            this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+            console.log('[Chat] 📍 Scroll posicionado no final:', this.messagesContainer.scrollHeight);
+        }, 300);
+>>>>>>> 7dbc97f (Chat fix)
 
         console.log('[Chat] ✅ Inicializado com sucesso');
     }
@@ -87,27 +125,22 @@ this.typingText = document.getElementById('chatTypingText');
     }
 
     setupEventListeners() {
-        // Form submit
         this.chatForm.addEventListener('submit', (e) => this.handleSendMessage(e));
         
-        // Input de moderação
         this.messageInput.addEventListener('input', (e) => {
-        this.handleInputModeration(e);
-        this.handleTypingInput(e); // ✅ NOVO
-    });
+            this.handleInputModeration(e);
+            this.handleTypingInput(e);
+        });
 
-        // Toggle chat
         const toggleBtn = document.getElementById('toggleChatBtn');
         if (toggleBtn) {
             toggleBtn.addEventListener('click', () => this.toggleChat());
         }
         
-        // ✅ BOTÃO DE ANEXO - apenas um listener
         const attachBtn = document.getElementById('chatAttachBtn');
         if (attachBtn && this.fileInput) {
             console.log('[Chat] ✅ Configurando botão de anexo');
             
-            // Remover listeners antigos se existirem
             attachBtn.replaceWith(attachBtn.cloneNode(true));
             const newAttachBtn = document.getElementById('chatAttachBtn');
             
@@ -119,11 +152,9 @@ this.typingText = document.getElementById('chatTypingText');
             });
         }
         
-        // ✅ FILE INPUT - apenas um listener
         if (this.fileInput) {
             console.log('[Chat] ✅ Configurando input de arquivo');
             
-            // Remover listeners antigos
             this.fileInput.replaceWith(this.fileInput.cloneNode(true));
             this.fileInput = document.getElementById('chatFileInput');
             
@@ -145,19 +176,13 @@ this.typingText = document.getElementById('chatTypingText');
 
         this.channel = window.Echo.join(channelName);
 
-        // ==================== LISTENER: NOVA MENSAGEM ====================
         this.channel.listen('.nova.mensagem', (data) => {
             console.group('[Chat] 📨 EVENTO: Nova Mensagem');
             console.log('Raw data:', data);
-            console.log('Tipo:', typeof data);
-            console.log('Keys:', Object.keys(data));
             
-            // Extrair mensagem do payload
             const mensagem = data.id ? data : (data.mensagem || data.message || data);
             
             console.log('Mensagem extraída:', mensagem);
-            console.log('ID da mensagem:', mensagem?.id);
-            console.log('Usuário:', mensagem?.usuario?.username);
             
             if (!mensagem || !mensagem.id) {
                 console.error('❌ Payload inválido');
@@ -165,7 +190,6 @@ this.typingText = document.getElementById('chatTypingText');
                 return;
             }
             
-            // ✅ VERIFICAR SE JÁ EXISTE (evitar duplicatas)
             const exists = this.messages.find(m => m.id === mensagem.id);
             if (exists) {
                 console.warn('⚠️ Mensagem já existe no array, ignorando');
@@ -179,11 +203,9 @@ this.typingText = document.getElementById('chatTypingText');
             this.handleNewMessage(mensagem);
         });
 
-        // ==================== LISTENER: MENSAGEM DELETADA ====================
         this.channel.listen('.mensagem.deletada', (data) => {
             console.group('[Chat] 🗑️ EVENTO: Mensagem Deletada');
             console.log('Data:', data);
-            console.log('ID da mensagem:', data.mensagem_id);
             
             if (!data.mensagem_id) {
                 console.error('❌ ID da mensagem não encontrado');
@@ -197,11 +219,9 @@ this.typingText = document.getElementById('chatTypingText');
             this.handleDeletedMessage(data.mensagem_id);
         });
 
-        // ==================== LISTENER: MENSAGEM EDITADA ====================
         this.channel.listen('.mensagem.editada', (data) => {
             console.group('[Chat] ✏️ EVENTO: Mensagem Editada');
             console.log('Data:', data);
-            console.log('ID da mensagem:', data.mensagem_id);
             
             if (!data.mensagem_id || !data.nova_mensagem) {
                 console.error('❌ Dados incompletos');
@@ -215,7 +235,6 @@ this.typingText = document.getElementById('chatTypingText');
             this.handleEditedMessage(data);
         });
 
-        // Logs de presença
         this.channel.here((users) => {
             console.log('[Chat] 👥 Usuários online:', users.length, users);
         });
@@ -233,11 +252,10 @@ this.typingText = document.getElementById('chatTypingText');
         });
 
         this.channel.listen('.usuario.digitando', (data) => {
-    console.log('[Chat] ⌨️ Evento de digitação:', data);
-    this.handleTypingEvent(data);
-});
+            console.log('[Chat] ⌨️ Evento de digitação:', data);
+            this.handleTypingEvent(data);
+        });
         
-        // Verificar subscrição
         setTimeout(() => {
             const subscription = window.Echo.connector.channels[`presence-${channelName}`];
             if (subscription) {
@@ -247,143 +265,117 @@ this.typingText = document.getElementById('chatTypingText');
                 console.error('[Chat] ❌ Falha ao subscrever no canal');
             }
         }, 1000);
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 7dbc97f (Chat fix)
         console.log('[Chat] ✅ WebSocket configurado');
     }
 
-    // ==================== TYPING INDICATOR ====================
-
-/**
- * Manipular input de digitação
- */
-handleTypingInput(e) {
-    const text = e.target.value.trim();
-    
-    // Se campo vazio, notificar que parou de digitar
-    if (!text) {
-        if (this.isTyping) {
-            this.notifyTyping(false);
-        }
-        return;
-    }
-    
-    // Se ainda não estava digitando, notificar que começou
-    if (!this.isTyping) {
-        this.notifyTyping(true);
-    }
-    
-    // Resetar timeout - usuário ainda está digitando
-    clearTimeout(this.typingTimeout);
-    
-    // Após X ms sem digitar, considerar que parou
-    this.typingTimeout = setTimeout(() => {
-        if (this.isTyping) {
-            this.notifyTyping(false);
-        }
-    }, this.typingDebounceMs);
-}
-
-/**
- * Notificar backend sobre status de digitação
- */
-async notifyTyping(isTyping) {
-    this.isTyping = isTyping;
-    
-    try {
-        await fetch(`/salas/${this.salaId}/chat/typing`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': this.getCsrfToken()
-            },
-            body: JSON.stringify({ is_typing: isTyping })
-        });
+    handleTypingInput(e) {
+        const text = e.target.value.trim();
         
-        console.log('[Chat] 📤 Typing notification sent:', isTyping);
-    } catch (error) {
-        console.error('[Chat] Erro ao notificar digitação:', error);
-    }
-}
-
-/**
- * Processar evento de digitação recebido
- */
-handleTypingEvent(data) {
-    const userId = parseInt(data.user_id);
-    const username = data.username;
-    const isTyping = data.is_typing;
-    
-    // Ignorar evento do próprio usuário
-    if (userId === parseInt(this.userId)) {
-        return;
-    }
-    
-    if (isTyping) {
-        // Adicionar usuário à lista de quem está digitando
-        this.usersTyping.set(userId, {
-            username: username,
-            timeout: setTimeout(() => {
-                // Auto-remover após 3 segundos (caso evento de "parou" não chegue)
-                this.usersTyping.delete(userId);
-                this.updateTypingIndicator();
-            }, 5000)
-        });
-    } else {
-        // Remover usuário da lista
-        const userData = this.usersTyping.get(userId);
-        if (userData && userData.timeout) {
-            clearTimeout(userData.timeout);
+        if (!text) {
+            if (this.isTyping) {
+                this.notifyTyping(false);
+            }
+            return;
         }
-        this.usersTyping.delete(userId);
+        
+        if (!this.isTyping) {
+            this.notifyTyping(true);
+        }
+        
+        clearTimeout(this.typingTimeout);
+        
+        this.typingTimeout = setTimeout(() => {
+            if (this.isTyping) {
+                this.notifyTyping(false);
+            }
+        }, this.typingDebounceMs);
     }
-    
-    this.updateTypingIndicator();
-}
 
-/**
- * Atualizar indicador visual de digitação
- */
-updateTypingIndicator() {
-    const typingCount = this.usersTyping.size;
-    
-    if (typingCount === 0) {
-        // Ninguém digitando - esconder indicador
-        this.typingIndicator.style.display = 'none';
-        return;
+    async notifyTyping(isTyping) {
+        this.isTyping = isTyping;
+        
+        try {
+            await fetch(`/salas/${this.salaId}/chat/typing`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': this.getCsrfToken()
+                },
+                body: JSON.stringify({ is_typing: isTyping })
+            });
+            
+            console.log('[Chat] 📤 Typing notification sent:', isTyping);
+        } catch (error) {
+            console.error('[Chat] Erro ao notificar digitação:', error);
+        }
     }
-    
-    // Alguém digitando - mostrar indicador
-    this.typingIndicator.style.display = 'block';
-    
-    let text = '';
-    
-    if (typingCount === 1) {
-        // 1 pessoa: "Ana digitando…"
-        const [userData] = this.usersTyping.values();
-        text = `${userData.username} digitando…`;
-    } else if (typingCount <= 3) {
-        // 2-3 pessoas: "Ana, João e Pedro digitando…"
-        const names = Array.from(this.usersTyping.values()).map(u => u.username);
-        const lastUser = names.pop();
-        text = `${names.join(', ')} e ${lastUser} digitando…`;
-    } else {
-        // 3+ pessoas: "Várias pessoas estão digitando…"
-        text = 'Várias pessoas estão digitando…';
-    }
-    
-    this.typingText.textContent = text;
-}
 
-/**
- * Limpar estado de digitação ao enviar mensagem
- */
-clearTypingState() {
-    if (this.isTyping) {
-        this.notifyTyping(false);
+    handleTypingEvent(data) {
+        const userId = parseInt(data.user_id);
+        const username = data.username;
+        const isTyping = data.is_typing;
+        
+        if (userId === parseInt(this.userId)) {
+            return;
+        }
+        
+        if (isTyping) {
+            this.usersTyping.set(userId, {
+                username: username,
+                timeout: setTimeout(() => {
+                    this.usersTyping.delete(userId);
+                    this.updateTypingIndicator();
+                }, 5000)
+            });
+        } else {
+            const userData = this.usersTyping.get(userId);
+            if (userData && userData.timeout) {
+                clearTimeout(userData.timeout);
+            }
+            this.usersTyping.delete(userId);
+        }
+        
+        this.updateTypingIndicator();
     }
-    clearTimeout(this.typingTimeout);
-}
+
+    updateTypingIndicator() {
+        const typingCount = this.usersTyping.size;
+        
+        if (typingCount === 0) {
+            this.typingIndicator.style.display = 'none';
+            return;
+        }
+        
+        this.typingIndicator.style.display = 'block';
+        
+        let text = '';
+        
+        if (typingCount === 1) {
+            const [userData] = this.usersTyping.values();
+            text = `${userData.username} digitando…`;
+        } else if (typingCount <= 3) {
+            const names = Array.from(this.usersTyping.values()).map(u => u.username);
+            const lastUser = names.pop();
+            text = `${names.join(', ')} e ${lastUser} digitando…`;
+        } else {
+            text = 'Várias pessoas estão digitando…';
+        }
+        
+        this.typingText.textContent = text;
+    }
+
+    clearTypingState() {
+        if (this.isTyping) {
+            this.notifyTyping(false);
+        }
+        clearTimeout(this.typingTimeout);
+    }
 
     async loadMessages() {
         this.setLoading(true);
@@ -403,8 +395,8 @@ clearTypingState() {
             
             this.renderMessages();
             requestAnimationFrame(() => {
-    this.scrollToBottom(false); // false = sem animação smooth
-});
+                this.scrollToBottom(false);
+            });
 
         } catch (error) {
             console.error('[Chat] Erro ao carregar mensagens:', error);
@@ -440,7 +432,6 @@ clearTypingState() {
             return Number(m.id) || 0;
         };
 
-        // Ordenar mensagens antigas primeiro (ASC)
         const sortedMessages = [...this.messages].sort((a, b) => {
             return getMessageTimestamp(a) - getMessageTimestamp(b);
         });
@@ -454,420 +445,365 @@ clearTypingState() {
     }
 
     renderMessage(msg) {
-    const isOwn = parseInt(msg.usuario.id) === parseInt(this.userId);
-    const isCensored = msg.censurada;
-    const flags = msg.flags_detectadas || msg.flags || [];
-    
-    const userAge = this.userAge;
-    let deveCensurar = false;
-    let podeVerCensurado = false;
-    let mensagemExibida = msg.mensagem;
-    
-    console.log('[Chat] 🔍 RENDERIZANDO', {
-        id: msg.id,
-        isCensored,
-        flags,
-        userAge,
-        mensagem_backend: msg.mensagem,
-        mensagem_original: msg.mensagem_original
-    });
-    
-    if (isCensored && flags.length > 0) {
-        const temProfanity = flags.includes('profanity');
-        const temConteudoSexual = flags.includes('sexual') || flags.includes('porn');
+        const isOwn = parseInt(msg.usuario.id) === parseInt(this.userId);
+        const isCensored = msg.censurada;
+        const flags = msg.flags_detectadas || msg.flags || [];
         
-        console.log('[Chat] 🚨 MENSAGEM CENSURADA DETECTADA', {
-            temProfanity,
-            temConteudoSexual,
-            userAge
-        });
+        const userAge = this.userAge;
+        let deveCensurar = false;
+        let podeVerCensurado = false;
+        let mensagemExibida = msg.mensagem;
         
-        // ✅ MENOR DE 15: SEMPRE CENSURAR (nunca pode ver)
-        if (userAge < 15) {
-            if (temProfanity || temConteudoSexual) {
-                mensagemExibida = msg.mensagem;
-                deveCensurar = true;
-                podeVerCensurado = false; // ← NUNCA pode ver
-                console.log('✅ CENSURANDO PARA MENOR DE 15');
-            }
-        } 
-        // ✅ 15-17: Mostra palavrões, censura sexual (nunca pode ver sexual)
-        else if (userAge >= 15 && userAge < 18) {
-            if (temConteudoSexual) {
-                deveCensurar = true;
-                podeVerCensurado = false; // ← NUNCA pode ver
-                mensagemExibida = '[Mensagem oculta – violou as regras de conteúdo]';
-            } else if (temProfanity) {
-                mensagemExibida = msg.mensagem_original || msg.mensagem;
-                deveCensurar = false;
-                podeVerCensurado = false;
-            }
-        } 
-        // ✅ 18+: Mostra palavrões, censura sexual (MAS pode ver depois)
-        else if (userAge >= 18) {
-            if (temConteudoSexual) {
-                deveCensurar = true;
-                podeVerCensurado = true; // ← SÓ AQUI pode ver
-                mensagemExibida = '[Mensagem oculta – violou as regras de conteúdo]';
-            } else if (temProfanity) {
-                mensagemExibida = msg.mensagem_original || msg.mensagem;
-                deveCensurar = false;
-                podeVerCensurado = false;
+        if (isCensored && flags.length > 0) {
+            const temProfanity = flags.includes('profanity');
+            const temConteudoSexual = flags.includes('sexual') || flags.includes('porn');
+            
+            if (userAge < 15) {
+                if (temProfanity || temConteudoSexual) {
+                    mensagemExibida = msg.mensagem;
+                    deveCensurar = true;
+                    podeVerCensurado = false;
+                }
+            } else if (userAge >= 15 && userAge < 18) {
+                if (temConteudoSexual) {
+                    deveCensurar = true;
+                    podeVerCensurado = false;
+                    mensagemExibida = '[Mensagem oculta – violou as regras de conteúdo]';
+                } else if (temProfanity) {
+                    mensagemExibida = msg.mensagem_original || msg.mensagem;
+                    deveCensurar = false;
+                    podeVerCensurado = false;
+                }
+            } else if (userAge >= 18) {
+                if (temConteudoSexual) {
+                    deveCensurar = true;
+                    podeVerCensurado = true;
+                    mensagemExibida = '[Mensagem oculta – violou as regras de conteúdo]';
+                } else if (temProfanity) {
+                    mensagemExibida = msg.mensagem_original || msg.mensagem;
+                    deveCensurar = false;
+                    podeVerCensurado = false;
+                }
             }
         }
-        
-        console.log('[Chat] 📤 RESULTADO FINAL', {
-            deveCensurar,
-            podeVerCensurado,
-            mensagemExibida,
-            vai_ter_fundo_vermelho: deveCensurar
-        });
-    }
 
-    // ✅ AVATAR HTML
-   const avatarHtml = msg.usuario.avatar_url 
-        ? `<img src="${msg.usuario.avatar_url}" 
-                alt="${msg.usuario.username}" 
-                class="ambience-avatar"
-                style="width:38px!important;height:38px!important;object-fit:cover!important;border-radius:50%!important;">`
-        : `<div class="ambience-avatar-fallback" 
-                style="width:38px!important;height:38px!important;min-width:38px!important;">
-                ${msg.usuario.username.charAt(0).toUpperCase()}
-           </div>`;
-    
-    // ✅ ANEXOS
-    const attachmentsHtml = msg.anexos && msg.anexos.length > 0
-        ? msg.anexos.map(anexo => {
-            if (anexo.eh_imagem) {
-                return `
-                    <img src="${anexo.url}" 
-                         alt="${anexo.nome}" 
-                         class="ambience-message-attachment"
-                         onclick="window.open('${anexo.url}', '_blank')">
-                `;
-            } else {
-                return `
-                    <a href="${anexo.url}" 
-                       target="_blank" 
-                       class="ambience-attachment-link">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
-                            <polyline points="13 2 13 9 20 9"/>
-                        </svg>
-                        ${anexo.nome}
-                    </a>
-                `;
-            }
-          }).join('')
-        : '';
-    
-    // ✅ RENDERIZAÇÃO FINAL (NOVO DESIGN)
-    return `
-        <div class="ambience-message ${msg.editada ? 'edited' : ''}" 
-             data-message-id="${msg.id}"
-            style="display:flex!important;gap:12px!important;align-items:flex-start!important;">
-            ${avatarHtml}
-            <div class="ambience-message-content" 
-                 style="flex:1!important;min-width:0!important;max-width:75%!important;">
-                <span class="ambience-username">
-    <span style="color:#22c55e!important;font-weight:700!important;font-size:13px!important;">
-        ${this.escapeHtml(msg.usuario.username)}
-    </span>
-    
-    <!-- ✅ NOVO: Ícone de três pontos VERTICAIS ao lado do nome -->
-    <button class="ambience-action-menu-btn-inline" 
-            data-message-id="${msg.id}" 
-            data-user-id="${msg.usuario.id}"
-            title="Mais opções">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="1"/>
-            <circle cx="12" cy="5" r="1"/>
-            <circle cx="12" cy="19" r="1"/>
-        </svg>
-    </button>
-    
-    ${isOwn ? '<span class="ambience-user-badge" style="display:inline-flex!important;padding:3px 8px!important;margin-left:6px!important;background:rgba(59,130,246,0.2)!important;border:1px solid rgba(59,130,246,0.4)!important;border-radius:8px!important;color:#60a5fa!important;font-size:10px!important;font-weight:600!important;text-transform:uppercase!important;vertical-align:middle!important;">você</span>' : ''}
-</span>  
-                <div class="ambience-bubble ${deveCensurar ? 'ambience-bubble-censored' : ''}" 
-                     data-message-text="${msg.id}"
-                     style="padding:10px 14px!important;border-radius:12px!important;background:#374151!important;color:#e5eef1!important;font-size:14px!important;line-height:1.5!important;word-wrap:break-word!important;display:block!important;width:fit-content!important;">
-                    ${this.escapeHtml(mensagemExibida)}
-                    ${attachmentsHtml}
-                </div>
-                
-                <div class="ambience-message-footer">
-                    <span class="ambience-timestamp">
-                        ${msg.timestamp_formatado}
-                        ${msg.editada ? '<span class="ambience-edited-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> editada</span>' : ''}
-                    </span>
-                    ${deveCensurar && podeVerCensurado ? `
-                        <button class="ambience-reveal-btn" 
-                                data-message-id="${msg.id}" 
-                                data-revealed="false"
-                                title="Exibir mensagem original">
+        const avatarHtml = msg.usuario.avatar_url 
+            ? `<img src="${msg.usuario.avatar_url}" 
+                    alt="${msg.usuario.username}" 
+                    class="ambience-avatar"
+                    style="width:38px!important;height:38px!important;object-fit:cover!important;border-radius:50%!important;">`
+            : `<div class="ambience-avatar-fallback" 
+                    style="width:38px!important;height:38px!important;min-width:38px!important;">
+                    ${msg.usuario.username.charAt(0).toUpperCase()}
+               </div>`;
+        
+        const attachmentsHtml = msg.anexos && msg.anexos.length > 0
+            ? msg.anexos.map(anexo => {
+                if (anexo.eh_imagem) {
+                    return `
+                        <img src="${anexo.url}" 
+                             alt="${anexo.nome}" 
+                             class="ambience-message-attachment"
+                             onclick="window.open('${anexo.url}', '_blank')">
+                    `;
+                } else {
+                    return `
+                        <a href="${anexo.url}" 
+                           target="_blank" 
+                           class="ambience-attachment-link">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                                <polyline points="13 2 13 9 20 9"/>
                             </svg>
-                            <span>Exibir</span>
+                            ${anexo.nome}
+                        </a>
+                    `;
+                }
+              }).join('')
+            : '';
+        
+        return `
+            <div class="ambience-message ${msg.editada ? 'edited' : ''}" 
+                 data-message-id="${msg.id}"
+                style="display:flex!important;gap:12px!important;align-items:flex-start!important;">
+                ${avatarHtml}
+                <div class="ambience-message-content" 
+                     style="flex:1!important;min-width:0!important;max-width:75%!important;">
+                    <span class="ambience-username">
+                        <span style="color:#22c55e!important;font-weight:700!important;font-size:13px!important;">
+                            ${this.escapeHtml(msg.usuario.username)}
+                        </span>
+                        
+                        <button class="ambience-action-menu-btn-inline" 
+                                data-message-id="${msg.id}" 
+                                data-user-id="${msg.usuario.id}"
+                                title="Mais opções">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="1"/>
+                                <circle cx="12" cy="5" r="1"/>
+                                <circle cx="12" cy="19" r="1"/>
+                            </svg>
                         </button>
-                    ` : ''}
+                        
+                        ${isOwn ? '<span class="ambience-user-badge" style="display:inline-flex!important;padding:3px 8px!important;margin-left:6px!important;background:rgba(59,130,246,0.2)!important;border:1px solid rgba(59,130,246,0.4)!important;border-radius:8px!important;color:#60a5fa!important;font-size:10px!important;font-weight:600!important;text-transform:uppercase!important;vertical-align:middle!important;">você</span>' : ''}
+                    </span>  
+                    <div class="ambience-bubble ${deveCensurar ? 'ambience-bubble-censored' : ''}" 
+                         data-message-text="${msg.id}"
+                         style="padding:10px 14px!important;border-radius:12px!important;background:#374151!important;color:#e5eef1!important;font-size:14px!important;line-height:1.5!important;word-wrap:break-word!important;display:block!important;width:fit-content!important;">
+                        ${this.escapeHtml(mensagemExibida)}
+                        ${attachmentsHtml}
+                    </div>
+                    
+                    <div class="ambience-message-footer">
+                        <span class="ambience-timestamp">
+                            ${msg.timestamp_formatado}
+                            ${msg.editada ? '<span class="ambience-edited-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> editada</span>' : ''}
+                        </span>
+                        ${deveCensurar && podeVerCensurado ? `
+                            <button class="ambience-reveal-btn" 
+                                    data-message-id="${msg.id}" 
+                                    data-revealed="false"
+                                    title="Exibir mensagem original">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                <span>Exibir</span>
+                            </button>
+                        ` : ''}
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
-}
+        `;
+    }
 
     attachMessageMenuListeners() {
-    // ✅ NOVA CLASSE: ambience-action-menu-btn-inline (botão ao lado do nome)
-    document.querySelectorAll('.ambience-action-menu-btn-inline').forEach(btn => {
-        btn.addEventListener('click', (e) => this.showMessageMenu(e));
-    });
+        document.querySelectorAll('.ambience-action-menu-btn-inline').forEach(btn => {
+            btn.addEventListener('click', (e) => this.showMessageMenu(e));
+        });
 
-    // ✅ CLASSE: ambience-view-censored-btn
-    document.querySelectorAll('.ambience-view-censored-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => this.viewCensoredContent(e));
-    });
+        document.querySelectorAll('.ambience-view-censored-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.viewCensoredContent(e));
+        });
 
-    document.querySelectorAll('.ambience-reveal-btn').forEach(btn => {
+        document.querySelectorAll('.ambience-reveal-btn').forEach(btn => {
             btn.addEventListener('click', (e) => this.toggleRevealCensored(e));
         });
-}
-
-async toggleRevealCensored(e) {
-    e.stopPropagation();
-    const btn = e.currentTarget;
-    const messageId = btn.dataset.messageId;
-    const isRevealed = btn.dataset.revealed === 'true';
-    
-    const messageEl = document.querySelector(`[data-message-id="${messageId}"]`);
-    if (!messageEl) return;
-    
-    const bubbleEl = messageEl.querySelector('.ambience-bubble');
-    if (!bubbleEl) return;
-    
-    // Salvar posição atual do scroll ANTES de qualquer alteração
-    const scrollContainer = this.messagesContainer;
-    const currentScrollTop = scrollContainer.scrollTop;
-    
-    if (isRevealed) {
-        // Ocultar novamente
-        const msg = this.messages.find(m => m.id === parseInt(messageId));
-        if (msg) {
-            bubbleEl.textContent = '[Mensagem oculta — violou as regras de conteúdo]';
-            bubbleEl.classList.add('ambience-bubble-censored');
-            
-            btn.dataset.revealed = 'false';
-            btn.querySelector('span').textContent = 'Exibir';
-            btn.title = 'Exibir mensagem original';
-        }
-    } else {
-        // Revelar conteúdo
-        try {
-            const response = await fetch(`/chat/mensagens/${messageId}/ver-censurado`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': this.getCsrfToken()
-                }
-            });
-
-            if (!response.ok) throw new Error('Não autorizado');
-
-            const data = await response.json();
-            
-            bubbleEl.textContent = data.mensagem_original;
-            bubbleEl.classList.remove('ambience-bubble-censored');
-            
-            btn.dataset.revealed = 'true';
-            btn.querySelector('span').textContent = 'Ocultar';
-            btn.title = 'Ocultar mensagem';
-
-        } catch (error) {
-            console.error('[Chat] Erro ao revelar conteúdo:', error);
-            this.showError('Você não tem permissão para ver este conteúdo');
-        }
     }
-    
-    // Restaurar posição exata do scroll após a alteração
-    requestAnimationFrame(() => {
-        scrollContainer.scrollTop = currentScrollTop;
-    });
-}
+
+    async toggleRevealCensored(e) {
+        e.stopPropagation();
+        const btn = e.currentTarget;
+        const messageId = btn.dataset.messageId;
+        const isRevealed = btn.dataset.revealed === 'true';
+        
+        const messageEl = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (!messageEl) return;
+        
+        const bubbleEl = messageEl.querySelector('.ambience-bubble');
+        if (!bubbleEl) return;
+        
+        const scrollContainer = this.messagesContainer;
+        const currentScrollTop = scrollContainer.scrollTop;
+        
+        if (isRevealed) {
+            const msg = this.messages.find(m => m.id === parseInt(messageId));
+            if (msg) {
+                bubbleEl.textContent = '[Mensagem oculta — violou as regras de conteúdo]';
+                bubbleEl.classList.add('ambience-bubble-censored');
+                
+                btn.dataset.revealed = 'false';
+                btn.querySelector('span').textContent = 'Exibir';
+                btn.title = 'Exibir mensagem original';
+            }
+        } else {
+            try {
+                const response = await fetch(`/chat/mensagens/${messageId}/ver-censurado`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.getCsrfToken()
+                    }
+                });
+
+                if (!response.ok) throw new Error('Não autorizado');
+
+                const data = await response.json();
+                
+                bubbleEl.textContent = data.mensagem_original;
+                bubbleEl.classList.remove('ambience-bubble-censored');
+                
+                btn.dataset.revealed = 'true';
+                btn.querySelector('span').textContent = 'Ocultar';
+                btn.title = 'Ocultar mensagem';
+
+            } catch (error) {
+                console.error('[Chat] Erro ao revelar conteúdo:', error);
+                this.showError('Você não tem permissão para ver este conteúdo');
+            }
+        }
+        
+        requestAnimationFrame(() => {
+            scrollContainer.scrollTop = currentScrollTop;
+        });
+    }
 
     showMessageMenu(e) {
-    e.stopPropagation();
-    const btn = e.currentTarget;
-    const messageId = btn.dataset.messageId;
-    const userId = btn.dataset.userId;
-    const isOwn = parseInt(userId) === parseInt(this.userId);
-    
-    // ✅ VERIFICAR SE A MENSAGEM JÁ ESTÁ SELECIONADA
-    const isSelected = this.selectedMessages.has(parseInt(messageId));
+        e.stopPropagation();
+        const btn = e.currentTarget;
+        const messageId = btn.dataset.messageId;
+        const userId = btn.dataset.userId;
+        const isOwn = parseInt(userId) === parseInt(this.userId);
+        
+        const isSelected = this.selectedMessages.has(parseInt(messageId));
 
-    document.querySelectorAll('.ambience-action-dropdown').forEach(m => m.remove());
+        document.querySelectorAll('.ambience-action-dropdown').forEach(m => m.remove());
 
-    // ✅ OBTER USERNAME DA MENSAGEM
-    const msg = this.messages.find(m => m.id === parseInt(messageId));
-    const username = msg?.usuario?.username || '';
+        const msg = this.messages.find(m => m.id === parseInt(messageId));
+        const username = msg?.usuario?.username || '';
 
-    const menu = document.createElement('div');
-    menu.className = 'ambience-action-dropdown active';
-    menu.innerHTML = `
-        <button class="ambience-action-item" data-action="profile" data-username="${username}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-            </svg>
-            Ver perfil
-        </button>
-        ${(isOwn || this.podeModerarChat || this.ehCriadorSala) ? `
-    <button class="ambience-action-item" data-action="edit" data-message-id="${messageId}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-        </svg>
-        ${isOwn ? 'Editar' : 'Editar (Moderador)'}
-    </button>
-` : ''}
-        ${!isOwn ? `
-            <button class="ambience-action-item danger" data-action="report" data-message-id="${messageId}" data-user-id="${userId}">
+        const menu = document.createElement('div');
+        menu.className = 'ambience-action-dropdown active';
+        menu.innerHTML = `
+            <button class="ambience-action-item" data-action="profile" data-username="${username}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
-                    <line x1="4" y1="22" x2="4" y2="15"/>
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
                 </svg>
-                Denunciar
+                Ver perfil
             </button>
-        ` : ''}
-       ${(isOwn || this.podeModerarChat || this.ehCriadorSala) ? `
-    <button class="ambience-action-item danger" data-action="delete" data-message-id="${messageId}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="3 6 5 6 21 6"/>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-        </svg>
-        ${isOwn ? 'Deletar' : 'Deletar (Moderador)'}
-    </button>
-` : ''}
-        ${!isOwn ? `
-            <button class="ambience-action-item ${isSelected ? 'selected' : ''}" data-action="select" data-message-id="${messageId}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    ${isSelected 
-                        ? '<rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="9 11 12 14 22 4"/>' 
-                        : '<rect x="3" y="3" width="18" height="18" rx="2"/>'}
-                </svg>
-                ${isSelected ? 'Remover seleção' : 'Selecionar para denúncia'}
-            </button>
-        ` : ''}
-    `;
+            ${(isOwn || this.podeModerarChat || this.ehCriadorSala) ? `
+                <button class="ambience-action-item" data-action="edit" data-message-id="${messageId}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    ${isOwn ? 'Editar' : 'Editar (Moderador)'}
+                </button>
+            ` : ''}
+            ${!isOwn ? `
+                <button class="ambience-action-item danger" data-action="report" data-message-id="${messageId}" data-user-id="${userId}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                        <line x1="4" y1="22" x2="4" y2="15"/>
+                    </svg>
+                    Denunciar
+                </button>
+            ` : ''}
+            ${(isOwn || this.podeModerarChat || this.ehCriadorSala) ? `
+                <button class="ambience-action-item danger" data-action="delete" data-message-id="${messageId}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                    ${isOwn ? 'Deletar' : 'Deletar (Moderador)'}
+                </button>
+            ` : ''}
+            ${!isOwn ? `
+                <button class="ambience-action-item ${isSelected ? 'selected' : ''}" data-action="select" data-message-id="${messageId}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        ${isSelected 
+                            ? '<rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="9 11 12 14 22 4"/>' 
+                            : '<rect x="3" y="3" width="18" height="18" rx="2"/>'}
+                    </svg>
+                    ${isSelected ? 'Remover seleção' : 'Selecionar para denúncia'}
+                </button>
+            ` : ''}
+        `;
 
         const rect = btn.getBoundingClientRect();
-const menuWidth = 180;
+        const menuWidth = 180;
 
-// Adicionar ao body primeiro para calcular altura real
-document.body.appendChild(menu);
-const menuHeight = menu.offsetHeight;
+        document.body.appendChild(menu);
+        const menuHeight = menu.offsetHeight;
 
-// Calcular posição: sempre logo abaixo do botão
-let top = rect.bottom + 4; // 4px de espaço
-let left = rect.left;
+        let top = rect.bottom + 4;
+        let left = rect.left;
 
-// Ajustar horizontalmente se ultrapassar a borda direita
-if (left + menuWidth > window.innerWidth - 8) {
-    left = rect.right - menuWidth;
-}
+        if (left + menuWidth > window.innerWidth - 8) {
+            left = rect.right - menuWidth;
+        }
 
-// Ajustar horizontalmente se ultrapassar a borda esquerda
-if (left < 8) {
-    left = 8;
-}
+        if (left < 8) {
+            left = 8;
+        }
 
-// Ajustar verticalmente se ultrapassar a borda inferior
-if (top + menuHeight > window.innerHeight - 8) {
-    // Se não couber embaixo, colocar em cima
-    top = rect.top - menuHeight - 4;
-    
-    // Se ainda assim não couber, manter embaixo mas ajustar
-    if (top < 8) {
-        top = window.innerHeight - menuHeight - 8;
-    }
-}
+        if (top + menuHeight > window.innerHeight - 8) {
+            top = rect.top - menuHeight - 4;
+            
+            if (top < 8) {
+                top = window.innerHeight - menuHeight - 8;
+            }
+        }
 
-menu.style.top = `${top}px`;
-menu.style.left = `${left}px`;
+        menu.style.top = `${top}px`;
+        menu.style.left = `${left}px`;
 
         menu.querySelectorAll('.ambience-action-item').forEach(item => {
             item.addEventListener('click', (e) => this.handleMenuAction(e));
         });
 
         setTimeout(() => {
-    document.addEventListener('click', () => {
-        menu.style.opacity = '0';
-        menu.style.transform = 'translateY(-8px) scale(0.95)';
-        menu.style.transition = 'all 0.2s ease';
-        setTimeout(() => menu.remove(), 200);
-    }, { once: true });
-}, 100);
+            document.addEventListener('click', () => {
+                menu.style.opacity = '0';
+                menu.style.transform = 'translateY(-8px) scale(0.95)';
+                menu.style.transition = 'all 0.2s ease';
+                setTimeout(() => menu.remove(), 200);
+            }, { once: true });
+        }, 100);
     }
 
     async handleMenuAction(e) {
-    const action = e.currentTarget.dataset.action;
-    const messageId = e.currentTarget.dataset.messageId;
-    const userId = e.currentTarget.dataset.userId;
-    const username = e.currentTarget.dataset.username;
+        const action = e.currentTarget.dataset.action;
+        const messageId = e.currentTarget.dataset.messageId;
+        const userId = e.currentTarget.dataset.userId;
+        const username = e.currentTarget.dataset.username;
 
-    console.log('[Chat] 🎯 Ação do menu:', { action, messageId, userId, username });
-
-    switch (action) {
-        case 'profile':
-            if (username) {
-                window.location.href = `/perfil/${username}`;
-            } else {
-                console.error('[Chat] Username não encontrado');
-            }
-            break;
-        
-        case 'edit':
-            this.startEditMessage(messageId);
-            break;
-        
-        case 'report':
-            console.log('[Chat] 🚨 Abrindo modal de denúncia...');
-            
-            if (messageId) {
-                this.selectedMessages.add(parseInt(messageId));
-                const messageEl = document.querySelector(`[data-message-id="${messageId}"]`);
-                if (messageEl) {
-                    messageEl.classList.add('ambience-message-selected');
+        switch (action) {
+            case 'profile':
+                if (username) {
+                    window.location.href = `/perfil/${username}`;
+                } else {
+                    console.error('[Chat] Username não encontrado');
                 }
-            }
+                break;
             
-            // ✅ GARANTIR que o modal existe antes de abrir
-            if (window.reportModal) {
-                console.log('[Chat] ✅ ReportModal encontrado, abrindo...');
-                window.reportModal.open(userId);
-            } else if (window.openReportModal) {
-                console.log('[Chat] ✅ Usando função global openReportModal...');
-                window.openReportModal(userId, messageId);
-            } else {
-                console.error('[Chat] ❌ ReportModal não disponível!');
-                alert('Erro: Sistema de denúncia não carregado. Recarregue a página.');
-            }
-            break;
-        
-        case 'delete':
-            await this.deleteMessage(messageId);
-            break;
-        
-        case 'select':
-            this.toggleMessageSelection(messageId);
-            break;
+            case 'edit':
+                this.startEditMessage(messageId);
+                break;
+            
+            case 'report':
+                if (messageId) {
+                    this.selectedMessages.add(parseInt(messageId));
+                    const messageEl = document.querySelector(`[data-message-id="${messageId}"]`);
+                    if (messageEl) {
+                        messageEl.classList.add('ambience-message-selected');
+                    }
+                }
+                
+                if (window.reportModal) {
+                    window.reportModal.open(userId);
+                } else if (window.openReportModal) {
+                    window.openReportModal(userId, messageId);
+                } else {
+                    console.error('[Chat] ❌ ReportModal não disponível!');
+                    alert('Erro: Sistema de denúncia não carregado. Recarregue a página.');
+                }
+                break;
+            
+            case 'delete':
+                await this.deleteMessage(messageId);
+                break;
+            
+            case 'select':
+                this.toggleMessageSelection(messageId);
+                break;
+        }
+
+        document.querySelectorAll('.ambience-action-dropdown').forEach(m => m.remove());
     }
 
-    document.querySelectorAll('.ambience-action-dropdown').forEach(m => m.remove());
-}
-
-    // ==================== EDITAR MENSAGEM ====================
     startEditMessage(messageId) {
         const msg = this.messages.find(m => m.id === parseInt(messageId));
         if (!msg) return;
@@ -880,7 +816,6 @@ menu.style.left = `${left}px`;
 
         const originalText = msg.mensagem_original || msg.mensagem;
 
-        // Criar input de edição
         textEl.innerHTML = `
             <div class="edit-message-container">
                 <input type="text" 
@@ -903,113 +838,87 @@ menu.style.left = `${left}px`;
     }
 
     async saveEditMessage(messageId) {
-    const input = document.getElementById(`edit-input-${messageId}`);
-    if (!input) {
-        console.error('[Chat] Input de edição não encontrado');
-        return;
-    }
+        const input = document.getElementById(`edit-input-${messageId}`);
+        if (!input) {
+            console.error('[Chat] Input de edição não encontrado');
+            return;
+        }
 
-    const newText = input.value.trim();
-    if (!newText) {
-        alert('A mensagem não pode estar vazia');
-        return;
-    }
+        const newText = input.value.trim();
+        if (!newText) {
+            alert('A mensagem não pode estar vazia');
+            return;
+        }
 
-    const msg = this.messages.find(m => m.id === parseInt(messageId));
-    if (!msg) {
-        console.error('[Chat] Mensagem não encontrada no array');
-        this.cancelEditMessage(messageId);
-        return;
-    }
+        const msg = this.messages.find(m => m.id === parseInt(messageId));
+        if (!msg) {
+            console.error('[Chat] Mensagem não encontrada no array');
+            this.cancelEditMessage(messageId);
+            return;
+        }
 
-    const originalText = msg.mensagem_original || msg.mensagem;
+        const originalText = msg.mensagem_original || msg.mensagem;
 
-    if (newText === originalText) {
-        console.log('[Chat] Mensagem não foi alterada');
-        this.cancelEditMessage(messageId);
-        return;
-    }
+        if (newText === originalText) {
+            this.cancelEditMessage(messageId);
+            return;
+        }
 
-    // ✅ SALVAR POSIÇÃO DO SCROLL ANTES DE EDITAR
-    const scrollContainer = this.messagesContainer;
-    const currentScrollTop = scrollContainer.scrollTop;
+        const scrollContainer = this.messagesContainer;
+        const currentScrollTop = scrollContainer.scrollTop;
 
-    try {
-        console.log('[Chat] 📤 Enviando edição', {
-            messageId,
-            newText: newText.substring(0, 50) + '...'
-        });
-
-        const response = await fetch(`/chat/mensagens/${messageId}/editar`, {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': this.getCsrfToken()
-            },
-            body: JSON.stringify({ mensagem: newText })
-        });
-
-        console.log('[Chat] 📥 Resposta recebida', {
-            status: response.status,
-            ok: response.ok
-        });
-
-        // ✅ LER RESPOSTA COMO TEXTO PRIMEIRO (PARA DEBUG)
-        const responseText = await response.text();
-        console.log('[Chat] 📄 Resposta (texto):', responseText.substring(0, 500));
-
-        let data;
         try {
-            data = JSON.parse(responseText);
-        } catch (parseError) {
-            console.error('[Chat] ❌ Erro ao parsear JSON:', parseError);
-            console.error('[Chat] Resposta raw:', responseText);
-            throw new Error('Resposta inválida do servidor');
-        }
-
-        if (!response.ok) {
-            console.error('[Chat] ❌ Erro HTTP', {
-                status: response.status,
-                data
+            const response = await fetch(`/chat/mensagens/${messageId}/editar`, {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.getCsrfToken()
+                },
+                body: JSON.stringify({ mensagem: newText })
             });
-            throw new Error(data.message || `Erro HTTP ${response.status}`);
+
+            const responseText = await response.text();
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('[Chat] ❌ Erro ao parsear JSON:', parseError);
+                throw new Error('Resposta inválida do servidor');
+            }
+
+            if (!response.ok) {
+                throw new Error(data.message || `Erro HTTP ${response.status}`);
+            }
+
+            if (!data.success) {
+                throw new Error(data.message || 'Falha ao editar mensagem');
+            }
+
+            this.updateMessageInArray(messageId, data.mensagem);
+            this.renderMessages();
+
+            requestAnimationFrame(() => {
+                scrollContainer.scrollTop = currentScrollTop;
+            });
+
+            this.showSuccess('Mensagem editada com sucesso!');
+
+        } catch (error) {
+            console.error('[Chat] Erro ao editar mensagem:', error);
+            this.showError(error.message || 'Erro ao editar mensagem');
+            this.cancelEditMessage(messageId);
+            
+            requestAnimationFrame(() => {
+                scrollContainer.scrollTop = currentScrollTop;
+            });
         }
-
-        if (!data.success) {
-            throw new Error(data.message || 'Falha ao editar mensagem');
-        }
-
-        console.log('[Chat] ✅ Mensagem editada com sucesso');
-
-        // ✅ ATUALIZAR LOCALMENTE
-        this.updateMessageInArray(messageId, data.mensagem);
-        this.renderMessages();
-
-        // ✅ RESTAURAR SCROLL
-        requestAnimationFrame(() => {
-            scrollContainer.scrollTop = currentScrollTop;
-        });
-
-        this.showSuccess('Mensagem editada com sucesso!');
-
-    } catch (error) {
-        console.error('[Chat] Erro ao editar mensagem:', error);
-        this.showError(error.message || 'Erro ao editar mensagem');
-        this.cancelEditMessage(messageId);
-        
-        // ✅ RESTAURAR SCROLL MESMO EM CASO DE ERRO
-        requestAnimationFrame(() => {
-            scrollContainer.scrollTop = currentScrollTop;
-        });
     }
-}
 
     cancelEditMessage(messageId) {
         this.renderMessages();
     }
 
-    // ==================== DELETAR MENSAGEM ====================
     async deleteMessage(messageId) {
         if (!confirm('Deseja realmente deletar esta mensagem?')) return;
 
@@ -1026,7 +935,6 @@ menu.style.left = `${left}px`;
 
             const data = await response.json();
             
-            // Remover localmente (o broadcast fará isso para os outros)
             this.handleDeletedMessage(messageId);
             
             this.showSuccess(data.message);
@@ -1037,61 +945,36 @@ menu.style.left = `${left}px`;
         }
     }
 
-    // ==================== HANDLERS DE EVENTOS WEBSOCKET ====================
-    
     handleNewMessage(message) {
-        console.group('[Chat] 🆕 PROCESSAR NOVA MENSAGEM');
-        console.log('1. Mensagem recebida:', message);
-        console.log('2. ID:', message.id);
-        console.log('3. Total antes:', this.messages.length);
-        
         const exists = this.messages.find(m => m.id === message.id);
-        console.log('4. Já existe?', !!exists);
         
         if (exists) {
-            console.warn('⚠️ Duplicata ignorada');
-            console.groupEnd();
             return;
         }
 
         this.messages.push(message);
-        console.log('5. Total depois:', this.messages.length);
         
         const messageHtml = this.renderMessage(message);
         this.messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
-        console.log('6. ✅ Inserido no DOM');
 
         this.attachMessageMenuListeners();
         this.scrollToBottom(true);
-        
-        console.log('7. ✅ Processamento completo');
-        console.groupEnd();
     }
 
     handleDeletedMessage(messageId) {
-        console.log('[Chat] 🗑️ Deletando mensagem:', messageId);
-        
-        // Remover do array
         this.messages = this.messages.filter(m => m.id !== messageId);
         
-        // Remover do DOM com animação
         const messageEl = document.querySelector(`[data-message-id="${messageId}"]`);
         if (messageEl) {
             messageEl.style.opacity = '0';
             messageEl.style.transform = 'translateX(-20px)';
             setTimeout(() => messageEl.remove(), 300);
         }
-        
-        console.log('[Chat] ✅ Mensagem deletada');
     }
 
     handleEditedMessage(data) {
-        console.log('[Chat] ✏️ Editando mensagem:', data.mensagem_id);
-        
-        // Atualizar no array
         this.updateMessageInArray(data.mensagem_id, data.nova_mensagem);
         
-        // Re-renderizar apenas essa mensagem
         const messageEl = document.querySelector(`[data-message-id="${data.mensagem_id}"]`);
         if (messageEl) {
             const msg = this.messages.find(m => m.id === data.mensagem_id);
@@ -1100,8 +983,6 @@ menu.style.left = `${left}px`;
                 this.attachMessageMenuListeners();
             }
         }
-        
-        console.log('[Chat] ✅ Mensagem editada');
     }
 
     updateMessageInArray(messageId, newText) {
@@ -1112,8 +993,6 @@ menu.style.left = `${left}px`;
         }
     }
 
-    // ==================== ENVIAR MENSAGEM ====================
-    
     async handleSendMessage(e) {
         e.preventDefault();
 
@@ -1121,20 +1000,20 @@ menu.style.left = `${left}px`;
         if (!messageText && this.attachments.length === 0) return;
 
         if (this.attachments.length > 0 && window.NSFWDetector) {
-        const imageFiles = this.attachments.filter(f => f.type.startsWith('image/'));
-        
-        for (const file of imageFiles) {
-            try {
-                const result = await window.NSFWDetector.analyze(file);
-                if (result && result.isBlocked) {
-                    alert(`A imagem "${file.name}" foi identificada como inapropriada. Remova-a para continuar.`);
-                    return;
+            const imageFiles = this.attachments.filter(f => f.type.startsWith('image/'));
+            
+            for (const file of imageFiles) {
+                try {
+                    const result = await window.NSFWDetector.analyze(file);
+                    if (result && result.isBlocked) {
+                        alert(`A imagem "${file.name}" foi identificada como inapropriada. Remova-a para continuar.`);
+                        return;
+                    }
+                } catch (error) {
+                    console.error('[Chat] Erro na verificação NSFW:', error);
                 }
-            } catch (error) {
-                console.error('[Chat] Erro na verificação NSFW:', error);
             }
         }
-    }
 
         let flags = [];
         try {
@@ -1173,14 +1052,12 @@ menu.style.left = `${left}px`;
             });
 
             const responseText = await response.text();
-            console.log('[Chat] Response status:', response.status);
 
             let data;
             try {
                 data = JSON.parse(responseText);
             } catch (parseError) {
                 console.error('[Chat] Erro ao parsear JSON:', parseError);
-                console.error('[Chat] Resposta raw:', responseText.substring(0, 1000));
                 
                 if (responseText.includes('<br') || responseText.includes('<!DOCTYPE') || responseText.includes('Exception')) {
                     throw new Error('Erro interno do servidor. Verifique os logs do Laravel.');
@@ -1190,10 +1067,8 @@ menu.style.left = `${left}px`;
 
             if (!response.ok) {
                 const errorMsg = data.message || data.error || `Erro HTTP ${response.status}`;
-                console.error('[Chat] Erro do servidor:', data);
                 
                 if (data.errors) {
-                    console.error('[Chat] Erros de validação:', data.errors);
                     const firstError = Object.values(data.errors)[0];
                     throw new Error(Array.isArray(firstError) ? firstError[0] : firstError);
                 }
@@ -1204,28 +1079,12 @@ menu.style.left = `${left}px`;
                 throw new Error(data.message || 'Falha ao enviar mensagem');
             }
 
-            // Limpar form
-            if (!data.success) {
-                throw new Error(data.message || 'Falha ao enviar mensagem');
-            }
-
-            console.log('[Chat] ✅ Mensagem enviada com sucesso');
-
-            // Limpar texto
             this.messageInput.value = '';
-            
-            // Limpar anexos (usando método dedicado)
             this.clearAttachments();
-            
-            // Esconder alerta
             this.hideModerationAlert();
-
             this.clearTypingState();
-            
-            // Focar no input
             this.messageInput.focus();
 
-            console.log('[Chat] 🧹 Formulário limpo');
         } catch (error) {
             console.error('[Chat] Erro ao enviar mensagem:', error);
             this.showError(error.message || 'Erro ao enviar mensagem');
@@ -1277,43 +1136,30 @@ menu.style.left = `${left}px`;
         this.moderationAlert.classList.add('d-none');
     }
 
-     async handleFileSelect(e) {
+    async handleFileSelect(e) {
         const files = Array.from(e.target.files);
         
         if (files.length === 0) {
-            console.log('[Chat] ⚠️ Nenhum arquivo selecionado');
             return;
         }
         
-        console.log('[Chat] 📎 Processando', files.length, 'arquivo(s)');
-        
         for (const file of files) {
-            console.log('[Chat] 📄 Arquivo:', {
-                nome: file.name,
-                tipo: file.type,
-                tamanho: `${(file.size / 1024).toFixed(2)} KB`
-            });
-            
-            // Validar quantidade
             if (this.attachments.length >= 5) {
                 alert('Máximo de 5 anexos por mensagem');
                 break;
             }
 
-            // Validar tamanho (10MB)
             if (file.size > 10 * 1024 * 1024) {
                 alert(`Arquivo ${file.name} muito grande (máx 10MB)`);
                 continue;
             }
 
-            // Validar se é imagem
             const isImage = file.type.startsWith('image/');
             if (!isImage) {
                 alert(`Arquivo ${file.name} não é uma imagem válida.\nApenas imagens são permitidas (JPEG, PNG, GIF, WebP).`);
                 continue;
             }
 
-            // Verificar NSFW
             if (window.NSFWDetector) {
                 try {
                     this.showModerationAlert(['Analisando imagem...']);
@@ -1323,7 +1169,6 @@ menu.style.left = `${left}px`;
                     if (result && result.isBlocked) {
                         this.hideModerationAlert();
                         alert(`A imagem "${file.name}" foi identificada como inapropriada e não pode ser enviada.`);
-                        console.warn('[Chat] ❌ Imagem bloqueada por NSFW:', file.name);
                         continue;
                     }
                     
@@ -1331,16 +1176,12 @@ menu.style.left = `${left}px`;
                 } catch (error) {
                     console.error('[Chat] Erro na análise NSFW:', error);
                     this.hideModerationAlert();
-                    // Continuar mesmo com erro
                 }
             }
 
             this.attachments.push(file);
-            console.log('[Chat] ✅ Arquivo adicionado:', file.name);
         }
 
-        console.log('[Chat] 📊 Total de anexos:', this.attachments.length);
-        
         if (this.attachments.length > 0) {
             this.renderAttachmentsPreview();
         }
@@ -1353,7 +1194,6 @@ menu.style.left = `${left}px`;
             return;
         }
 
-        // ✅ Revogar URLs antigas antes de criar novas
         const oldImages = this.attachmentsPreview.querySelectorAll('img');
         oldImages.forEach(img => {
             if (img.src.startsWith('blob:')) {
@@ -1380,7 +1220,6 @@ menu.style.left = `${left}px`;
             `;
         }).join('');
 
-        // ✅ Adicionar listeners aos botões de remoção
         this.attachmentsPreview.querySelectorAll('.ambience-attachment-remove').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -1388,27 +1227,19 @@ menu.style.left = `${left}px`;
                 
                 const index = parseInt(e.currentTarget.dataset.index);
                 
-                // Revogar URL do blob
                 const img = btn.previousElementSibling;
                 if (img && img.src.startsWith('blob:')) {
                     URL.revokeObjectURL(img.src);
                 }
                 
-                // Remover do array
                 this.attachments.splice(index, 1);
                 
-                console.log('[Chat] 🗑️ Anexo removido. Total:', this.attachments.length);
-                
-                // Re-renderizar
                 this.renderAttachmentsPreview();
             });
         });
     }
 
-     clearAttachments() {
-        console.log('[Chat] 🧹 Limpando anexos...');
-        
-        // 1. Revogar todos os URLs de blob
+    clearAttachments() {
         const images = this.attachmentsPreview.querySelectorAll('img');
         images.forEach(img => {
             if (img.src.startsWith('blob:')) {
@@ -1416,19 +1247,13 @@ menu.style.left = `${left}px`;
             }
         });
         
-        // 2. Limpar array
         this.attachments = [];
-        
-        // 3. Limpar preview
         this.attachmentsPreview.style.display = 'none';
         this.attachmentsPreview.innerHTML = '';
         
-        // 4. Resetar input
         if (this.fileInput) {
             this.fileInput.value = '';
         }
-        
-        console.log('[Chat] ✅ Anexos limpos');
     }
 
     async viewCensoredContent(e) {
@@ -1458,33 +1283,29 @@ menu.style.left = `${left}px`;
     }
 
     toggleMessageSelection(messageId) {
-    const msg = this.messages.find(m => m.id === parseInt(messageId));
-    if (!msg) return;
-    
-    // Impedir seleção de próprias mensagens
-    if (parseInt(msg.usuario.id) === parseInt(this.userId)) {
-        alert('Você não pode selecionar suas próprias mensagens para denúncia.');
-        return;
-    }
-    
-    const messageIdInt = parseInt(messageId);
-    
-    if (this.selectedMessages.has(messageIdInt)) {
-        this.selectedMessages.delete(messageIdInt);
-    } else {
-        this.selectedMessages.add(messageIdInt);
-    }
+        const msg = this.messages.find(m => m.id === parseInt(messageId));
+        if (!msg) return;
+        
+        if (parseInt(msg.usuario.id) === parseInt(this.userId)) {
+            alert('Você não pode selecionar suas próprias mensagens para denúncia.');
+            return;
+        }
+        
+        const messageIdInt = parseInt(messageId);
+        
+        if (this.selectedMessages.has(messageIdInt)) {
+            this.selectedMessages.delete(messageIdInt);
+        } else {
+            this.selectedMessages.add(messageIdInt);
+        }
 
-    const messageEl = document.querySelector(`[data-message-id="${messageId}"]`);
-    if (messageEl) {
-        messageEl.classList.toggle('ambience-message-selected', this.selectedMessages.has(messageIdInt));
-    }
+        const messageEl = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (messageEl) {
+            messageEl.classList.toggle('ambience-message-selected', this.selectedMessages.has(messageIdInt));
+        }
 
-    console.log('[Chat] Mensagens selecionadas:', Array.from(this.selectedMessages));
-    
-    // ✅ FECHAR MENU ATUAL PARA FORÇAR ATUALIZAÇÃO
-    document.querySelectorAll('.ambience-action-dropdown').forEach(m => m.remove());
-}
+        document.querySelectorAll('.ambience-action-dropdown').forEach(m => m.remove());
+    }
 
     openReportModal(userId, messageId = null) {
         const modal = document.getElementById('reportModal');
@@ -1535,6 +1356,538 @@ menu.style.left = `${left}px`;
         this.updateSelectedMessagesDisplay();
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * ========================================
+     * FLOATING BEHAVIOR - POINTER EVENTS
+     * ========================================
+     */
+    setupFloatingBehavior() {
+        console.log('[Chat] 🎮 Configurando chat flutuante (Pointer Events)');
+        
+        this.container.classList.add('chat-in-grid');
+        
+        this.restoreChatState();
+        this.addResizeHandles();
+        this.setupPointerEvents();
+        this.addDimensionsBadge();
+        this.setupAutoSave();
+        
+        console.log('[Chat] ✅ Pointer Events configurados');
+    }
+
+    /**
+     * Setup Pointer Events for drag and resize
+     */
+    setupPointerEvents() {
+
+         this.container.addEventListener('pointermove', (e) => {
+        if (this.pointerResizeState || this.pointerDragState) return;
+        
+        const edges = this.detectEdges(e);
+        
+        if (edges.length > 0) {
+            this.container.style.cursor = this.getCursorForEdges(edges);
+            console.log('[Chat] 🎯 Edges detectados:', edges); // ✅ Debug
+        } else {
+            this.container.style.cursor = '';
+        }
+    });
+        this.container.addEventListener('pointerdown', (e) => this.handlePointerDown(e));
+        
+        document.addEventListener('pointermove', (e) => this.handlePointerMove(e));
+        document.addEventListener('pointerup', (e) => this.handlePointerUp(e));
+        document.addEventListener('pointercancel', (e) => this.handlePointerCancel(e));
+        document.addEventListener('lostpointercapture', (e) => this.handleLostPointerCapture(e));
+        
+        console.log('[Chat] ✅ Pointer listeners registrados');
+    }
+
+    /**
+     * Handle pointerdown - Decide drag vs resize
+     */
+    handlePointerDown(e) {
+    console.log('[Chat] 🖱️ PointerDown:', {
+        target: e.target.className,
+        clientX: e.clientX,
+        clientY: e.clientY
+    });
+    
+    // Ignorar cliques em elementos interativos
+    if (e.target.closest('.ambience-toggle-btn') || 
+        e.target.closest('.ambience-message-input') ||
+        e.target.closest('.ambience-input-btn') ||
+        e.target.closest('.ambience-message-actions') ||
+        e.target.closest('.ambience-action-menu-btn-inline')) {
+        return;
+    }
+    
+    // ✅ CRÍTICO: VERIFICAR EDGES PRIMEIRO (prioridade máxima)
+    const edges = this.detectEdges(e);
+    console.log('[Chat] 🔍 Edges detectados:', edges);
+    
+    // ✅ Se detectou edges, SEMPRE fazer resize (não verificar header)
+    if (edges.length > 0) {
+        console.log('[Chat] 🔲 Iniciando RESIZE');
+        this.startPointerResize(e, edges);
+        return; // ✅ SAIR AQUI, não verificar header
+    }
+    
+    // ✅ Só fazer drag se NÃO detectou edges E está no header
+    const isHeader = e.target.closest('.ambience-chat-top');
+    if (isHeader) {
+        console.log('[Chat] 🖐️ Iniciando DRAG');
+        this.startPointerDrag(e);
+    }
+}
+
+    /**
+     * Detect which edges are within EDGE_SIZE pixels
+     */
+   detectEdges(e) {
+    const rect = this.container.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    const edges = [];
+    
+    // ✅ Detecção INTERNA (handles estão dentro agora)
+    const edgeThreshold = 12; // Mesma largura dos handles
+    
+    // Dentro do container
+    if (x >= rect.left && x <= rect.left + edgeThreshold) {
+        edges.push('w');
+    }
+    if (x >= rect.right - edgeThreshold && x <= rect.right) {
+        edges.push('e');
+    }
+    if (y >= rect.top && y <= rect.top + edgeThreshold) {
+        edges.push('n');
+    }
+    if (y >= rect.bottom - edgeThreshold && y <= rect.bottom) {
+        edges.push('s');
+    }
+    
+    console.log('[Chat] 🎯 Detecção:', {
+        x: x - rect.left,
+        y: y - rect.top,
+        edges: edges,
+        rect: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }
+    });
+    
+    return edges;
+}
+
+    /**
+     * Start resize interaction
+     */
+    startPointerResize(e, edges) {
+        e.preventDefault();
+        
+        console.log('[Chat] 🔲 Resize iniciado:', edges);
+        
+        const rect = this.container.getBoundingClientRect();
+        
+        this.pointerResizeState = {
+            pointerId: e.pointerId,
+            edges: edges,
+            startX: e.clientX,
+            startY: e.clientY,
+            startWidth: rect.width,
+            startHeight: rect.height,
+            startLeft: rect.left,
+            startTop: rect.top
+        };
+        
+        this.container.setPointerCapture(e.pointerId);
+        
+        this.container.classList.add('is-resizing');
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = this.getCursorForEdges(edges);
+    }
+
+    /**
+     * Start drag interaction
+     */
+    startPointerDrag(e) {
+        e.preventDefault();
+        
+        console.log('[Chat] 🖐️ Drag iniciado');
+        
+        const rect = this.container.getBoundingClientRect();
+        
+        this.pointerDragState = {
+            pointerId: e.pointerId,
+            startX: e.clientX,
+            startY: e.clientY,
+            startLeft: rect.left,
+            startTop: rect.top
+        };
+        
+        this.container.setPointerCapture(e.pointerId);
+        
+        this.container.classList.add('is-dragging');
+        this.container.style.transition = 'none';
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'grabbing';
+    }
+
+    /**
+     * Handle pointermove - Apply drag or resize
+     */
+    handlePointerMove(e) {
+        if (this.pointerResizeState && e.pointerId === this.pointerResizeState.pointerId) {
+            this.applyResize(e);
+        } else if (this.pointerDragState && e.pointerId === this.pointerDragState.pointerId) {
+            this.applyDrag(e);
+        }
+    }
+
+    /**
+     * Apply resize in requestAnimationFrame
+     */
+    applyResize(e) {
+        if (this.raf) return;
+        
+        this.raf = requestAnimationFrame(() => {
+            this.raf = null;
+            
+            if (!this.pointerResizeState) return;
+            
+            const state = this.pointerResizeState;
+            const deltaX = e.clientX - state.startX;
+            const deltaY = e.clientY - state.startY;
+            
+            let newWidth = state.startWidth;
+            let newHeight = state.startHeight;
+            let newLeft = state.startLeft;
+            let newTop = state.startTop;
+            
+            if (state.edges.includes('e')) {
+                newWidth = state.startWidth + deltaX;
+            }
+            if (state.edges.includes('w')) {
+                newWidth = state.startWidth - deltaX;
+                newLeft = state.startLeft + deltaX;
+            }
+            if (state.edges.includes('s')) {
+                newHeight = state.startHeight + deltaY;
+            }
+            if (state.edges.includes('n')) {
+                newHeight = state.startHeight - deltaY;
+                newTop = state.startTop + deltaY;
+            }
+            
+            const maxWidth = window.innerWidth - 40;
+            const maxHeight = window.innerHeight - 40;
+            
+            newWidth = Math.max(this.MIN_WIDTH, Math.min(newWidth, maxWidth));
+            newHeight = Math.max(this.MIN_HEIGHT, Math.min(newHeight, maxHeight));
+            
+            if (state.edges.includes('w') && newWidth === this.MIN_WIDTH) {
+                newLeft = state.startLeft + state.startWidth - this.MIN_WIDTH;
+            }
+            if (state.edges.includes('n') && newHeight === this.MIN_HEIGHT) {
+                newTop = state.startTop + state.startHeight - this.MIN_HEIGHT;
+            }
+            
+            newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - newWidth));
+            newTop = Math.max(0, Math.min(newTop, window.innerHeight - newHeight));
+            
+            this.container.style.width = `${newWidth}px`;
+            this.container.style.height = `${newHeight}px`;
+            this.container.style.left = `${newLeft}px`;
+            this.container.style.top = `${newTop}px`;
+            this.container.style.right = 'auto';
+            this.container.style.bottom = 'auto';
+            
+            this.updateDimensionsBadge(newWidth, newHeight);
+        });
+    }
+
+    /**
+     * Apply drag using transform (commit on pointerup)
+     */
+    applyDrag(e) {
+        if (this.raf) return;
+        
+        this.raf = requestAnimationFrame(() => {
+            this.raf = null;
+            
+            if (!this.pointerDragState) return;
+            
+            const state = this.pointerDragState;
+            const deltaX = e.clientX - state.startX;
+            const deltaY = e.clientY - state.startY;
+            
+            this.container.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+        });
+    }
+
+    /**
+     * Handle pointerup - Finalize and release
+     */
+    handlePointerUp(e) {
+        if (this.pointerResizeState && e.pointerId === this.pointerResizeState.pointerId) {
+            this.finishResize(e);
+        } else if (this.pointerDragState && e.pointerId === this.pointerDragState.pointerId) {
+            this.finishDrag(e);
+        }
+    }
+
+    /**
+     * Handle pointercancel - Same as pointerup
+     */
+    handlePointerCancel(e) {
+        console.warn('[Chat] ⚠️ pointercancel detectado');
+        this.handlePointerUp(e);
+    }
+
+    /**
+     * Handle lostpointercapture
+     */
+    handleLostPointerCapture(e) {
+        console.warn('[Chat] ⚠️ lostpointercapture detectado');
+        
+        if (this.pointerResizeState && e.pointerId === this.pointerResizeState.pointerId) {
+            this.finishResize(e);
+        } else if (this.pointerDragState && e.pointerId === this.pointerDragState.pointerId) {
+            this.finishDrag(e);
+        }
+    }
+
+    /**
+     * Finish resize
+     */
+    finishResize(e) {
+        console.log('[Chat] ✅ Resize finalizado');
+        
+        if (this.container.hasPointerCapture(e.pointerId)) {
+            this.container.releasePointerCapture(e.pointerId);
+        }
+        
+        this.container.classList.remove('is-resizing');
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+        
+        this.saveChatState();
+        
+        this.pointerResizeState = null;
+        
+        if (this.raf) {
+            cancelAnimationFrame(this.raf);
+            this.raf = null;
+        }
+    }
+
+    /**
+     * Finish drag - Commit transform to position
+     */
+    finishDrag(e) {
+        console.log('[Chat] ✅ Drag finalizado');
+        
+        if (!this.pointerDragState) return;
+        
+        const state = this.pointerDragState;
+        const deltaX = e.clientX - state.startX;
+        const deltaY = e.clientY - state.startY;
+        
+        let newLeft = state.startLeft + deltaX;
+        let newTop = state.startTop + deltaY;
+        
+        const maxX = window.innerWidth - this.container.offsetWidth;
+        const maxY = window.innerHeight - this.container.offsetHeight;
+        newLeft = Math.max(0, Math.min(newLeft, maxX));
+        newTop = Math.max(0, Math.min(newTop, maxY));
+        
+        this.container.style.left = `${newLeft}px`;
+        this.container.style.top = `${newTop}px`;
+        this.container.style.transform = '';
+        
+        if (this.container.hasPointerCapture(e.pointerId)) {
+            this.container.releasePointerCapture(e.pointerId);
+        }
+        
+        this.container.classList.remove('is-dragging');
+        this.container.style.transition = '';
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+        
+        this.saveChatState();
+        
+        this.pointerDragState = null;
+        
+        if (this.raf) {
+            cancelAnimationFrame(this.raf);
+            this.raf = null;
+        }
+    }
+
+    /**
+     * Get cursor for edges
+     */
+    getCursorForEdges(edges) {
+        const key = edges.sort().join('');
+        const cursors = {
+            'n': 'ns-resize',
+            's': 'ns-resize',
+            'e': 'ew-resize',
+            'w': 'ew-resize',
+            'ne': 'nesw-resize',
+            'nw': 'nwse-resize',
+            'se': 'nwse-resize',
+            'sw': 'nesw-resize',
+            'en': 'nesw-resize',
+            'es': 'nwse-resize'
+        };
+        return cursors[key] || 'default';
+    }
+
+    /**
+     * Add resize handles (visual only)
+     */
+    addResizeHandles() {
+        this.container.querySelectorAll('.chat-resize-handle').forEach(h => h.remove());
+        
+        const handles = `
+            <div class="chat-resize-handle chat-resize-handle-top"></div>
+            <div class="chat-resize-handle chat-resize-handle-bottom"></div>
+            <div class="chat-resize-handle chat-resize-handle-left"></div>
+            <div class="chat-resize-handle chat-resize-handle-right"></div>
+            <div class="chat-resize-handle chat-resize-handle-corner chat-resize-handle-nw"></div>
+            <div class="chat-resize-handle chat-resize-handle-corner chat-resize-handle-ne"></div>
+            <div class="chat-resize-handle chat-resize-handle-corner chat-resize-handle-sw"></div>
+            <div class="chat-resize-handle chat-resize-handle-corner chat-resize-handle-se"></div>
+        `;
+        
+        this.container.insertAdjacentHTML('beforeend', handles);
+        
+        console.log('[Chat] ✅ Resize handles adicionados');
+    }
+
+    /**
+     * Dimensions badge
+     */
+    addDimensionsBadge() {
+        const badge = document.createElement('div');
+        badge.className = 'chat-dimensions-badge';
+        badge.textContent = '0 × 0';
+        this.container.appendChild(badge);
+        this.dimensionsBadge = badge;
+    }
+
+    updateDimensionsBadge(width, height) {
+        if (this.dimensionsBadge) {
+            this.dimensionsBadge.textContent = `${Math.round(width)} × ${Math.round(height)}`;
+        }
+    }
+
+    /**
+     * Save and restore state
+     */
+    saveChatState() {
+        const state = {
+            width: this.container.offsetWidth,
+            height: this.container.offsetHeight,
+            left: this.container.offsetLeft,
+            top: this.container.offsetTop
+        };
+        
+        try {
+            localStorage.setItem('ambience_chat_state', JSON.stringify(state));
+            console.log('[Chat] 💾 Estado salvo:', state);
+        } catch (error) {
+            console.warn('[Chat] Erro ao salvar:', error);
+        }
+    }
+
+    restoreChatState() {
+        try {
+            const savedState = localStorage.getItem('ambience_chat_state');
+            if (!savedState) return;
+            
+            const state = JSON.parse(savedState);
+            
+            const width = Math.max(this.MIN_WIDTH, Math.min(state.width, window.innerWidth - 40));
+            const height = Math.max(this.MIN_HEIGHT, Math.min(state.height, window.innerHeight - 40));
+            const left = Math.max(0, Math.min(state.left, window.innerWidth - width));
+            const top = Math.max(0, Math.min(state.top, window.innerHeight - height));
+            
+            this.container.style.width = `${width}px`;
+            this.container.style.height = `${height}px`;
+            this.container.style.left = `${left}px`;
+            this.container.style.top = `${top}px`;
+            this.container.style.right = 'auto';
+            this.container.style.bottom = 'auto';
+            
+            console.log('[Chat] ✅ Estado restaurado:', { width, height, left, top });
+        } catch (error) {
+            console.warn('[Chat] Erro ao restaurar:', error);
+        }
+    }
+
+    setupAutoSave() {
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const maxWidth = window.innerWidth - 40;
+                const maxHeight = window.innerHeight - 40;
+                
+                if (this.container.offsetWidth > maxWidth) {
+                    this.container.style.width = `${maxWidth}px`;
+                }
+                if (this.container.offsetHeight > maxHeight) {
+                    this.container.style.height = `${maxHeight}px`;
+                }
+                
+                const maxLeft = window.innerWidth - this.container.offsetWidth;
+                const maxTop = window.innerHeight - this.container.offsetHeight;
+                
+                if (this.container.offsetLeft > maxLeft) {
+                    this.container.style.left = `${Math.max(0, maxLeft)}px`;
+                }
+                if (this.container.offsetTop > maxTop) {
+                    this.container.style.top = `${Math.max(0, maxTop)}px`;
+                }
+                
+                this.saveChatState();
+            }, 250);
+        });
+    }
+
+    /**
+     * Cleanup all pointer listeners
+     */
+    cleanup() {
+        console.log('[Chat] 🧹 Limpando listeners...');
+        
+        if (this.pointerResizeState) {
+            if (this.container.hasPointerCapture(this.pointerResizeState.pointerId)) {
+                this.container.releasePointerCapture(this.pointerResizeState.pointerId);
+            }
+            this.pointerResizeState = null;
+        }
+        
+        if (this.pointerDragState) {
+            if (this.container.hasPointerCapture(this.pointerDragState.pointerId)) {
+                this.container.releasePointerCapture(this.pointerDragState.pointerId);
+            }
+            this.pointerDragState = null;
+        }
+        
+        if (this.raf) {
+            cancelAnimationFrame(this.raf);
+            this.raf = null;
+        }
+        
+        this.clearTypingState();
+        
+        console.log('[Chat] ✅ Cleanup completo');
+    }
+
+>>>>>>> 7dbc97f (Chat fix)
     scrollToBottom(smooth = false) {
         const scrollOptions = {
             top: this.messagesContainer.scrollHeight,
@@ -1596,7 +1949,23 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 window.addEventListener('beforeunload', () => {
+<<<<<<< HEAD
     if (chatSystem) {
         chatSystem.clearTypingState();
+=======
+    if (chatSystem && typeof chatSystem.cleanup === 'function') {
+        chatSystem.cleanup();
+    }
+});
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden && chatSystem) {
+        if (chatSystem.pointerResizeState) {
+            chatSystem.finishResize({ pointerId: chatSystem.pointerResizeState.pointerId });
+        }
+        if (chatSystem.pointerDragState) {
+            chatSystem.finishDrag({ pointerId: chatSystem.pointerDragState.pointerId });
+        }
+>>>>>>> 7dbc97f (Chat fix)
     }
 });
