@@ -1,180 +1,124 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Código de Recuperação - Ambience RPG</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: #ffffff;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        .header {
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            color: white;
-            padding: 30px 20px;
-            text-align: center;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 28px;
-            font-weight: 300;
-        }
-        .content {
-            padding: 40px 30px;
-            text-align: center;
-        }
-        .greeting {
-            font-size: 18px;
-            color: #2c3e50;
-            margin-bottom: 20px;
-        }
-        .token-container {
-            background: #f8f9fa;
-            border: 3px dashed #007bff;
-            border-radius: 15px;
-            padding: 30px;
-            margin: 30px 0;
-        }
-        .token-code {
-            font-size: 3rem;
-            font-weight: bold;
-            color: #007bff;
-            letter-spacing: 0.5rem;
-            margin: 20px 0;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-        .token-label {
-            font-size: 14px;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-        .warning {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 5px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-        .warning-title {
-            font-weight: bold;
-            color: #856404;
-            margin-bottom: 10px;
-        }
-        .warning-text {
-            color: #856404;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        .footer {
-            background: #2c3e50;
-            color: #ecf0f1;
-            padding: 25px;
-            text-align: center;
-            font-size: 14px;
-        }
-        .footer p {
-            margin: 5px 0;
-        }
-        .timer {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            margin: 20px 0;
-        }
-        .timer strong {
-            color: #1976d2;
-        }
-        /* Responsivo */
-        @media only screen and (max-width: 600px) {
-            .container {
-                margin: 10px;
-                border-radius: 0;
-            }
-            .content {
-                padding: 20px 15px;
-            }
-            .header {
-                padding: 20px 15px;
-            }
-            .token-code {
-                font-size: 2rem;
-                letter-spacing: 0.3rem;
-            }
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperação de Senha - Ambience RPG</title>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🎮 Ambience RPG</h1>
-            <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Código de Recuperação</p>
-        </div>
-        
-        <div class="content">
-            <div class="greeting">
-                Olá, <strong>{{ $usuario->username }}</strong>! 👋
-            </div>
-            
-            <p style="font-size: 16px; color: #555; margin-bottom: 30px;">
-                Você solicitou a recuperação da sua senha no <strong>Ambience RPG</strong>.
-            </p>
+<body style="margin:0;padding:0;background-color:#0f1117;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
+    
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0f1117;padding:20px;">
+        <tr>
+            <td align="center">
+                
+                <!-- Container -->
+                <table width="500" cellpadding="0" cellspacing="0" border="0" style="background:#1a1d29;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                    
+                    <!-- Header Verde Escuro -->
+                    <tr>
+                        <td style="background:linear-gradient(135deg,#0d5f3a 0%,#0a4a2e 100%);padding:30px 25px;text-align:center;">
+                            <h1 style="margin:0;font-size:20px;color:#ffffff;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;">
+                            🔐 Código de Recuperação
+                            </h1>
+                            <p style="margin:8px 0 0 0;font-size:13px;color:#b8e6d5;">Código de Verificação</p>
+                        </td>
+                    </tr>
 
-            <div class="token-container">
-                <div class="token-label">SEU CÓDIGO DE RECUPERAÇÃO</div>
-                <div class="token-code">{{ $token }}</div>
-                <p style="color: #666; margin: 0; font-size: 14px;">
-                    Digite este código na tela de verificação
-                </p>
-            </div>
+                    <!-- Body -->
+                    <tr>
+                        <td style="padding:30px 25px;background:#1a1d29;">
+                            
+                            <!-- Saudação -->
+                            <p style="margin:0 0 15px 0;font-size:15px;color:#e0e0e0;line-height:1.5;">
+                                Olá, <strong style="color:#00ff88;">{{ $usuario->username }}</strong>
+                            </p>
 
-            <div class="timer">
-                <p style="margin: 0;">
-                    <strong>⏰ Tempo de validade:</strong> 15 minutos<br>
-                    <small>Expira em {{ $expires_at->format('d/m/Y às H:i') }}</small>
-                </p>
-            </div>
-            
-            <div class="warning">
-                <div class="warning-title">🛡️ Informações de Segurança:</div>
-                <div class="warning-text">
-                    • Este código expira em <strong>15 minutos</strong><br>
-                    • Máximo de <strong>5 tentativas por hora</strong><br>
-                    • Se você não solicitou esta recuperação, ignore este email<br>
-                    • Não compartilhe este código com ninguém<br>
-                    • Sua senha atual permanece válida até que você a altere
-                </div>
-            </div>
+                            <p style="margin:0 0 20px 0;font-size:14px;color:#b0b0b0;line-height:1.6;">
+                                Você solicitou a recuperação da sua senha no <strong style="color:#e0e0e0;">Ambience RPG</strong>. Use o código abaixo para continuar o processo.
+                            </p>
 
-            <div style="margin-top: 30px; padding: 15px; background: #e8f5e8; border-radius: 5px; border-left: 4px solid #4caf50;">
-                <p style="margin: 0; font-size: 14px; color: #2e7d32;">
-                    <strong>💡 Dica:</strong> Se você não recebeu este email, verifique sua pasta de spam ou lixo eletrônico.
-                </p>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p><strong>© {{ date('Y') }} Ambience RPG</strong></p>
-            <p>Sistema de RPG Online - Todos os direitos reservados</p>
-            <p style="opacity: 0.7; margin-top: 10px;">
-                Este é um email automático, não responda a esta mensagem.<br>
-                Em caso de dúvidas, entre em contato com nosso suporte.
-            </p>
-        </div>
-    </div>
+                            <!-- Box do Código -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0f1a14;border:2px dashed #00ff88;border-radius:8px;margin:20px 0;">
+                                <tr>
+                                    <td style="padding:25px;text-align:center;">
+                                        <div style="font-size:13px;color:#00ff88;margin-bottom:10px;font-weight:600;">SEU CÓDIGO DE RECUPERAÇÃO</div>
+                                        <div style="font-size:42px;font-weight:900;color:#00ff88;letter-spacing:10px;font-family:'Courier New',monospace;">
+                                            {{ $token }}
+                                        </div>
+                                        <p style="margin:12px 0 0 0;font-size:12px;color:#b0b0b0;">Digite este código na tela de verificação</p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Info de Validade -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#232631;border-radius:6px;margin:20px 0;">
+                                <tr>
+                                    <td style="padding:15px 20px;">
+                                        <div style="font-size:14px;color:#00ff88;margin-bottom:10px;font-weight:600;">Tempo de Validade</div>
+                                        <table width="100%" cellpadding="5" cellspacing="0">
+                                            <tr>
+                                                <td style="font-size:13px;color:#b0b0b0;">Expira em:</td>
+                                                <td style="font-size:13px;color:#e0e0e0;text-align:right;font-weight:600;">15 minutos</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-size:13px;color:#b0b0b0;padding-top:5px;">Válido até:</td>
+                                                <td style="font-size:13px;color:#e0e0e0;text-align:right;padding-top:5px;">{{ \Carbon\Carbon::parse($expires_at)->format('d/m/Y H:i') }}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Informações de Segurança -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#2a2416;border-radius:6px;margin:20px 0;">
+                                <tr>
+                                    <td style="padding:15px 20px;">
+                                        <div style="font-size:14px;color:#ffcc00;margin-bottom:8px;font-weight:600;">Informações de Segurança</div>
+                                        <ul style="margin:0;padding-left:18px;color:#e0e0e0;font-size:12px;line-height:1.8;">
+                                            <li>Não compartilhe este código com ninguém</li>
+                                            <li>Máximo de 5 tentativas por hora</li>
+                                            <li>Se você não solicitou, ignore este email</li>
+                                            <li>Sua senha atual continua válida</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Dica -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0f1a14;border-left:3px solid #00ff88;border-radius:4px;margin:20px 0 0 0;">
+                                <tr>
+                                    <td style="padding:12px 15px;">
+                                        <p style="margin:0;font-size:12px;color:#b0b0b0;line-height:1.6;">
+                                            <strong style="color:#00ff88;">Dica de Segurança:</strong> Use uma senha forte com números, letras maiúsculas, minúsculas e símbolos!
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background:#14161f;padding:20px;text-align:center;border-top:1px solid #2a2d3a;">
+                            <p style="margin:0 0 5px 0;font-size:13px;color:#00ff88;font-weight:600;">
+                                Ambience RPG
+                            </p>
+                            <p style="margin:0 0 10px 0;font-size:12px;color:#888;">
+                                Sistema de RPG Online
+                            </p>
+                            <p style="margin:0;font-size:11px;color:#666;line-height:1.5;">
+                                Este é um email automático, não responda esta mensagem.<br>
+                                © {{ date('Y') }} Ambience RPG. Todos os direitos reservados.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
 </body>
 </html>
