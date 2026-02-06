@@ -424,7 +424,7 @@ ambience-rpg/
 
 ---
 
-# ⚙️ Instalação do Ambience RPG
+# ⚙️ Instalação
 
 ## **Pré-requisitos**
 
