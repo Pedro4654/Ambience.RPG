@@ -401,138 +401,260 @@ ambience-rpg/
 
 ---
 
-## ⚙️ Instalação
+# ⚙️ Instalação do Ambience RPG
 
-### **Pré-requisitos**
+## **Pré-requisitos**
 
 Certifique-se de ter instalado:
-
 - **PHP** >= 8.2
 - **Composer** >= 2.5
 - **Node.js** >= 18.x
 - **NPM** >= 9.x
 - **MySQL** >= 8.0
 
-### **Passo a Passo**
+---
 
-#### **1. Clone o repositório**
+## **Passo a Passo**
 
+### **1. Clone o repositório**
 ```bash
-git clone https://github.com/seu-usuario/ambience-rpg.git
-cd ambience-rpg
+git clone https://github.com/Pedro4654/Ambience.RPG
+cd ambience.rpg
 ```
 
-#### **2. Instale as dependências do backend**
-
+### **2. Instale as dependências do backend**
 ```bash
 composer install
 ```
 
-#### **3. Configure as variáveis de ambiente**
-
+### **3. Configure as variáveis de ambiente**
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-#### **4. Configure o banco de dados**
+### **4. Configure o banco de dados**
 
-Edite o arquivo `.env` e configure as credenciais do MySQL:
-
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=ambience_rpg
-DB_USERNAME=seu_usuario
-DB_PASSWORD=sua_senha
+Crie um banco de dados MySQL:
+```sql
+CREATE DATABASE ambience_rpg CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-#### **5. Configure o sistema de e-mail**
+Edite o arquivo `.env` e altere **apenas** as credenciais do banco:
+```env
+DB_USERNAME=seu_usuario_mysql
+DB_PASSWORD=sua_senha_mysql
+```
 
-Para que a recuperação de senha funcione, configure o serviço de e-mail no `.env`:
+> ℹ️ As outras configurações de banco (`DB_DATABASE=ambience_rpg`, `DB_HOST`, etc) já estão corretas no `.env.example`
+
+### **5. Configure o sistema de e-mail (Opcional)**
+
+Para que a recuperação de senha funcione, edite no `.env`:
 
 ```env
-MAIL_MAILER=smtp
-MAIL_HOST=smtp.gmail.com
-MAIL_PORT=587
 MAIL_USERNAME=seu_email@gmail.com
 MAIL_PASSWORD=sua_senha_app
-MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS=seu_email@gmail.com
-MAIL_FROM_NAME="${APP_NAME}"
 ```
 
 > **💡 Dica:** Para Gmail, crie uma [Senha de App](https://myaccount.google.com/apppasswords) específica.
+>
+> ⚠️ **Esta etapa é opcional** - o sistema funciona sem e-mail, mas a recuperação de senha não estará disponível.
 
-#### **6. Execute as migrations e seeders**
-
+### **6. Execute as migrations e seeders**
 ```bash
 php artisan migrate --seed
 ```
 
-#### **7. Instale as dependências do frontend**
-
+### **7. Instale as dependências do frontend**
 ```bash
 npm install
 ```
 
-#### **8. Compile os assets**
+### **8. Inicie os serviços de desenvolvimento**
+
+**Opção A: Comando único (Recomendado)**
+```bash
+composer dev
+```
+
+Este comando inicia automaticamente:
+- ✅ Servidor Laravel (http://127.0.0.1:8000)
+- ✅ Fila de jobs (queue:listen)
+- ✅ Vite (hot reload do frontend)
+
+**Opção B: Serviços separados**
+
+Em **4 terminais diferentes**:
 
 ```bash
-# Modo desenvolvimento (com hot reload)
+# Terminal 1 - Servidor Laravel
+php artisan serve
+
+# Terminal 2 - Fila de jobs
+php artisan queue:listen --tries=1
+
+# Terminal 3 - Frontend (Vite)
 npm run dev
 
-# Modo produção (otimizado)
-npm run build
+# Terminal 4 - WebSocket (Laravel Reverb)
+php artisan reverb:start
 ```
 
-#### **9. Inicie o servidor**
-
-```bash
-php artisan serve
-```
-
-#### **10. Acesse a aplicação**
+### **9. Acesse a aplicação**
 
 Abra seu navegador em: **http://127.0.0.1:8000**
 
 ---
 
-### **🔌 Configuração do WebSocket (Opcional)**
+## **🎯 Comandos Úteis**
 
-Para funcionalidade em tempo real completa (chat e grid sincronizado):
-
+### **Desenvolvimento**
 ```bash
-# Instale o pacote
-composer require beyondcode/laravel-websockets
+# Modo desenvolvimento (padrão)
+composer dev
 
-# Publique as configurações
-php artisan vendor:publish --provider="BeyondCode\LaravelWebSockets\WebSocketsServiceProvider"
+# Modo desenvolvimento com SSR (Server-Side Rendering)
+composer dev:ssr
 
-# Rode as migrations
-php artisan migrate
+# Build de produção do frontend
+npm run build
 
-# Inicie o servidor WebSocket (em nova janela do terminal)
-php artisan websockets:serve
+# Build com SSR
+npm run build:ssr
 ```
 
-Configure no `.env`:
+### **Qualidade de Código**
+```bash
+# Formatar código JavaScript/React
+npm run format
 
-```env
-BROADCAST_DRIVER=pusher
+# Verificar formatação
+npm run format:check
 
-PUSHER_APP_ID=local
-PUSHER_APP_KEY=local
-PUSHER_APP_SECRET=local
-PUSHER_APP_CLUSTER=mt1
+# Linter JavaScript
+npm run lint
 
-PUSHER_HOST=127.0.0.1
-PUSHER_PORT=6001
-PUSHER_SCHEME=http
+# Verificar tipos TypeScript
+npm run types
+```
+
+### **Testes**
+```bash
+# Executar testes
+composer test
+
+# Ou diretamente:
+php artisan test
 ```
 
 ---
+
+## **🔧 Troubleshooting**
+
+### **Erro de permissões (Linux/Mac)**
+```bash
+sudo chmod -R 775 storage bootstrap/cache
+sudo chown -R $USER:www-data storage bootstrap/cache
+```
+
+### **Limpar cache do Laravel**
+```bash
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+php artisan route:clear
+```
+
+### **Recriar banco de dados**
+```bash
+php artisan migrate:fresh --seed
+```
+
+### **Reinstalar dependências do Node**
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+---
+
+## **📦 Dependências Principais**
+
+### **Backend (PHP/Laravel 12)**
+| Pacote | Versão | Descrição |
+|--------|--------|-----------|
+| `laravel/framework` | ^12.0 | Framework Laravel |
+| `inertiajs/inertia-laravel` | ^2.0 | SSR com React |
+| `laravel/reverb` | ^1.6 | WebSocket nativo |
+| `intervention/image` | ^3.11 | Processamento de imagens |
+| `consoletvs/profanity` | ^3.5 | Filtro de palavrões |
+| `pusher/pusher-php-server` | ^7.2 | Broadcasting |
+
+### **Frontend (React 19 + TypeScript)**
+| Pacote | Versão | Descrição |
+|--------|--------|-----------|
+| `react` | ^19.2.0 | Biblioteca React |
+| `typescript` | ^5.7.2 | TypeScript |
+| `tailwindcss` | ^4.0.0 | Framework CSS |
+| `vite` | ^7.0.4 | Build tool |
+| `@inertiajs/react` | ^2.1.0 | Inertia React adapter |
+| `@tensorflow/tfjs` | ^4.22.0 | Detecção NSFW |
+| `nsfwjs` | ^4.2.1 | Modelo de detecção NSFW |
+| `lucide-react` | ^0.475.0 | Ícones |
+
+### **Componentes UI (Radix UI + shadcn/ui)**
+- `@radix-ui/react-*` - Componentes acessíveis
+- `class-variance-authority` - Variantes de componentes
+- `tailwind-merge` - Merge de classes Tailwind
+- `clsx` - Utilitário de classes condicionais
+
+---
+
+## **🌐 Configurações de Produção**
+
+### **1. Otimize o autoload**
+```bash
+composer install --optimize-autoloader --no-dev
+```
+
+### **2. Compile os assets**
+```bash
+npm run build
+```
+
+### **3. Configure cache**
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+### **4. Configure o `.env` de produção**
+```env
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://seu-dominio.com
+
+# Use banco de dados de produção
+DB_CONNECTION=mysql
+DB_HOST=seu-servidor-mysql
+DB_DATABASE=ambience_rpg
+DB_USERNAME=usuario_producao
+DB_PASSWORD=senha_segura
+
+# Configure Reverb para produção
+REVERB_HOST=seu-dominio.com
+REVERB_PORT=443
+REVERB_SCHEME=https
+
+# Configure e-mail real
+MAIL_MAILER=smtp
+MAIL_HOST=seu-servidor-smtp
+MAIL_PORT=587
+# ... outras configurações
+```
 
 ## 📸 Demonstração
 
