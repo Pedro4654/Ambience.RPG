@@ -994,7 +994,7 @@ SOFTWARE.
 | 👤 Membro | 🎯 Função | 📧 Contato |
 |-----------|-----------|------------|
 | **Danilo Sena Pereira** | Designer & Desenvolvedor Frontend | [danilosena.s.pereira@gmail.com](mailto:danilosena.s.pereira@gmail.com) • [@danilo-p-sena](https://github.com/danilo-p-sena) |
-| **Guilherme Cavalcante dos Santos** | Designer & Desenvolvedor Full-Stack | [guilherme.santos@etec.sp.gov.br](mailto:guilherme.cavalcante.tech@gmail.com) • [@guilherme-c-dev](https://github.com/guilherme-c-dev) |
+| **Guilherme Cavalcante dos Santos** | Designer & Desenvolvedor Full-Stack | [guilherme.cavalcante.tech@gmail.com](mailto:guilherme.cavalcante.tech@gmail.com) • [@guilherme-c-dev](https://github.com/guilherme-c-dev) |
 | **Lucas Gallo Gomes da Silva** | Desenvolvedor Frontend | [lucas.gallo@etec.sp.gov.br](mailto:lucas.gallo@etec.sp.gov.br) • [@lucas-gallo](https://github.com/lucas-gallo) |
 | **Pedro Henrique Souza Brito** | Desenvolvedor Full-Stack | [pedro.brito@etec.sp.gov.br](mailto:pedro.brito@etec.sp.gov.br) • [@pedro-brito](https://github.com/pedro-brito) |
 | **Ryan Alves da Silva** | Desenvolvedor Full-Stack | [ryan.alves@etec.sp.gov.br](mailto:ryan.alves@etec.sp.gov.br) • [@ryan-alves](https://github.com/ryan-alves) |
@@ -1006,8 +1006,8 @@ SOFTWARE.
 Agradecemos a todos que contribuíram para o sucesso deste projeto:
 
 - **Etec** - Pela infraestrutura e suporte acadêmico
-- **Prof. Denilson** - Pela orientação e mentoria técnica
-- **Prof. Daniel Quaiati** - Pelo apoio metodológico
+- **Prof. Daniel Quaiati** - Pela orientação e mentoria técnica
+- **Prof. Denilson** - Pelo apoio metodológico
 - **Comunidade RPG** - Pelos feedbacks valiosos durante testes beta
 - **Família e Amigos** - Pelo suporte emocional durante o desenvolvimento
 - **Laravel Community** - Pela documentação excepcional e pacotes open-source
