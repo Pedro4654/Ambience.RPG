@@ -1,80 +1,116 @@
-{{-- ===== resources/views/emails/novo-ticket-staff.blade.php ===== --}}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novo Ticket - Staff - Ambience RPG</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0f1117;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
+    
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0f1117;padding:20px;">
+        <tr>
+            <td align="center">
+                
+                <table width="500" cellpadding="0" cellspacing="0" border="0" style="background:#1a1d29;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background:linear-gradient(135deg,#0d5f3a 0%,#0a4a2e 100%);padding:30px 25px;text-align:center;">
+                            <h1 style="margin:0;font-size:20px;color:#ffffff;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;">
+                                NOVO TICKET - STAFF
+                            </h1>
+                            <p style="margin:8px 0 0 0;font-size:13px;color:#b8e6d5;">Atendimento necessário</p>
+                        </td>
+                    </tr>
 
-@extends('emails.layout')
+                    <!-- Body -->
+                    <tr>
+                        <td style="padding:30px 25px;background:#1a1d29;">
+                            
+                            <p style="margin:0 0 15px 0;font-size:15px;color:#e0e0e0;line-height:1.5;">
+                                Olá, <strong style="color:#00ff88;">Staff</strong>
+                            </p>
 
-@section('title', 'Novo Ticket')
+                            <p style="margin:0 0 20px 0;font-size:14px;color:#b0b0b0;line-height:1.6;">
+                                Um novo ticket foi criado e precisa de atenção da equipe!
+                            </p>
 
-@section('header-title')
-    @if($ticket->ehDenuncia())
-        🚨 Nova Denúncia Recebida
-    @else
-        📩 Novo Ticket de Suporte
-    @endif
-@endsection
+                            <!-- Box do Ticket -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0f1a14;border:2px dashed #00ff88;border-radius:8px;margin:20px 0;">
+                                <tr>
+                                    <td style="padding:25px;text-align:center;">
+                                        <div style="font-size:13px;color:#00ff88;margin-bottom:10px;font-weight:600;">NOVO TICKET</div>
+                                        <div style="font-size:42px;font-weight:900;color:#00ff88;letter-spacing:10px;font-family:'Courier New',monospace;">
+                                            #{{ $ticket->id }}
+                                        </div>
+                                        <p style="margin:12px 0 0 0;font-size:12px;color:#b0b0b0;">{{ $ticket->assunto }}</p>
+                                    </td>
+                                </tr>
+                            </table>
 
-@section('header-subtitle')
-    Ticket #{{ $ticket->numero_ticket }} requer atenção da equipe
-@endsection
+                            <!-- Informações -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#232631;border-radius:6px;margin:20px 0;">
+                                <tr>
+                                    <td style="padding:15px 20px;">
+                                        <div style="font-size:14px;color:#00ff88;margin-bottom:10px;font-weight:600;">Informações do Ticket</div>
+                                        <table width="100%" cellpadding="5" cellspacing="0">
+                                            <tr>
+                                                <td style="font-size:13px;color:#b0b0b0;">Usuário:</td>
+                                                <td style="font-size:13px;color:#e0e0e0;text-align:right;font-weight:600;">{{ $ticket->usuario->username }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-size:13px;color:#b0b0b0;padding-top:5px;">Categoria:</td>
+                                                <td style="font-size:13px;color:#e0e0e0;text-align:right;padding-top:5px;">{{ ucfirst($ticket->categoria) }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-size:13px;color:#b0b0b0;padding-top:5px;">Prioridade:</td>
+                                                <td style="font-size:13px;color:#00ff88;text-align:right;padding-top:5px;font-weight:600;">{{ ucfirst($ticket->prioridade) }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-size:13px;color:#b0b0b0;padding-top:5px;">Data:</td>
+                                                <td style="font-size:13px;color:#e0e0e0;text-align:right;padding-top:5px;">{{ $ticket->created_at->format('d/m/Y H:i') }}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
 
-@section('content')
-    <p style="font-size: 15px; color: #374151; margin-bottom: 20px;">
-        Olá equipe,
-    </p>
+                            <!-- Mensagem -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#232631;border-radius:6px;margin:20px 0;">
+                                <tr>
+                                    <td style="padding:15px 20px;">
+                                        <div style="font-size:14px;color:#00ff88;margin-bottom:10px;font-weight:600;">Mensagem</div>
+                                        <div style="font-size:13px;color:#e0e0e0;line-height:1.6;">
+                                            {{ $ticket->mensagem }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
 
-    <p style="font-size: 15px; color: #374151; margin-bottom: 20px;">
-        @if($ticket->ehDenuncia())
-            Uma nova <strong>denúncia</strong> foi registrada e requer atenção imediata.
-        @else
-            Um novo ticket de suporte foi criado.
-        @endif
-    </p>
+                        </td>
+                    </tr>
 
-    <div class="ticket-info">
-        <h3>📋 Detalhes do Ticket</h3>
-        
-        <div class="info-row">
-            <span class="info-label">Número:</span>
-            <span class="info-value"><strong>{{ $ticket->numero_ticket }}</strong></span>
-        </div>
-        
-        <div class="info-row">
-            <span class="info-label">Usuário:</span>
-            <span class="info-value">{{ $ticket->usuario->username }}</span>
-        </div>
-        
-        <div class="info-row">
-            <span class="info-label">Categoria:</span>
-            <span class="info-value">{{ $ticket->getCategoriaLabel() }}</span>
-        </div>
-        
-        <div class="info-row">
-            <span class="info-label">Assunto:</span>
-            <span class="info-value"><strong>{{ $ticket->assunto }}</strong></span>
-        </div>
-        
-        <div class="info-row">
-            <span class="info-label">Prioridade:</span>
-            <span class="info-value">
-                <span class="badge priority-{{ $ticket->prioridade }}">{{ $ticket->getPrioridadeLabel() }}</span>
-            </span>
-        </div>
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background:#14161f;padding:20px;text-align:center;border-top:1px solid #2a2d3a;">
+                            <p style="margin:0 0 5px 0;font-size:13px;color:#00ff88;font-weight:600;">
+                                Ambience RPG
+                            </p>
+                            <p style="margin:0 0 10px 0;font-size:12px;color:#888;">
+                                Sistema de RPG Online
+                            </p>
+                            <p style="margin:0;font-size:11px;color:#666;line-height:1.5;">
+                                Este é um email automático, não responda esta mensagem.<br>
+                                © {{ date('Y') }} Ambience RPG. Todos os direitos reservados.
+                            </p>
+                        </td>
+                    </tr>
 
-        @if($ticket->ehDenuncia() && $ticket->usuarioDenunciado)
-        <div class="info-row">
-            <span class="info-label">Usuário Denunciado:</span>
-            <span class="info-value"><strong>{{ $ticket->usuarioDenunciado->username }}</strong></span>
-        </div>
-        @endif
-    </div>
+                </table>
 
-    <div class="message-content">
-        <p><strong>📝 Descrição:</strong></p>
-        <p>{{ Str::limit($ticket->descricao, 300) }}</p>
-    </div>
+            </td>
+        </tr>
+    </table>
 
-    <div style="text-align: center;">
-        <a href="{{ route('suporte.show', $ticket->id) }}" class="button">
-            👁️ Visualizar e Atribuir
-        </a>
-    </div>
-@endsection
+</body>
+</html>
