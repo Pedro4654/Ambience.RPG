@@ -114,7 +114,6 @@ Essa fragmentação resulta em:
 - **Sistema de Permissões**
   - **Mestre:** Controle total da sala e sessão
   - **Jogador:** Participação ativa com tokens próprios
-  - **Espectador:** Visualização sem interferência
 
 - **Recursos de Sala**
   - Lobby com lista de participantes em tempo real
@@ -149,7 +148,6 @@ Essa fragmentação resulta em:
 - **Chat Flutuante**
   - Continuação do chat da sala
   - Posicionamento arrastável
-  - Rolagem de dados integrada
 
 </details>
 
