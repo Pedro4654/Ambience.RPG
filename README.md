@@ -1140,7 +1140,7 @@ SOFTWARE.
 |-----------|-----------|------------|
 | **Danilo Sena Pereira** | Designer & Desenvolvedor Frontend | [danilosena.s.pereira@gmail.com](mailto:danilosena.s.pereira@gmail.com) • [@danilo-p-sena](https://github.com/danilo-p-sena) |
 | **Guilherme Cavalcante dos Santos** | Designer & Desenvolvedor Full-Stack | [guilherme.cavalcante.tech@gmail.com](mailto:guilherme.cavalcante.tech@gmail.com) • [@guilherme-c-dev](https://github.com/guilherme-c-dev) |
-| **Lucas Gallo Gomes da Silva** | Desenvolvedor Frontend | [lucas.gallo@etec.sp.gov.br](mailto:lucas.gallo@etec.sp.gov.br) • [@lucas-gallo](https://github.com/lucas-gallo) |
+| **Lucas Gallo Gomes da Silva** | Desenvolvedor Frontend | [lucasgallogomes5@gmail.com](mailto:lucasgallogomes5@gmail.com) • [@lucasgallogomes5-dot](https://github.com/lucasgallogomes5-dot) |
 | **Pedro Henrique Souza Brito** | Desenvolvedor Full-Stack | [pedro.brito@etec.sp.gov.br](mailto:pedro.brito@etec.sp.gov.br) • [@pedro-brito](https://github.com/pedro-brito) |
 | **Ryan Alves da Silva** | Desenvolvedor Full-Stack | [ryan.alves@etec.sp.gov.br](mailto:ryan.alves@etec.sp.gov.br) • [@ryan-alves](https://github.com/ryan-alves) |
 
