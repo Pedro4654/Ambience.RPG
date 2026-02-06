@@ -339,64 +339,89 @@ MySQL 8.0+
 ```
 ambience-rpg/
 │
-├── 📁 app/                          # Lógica da aplicação
+├── 📁 app/                          # Núcleo da aplicação
+│   ├── Console/                     # Comandos Artisan
+│   │   └── Commands/
+│   ├── Events/                      # Eventos da aplicação
+│   ├── Helpers/                     # Funções auxiliares
 │   ├── Http/
 │   │   ├── Controllers/             # Controllers MVC
-│   │   ├── Middleware/              # Middleware personalizado
-│   │   └── Requests/                # Form Requests validados
-│   ├── Models/                      # Models Eloquent (ORM)
-│   ├── Services/                    # Lógica de negócio
-│   ├── Events/                      # Eventos (WebSockets)
-│   ├── Listeners/                   # Event Listeners
+│   │   │   ├── Api/                 # Controllers da API
+│   │   │   ├── Auth/                # Autenticação
+│   │   │   └── Settings/            # Configurações do usuário
+│   │   ├── Middleware/              # Middlewares
+│   │   └── Requests/                # Form Requests
+│   │       ├── Auth/
+│   │       └── Settings/
+│   ├── Mail/                        # Classes de e-mail
+│   ├── Models/                      # Models Eloquent
+│   ├── Policies/                    # Políticas de autorização
 │   └── Providers/                   # Service Providers
 │
-├── 📁 database/
-│   ├── migrations/                  # Migrações do banco de dados
-│   ├── seeders/                     # Dados iniciais (seeders)
-│   └── factories/                   # Model Factories
+├── 📁 bootstrap/                    # Inicialização do framework
+│   └── cache/
 │
-├── 📁 resources/
-│   ├── views/                       # Templates Blade
-│   │   ├── auth/                    # Views de autenticação
-│   │   ├── salas/                   # Views de salas
-│   │   ├── grid/                    # Mesa virtual
-│   │   ├── comunidade/              # Feed social
-│   │   └── layouts/                 # Layouts base
-│   ├── js/                          # JavaScript/TypeScript
-│   │   ├── components/              # Componentes React
-│   │   ├── services/                # Serviços API
-│   │   └── utils/                   # Funções utilitárias
-│   └── css/                         # Estilos CSS
-│       └── app.css                  # CSS principal (Tailwind)
+├── 📁 config/                       # Arquivos de configuração
 │
-├── 📁 routes/
+├── 📁 database/                     # Banco de dados
+│   ├── factories/                   # Factories
+│   ├── migrations/                  # Migrações
+│   └── seeders/                     # Seeders
+│
+├── 📁 owlbear-legacy/               # Integração da mesa virtual (Owlbear)
+│   ├── backend/                     # Backend próprio do Owlbear
+│   ├── public/                      # Build público
+│   └── src/                         # Código-fonte (React/TS)
+│
+├── 📁 public/                       # Arquivos públicos
+│   ├── css/
+│   ├── js/
+│   ├── images/
+│   │   ├── avatars/
+│   │   └── ICONS/
+│   ├── models/                      # Modelos ML (nsfwjs)
+│   └── owlbear/                     # Assets compilados do Owlbear
+│
+├── 📁 resources/                    # Front-end e views
+│   ├── css/                         # Estilos
+│   ├── js/                          # JavaScript / React
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── layouts/
+│   │   ├── pages/
+│   │   ├── lib/
+│   │   └── types/
+│   └── views/                       # Templates Blade
+│       ├── auth/
+│       ├── comunidade/
+│       ├── salas/
+│       ├── perfil/
+│       ├── moderacao/
+│       ├── suporte/
+│       ├── components/
+│       └── layout/
+│
+├── 📁 routes/                       # Rotas
 │   ├── web.php                      # Rotas web
-│   ├── api.php                      # Rotas API
-│   └── channels.php                 # Broadcasting channels
+│   ├── api.php                      # Rotas da API
+│   └── channels.php                 # Broadcasting
 │
-├── 📁 public/                       # Assets públicos
-│   ├── images/                      # Imagens estáticas
-│   ├── uploads/                     # Uploads de usuários
-│   └── build/                       # Assets compilados (Vite)
+├── 📁 storage/                      # Arquivos gerados pelo sistema
+│   ├── app/
+│   ├── framework/
+│   └── logs/
 │
 ├── 📁 tests/                        # Testes automatizados
-│   ├── Feature/                     # Testes de funcionalidade
-│   └── Unit/                        # Testes unitários
+│   ├── Feature/
+│   │   ├── Auth/
+│   │   └── Settings/
+│   └── Unit/
 │
-├── 📁 docs/                         # Documentação
-│   ├── assets/
-│   │   ├── screenshots/             # Prints das telas
-│   │   └── gifs/                    # GIFs demonstrativos
-│   ├── TCC/
-│   │   ├── Ambience_RPG_TCC.pdf     # PDF do TCC
-│   │   └── slides/                  # Apresentação
-│   └── api/                         # Documentação da API
-│
-├── 📄 .env.example                  # Variáveis de ambiente (exemplo)
+├── 📄 .env.example                  # Variáveis de ambiente
 ├── 📄 composer.json                 # Dependências PHP
-├── 📄 package.json                  # Dependências JavaScript
-├── 📄 vite.config.js                # Configuração Vite
-└── 📄 README.md                     # Este arquivo
+├── 📄 package.json                  # Dependências JS
+├── 📄 vite.config.js                # Vite
+└── 📄 README.md                     # Documentação do projeto
 ```
 
 ---
